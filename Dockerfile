@@ -13,6 +13,10 @@ RUN pip install --upgrade pip && \
     poetry config virtualenvs.create false && \
     poetry install --no-interaction
 
+
+# .env 파일 복사 (환경 변수 설정용)
+COPY .env /app/.env
+
 # 소스 코드 복사
 COPY . /app
 

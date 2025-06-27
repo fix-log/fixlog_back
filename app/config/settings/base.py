@@ -54,7 +54,7 @@ INSTALLED_APPS = [
 INSTALLED_APPS += [
     "rest_framework", # drf
     "drf_spectacular", # 스웨거
-    # "app.accounts",  # 회원,인증
+    "accounts",
     # "app.fixed",  # Fixed 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
@@ -168,3 +168,6 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
+
+# User 모델 변경 (이메일)
+AUTH_USER_MODEL = 'accounts.User'

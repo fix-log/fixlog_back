@@ -4,10 +4,44 @@ from .models import Project
 from .serializers import ProjectSerializer
 
 
-class ProjectCreateAPIView(generics.CreateAPIView):
-    queryset = Project.objects.all()
+class ProjectListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
     
+    def get_queryset(self):
+        queryset = Project.objects.all()
+        
+        # 모집구분 필터링 (status)
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+        
+        # 기술스택 필터링 (skills) - AND 조건
+        skills = self.request.query_params.getlist('skills')
+        if skills:
+            for skill in skills:
+                queryset = queryset.filter(skills__contains=skill)
+        
+        # 포지션 필터링 (position) - AND 조건
+        positions = self.request.query_params.getlist('positions')
+        if positions:
+            for position in positions:
+                queryset = queryset.filter(positions__contains=position)
+        
+        # 정렬 (인기많은것부터 역순, 기본은 최신순)
+        ordering = self.request.query_params.get('ordering', '-created_at')
+        if ordering == 'popular':
+            queryset = queryset.order_by('-count', '-created_at')
+        else:
+            queryset = queryset.order_by('-created_at')
+            
+        return queryset
+    
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class ProjectDetailAPIView(generics.RetrieveAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    lookup_field = 'pk'

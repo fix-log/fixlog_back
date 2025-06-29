@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from .models import Project
 from .serializers import ProjectSerializer
 
@@ -45,3 +46,29 @@ class ProjectDetailAPIView(generics.RetrieveAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     lookup_field = 'pk'
+
+
+class ProjectUpdateAPIView(generics.UpdateAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+    
+    def get_object(self):
+        obj = super().get_object()
+        if obj.user != self.request.user:
+            raise PermissionDenied("본인이 생성한 프로젝트만 수정할 수 있습니다.")
+        return obj
+
+
+class ProjectDeleteAPIView(generics.DestroyAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+    
+    def get_object(self):
+        obj = super().get_object()
+        if obj.user != self.request.user:
+            raise PermissionDenied("본인이 생성한 프로젝트만 삭제할 수 있습니다.")
+        return obj

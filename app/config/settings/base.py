@@ -50,11 +50,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "app.crew",
 ]
 INSTALLED_APPS += [
     "rest_framework", # drf
     "drf_spectacular", # 스웨거
-    # "app.accounts",  # 회원,인증
+    "app.accounts",  # 회원,인증
     # "app.fixed",  # Fixed 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
@@ -98,7 +99,7 @@ ASGI_APPLICATION = "app.config.asgi.application"
 #         'ENGINE': 'django.db.backends.sqlite3',
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
-# }
+# }ㅣㄹ실
 
 DATABASES = {
     "default": {
@@ -151,6 +152,9 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Custom User Model
+AUTH_USER_MODEL = "accounts.User"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

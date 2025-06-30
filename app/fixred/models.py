@@ -2,6 +2,7 @@ from django.db import models
 
 from app.util.models import CreatedOnlyModel, TimestampModel
 
+# 픽레드 모델
 class Fixred(TimestampModel):
     user= models.ForeignKey("users.User",on_delete=models.CASCADE, related_name='fixreds')
     content = models.TextField()
@@ -16,14 +17,14 @@ class Fixred(TimestampModel):
         ],
         default='all'
     )
-    
     class Meta:
         db_table = 'fixred'
         ordering = ['-created_at'] # 최신순
 
     def __str__(self): 
         return f"[{self.id}] {self.user.nickname}: {self.content[:20]}..."
-    
+
+# 픽레드 이미지 모델    
 class FixredImage(models.Model):
     post = models.ForeignKey(Fixred, on_delete=models.CASCADE)
     image = models.ImageField('fixred_image',upload_to='fixred_images/')
@@ -31,12 +32,16 @@ class FixredImage(models.Model):
     def __str__(self):
         return f"{self.post.content[:10]} image"
     
-
+# 픽레드 댓글 모델
 class FixredComment(CreatedOnlyModel):
-    fixred_id = models.ForeignKey(Fixred, on_delete=models.CASCADE)
+    fixred = models.ForeignKey(Fixred, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
     comment = models.CharField(max_length=500)
-    
+
+    def __str__(self):
+        return f"[{self.id}] {self.user.nickname}: {self.comment[:10]}..."
+
+# 픽레드 신고 모델
 class FixredReport(CreatedOnlyModel):
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
     fixred_post = models.ForeignKey(Fixred, on_delete=models.CASCADE)
@@ -50,7 +55,14 @@ class FixredReport(CreatedOnlyModel):
             ('etc', '기타')
         ]
         )
-    
+    def __str__(self):
+        return (
+        f"[{self.id}] {self.user.nickname}님의 신고\n"
+        f"- 게시물 ID: [{self.fixred_post.id}]\n"
+        f"- 내용: {self.fixred_post.content[:10]}...\n"
+        f"- 사유: {self.reason}"
+    )
+# 픽레드 차단 모델
 class UserBlock(CreatedOnlyModel):
-    blocker = models.Foreignkey("users.User", on_delete=models.CASCADE)
-    blocked = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    blocker = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='blocks_made')
+    blocked = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='blocks_received')

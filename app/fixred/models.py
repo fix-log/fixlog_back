@@ -63,6 +63,13 @@ class FixredReport(CreatedOnlyModel):
         f"- 사유: {self.reason}"
     )
 # 픽레드 차단 모델
-class UserBlock(CreatedOnlyModel):
-    blocker = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='blocks_made')
-    blocked = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='blocks_received')
+class FixredBlock(CreatedOnlyModel):
+    blocker = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='fixred_blocks_made')
+    blocked = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='fixred_blocks_received')
+
+    class Meta:
+        db_table = 'fixred_block'
+        unique_together = ('blocker', 'blocked')  # 동일한 차단 관계는 중복되지 않도록 설정
+
+    def __str__(self):
+        return f"{self.blocker.nickname} → {self.blocked.nickname} | 차단"

@@ -7,8 +7,8 @@ class Project(models.Model):
         ('recruiting', '모집중'),
         ('completed', '모집완료'),
     ]
-    
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='projects')
     title = models.CharField(max_length=100)
     deadline = models.DateTimeField()
     start_date = models.DateTimeField()

@@ -58,6 +58,7 @@ INSTALLED_APPS += [
     # "app.fixed",  # Fixed 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
+    "app.util",     # 유틸 기능
 ]
 
 MIDDLEWARE = [
@@ -106,8 +107,8 @@ DATABASES = {
         "NAME": os.getenv("POSTGRES_DB"),  # 환경변수에서 DB 이름을 가져온다.
         "USER": os.getenv("POSTGRES_USER"),  # 환경변수에서 사용자 이름을 가져온다.
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),  # 환경변수에서 비밀번호를 가져온다.
-        "HOST": os.getenv("POSTGRES_HOST"),  # 환경변수에서 호스트를 가져온다.
-        "PORT": os.getenv("POSTGRES_PORT"),  # 환경변수에서 포트를 가져온다.
+        "HOST": os.getenv("POSTGRES_HOST", "localhost"),  # 환경변수에서 호스트를 가져온다.
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),  # 환경변수에서 포트를 가져온다.
     }
 }
 
@@ -133,7 +134,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ko-KR"
 
 TIME_ZONE = "UTC"
 

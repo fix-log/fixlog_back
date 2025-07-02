@@ -29,7 +29,7 @@ services:
     build:
       context: .                            # Dockerfile 경로를 현재 디렉토리로 지정한다.
     command: >
-      sh -c "python manage.py migrate &&
+      sh -c "cd /app && python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app                              # 현재 디렉토리를 /app에 마운트한다.

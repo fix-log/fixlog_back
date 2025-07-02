@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 class Crew(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='projects')
     title = models.CharField(max_length=100)
     deadline = models.DateTimeField()
     start_date = models.DateTimeField()

@@ -1,7 +1,9 @@
-from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
 from django.utils import timezone
-from app.util.models import Position, Language, Stack
+
+from app.util.models import Language, Position, Stack
+
 
 class CoopTool(models.Model):
     name = models.CharField(max_length=100)
@@ -34,7 +36,7 @@ class Career(models.Model):
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
-            raise ValueError('이메일은 필수입니다.')
+            raise ValueError("이메일은 필수입니다.")
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -42,9 +44,9 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
         return self.create_user(email, password, **extra_fields)
 
 
@@ -80,7 +82,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     def __str__(self):
@@ -90,11 +92,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.nickname or self.email
 
     def get_short_name(self):
-        return self.nickname or self.email.split('@')[0]
+        return self.nickname or self.email.split("@")[0]
 
 
 class RefreshToken(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='refresh_tokens')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="refresh_tokens")
     token = models.TextField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
@@ -109,12 +111,12 @@ class RefreshToken(models.Model):
 
 class SocialAccount(models.Model):
     PROVIDER_CHOICES = [
-        ('github', 'GitHub'),
-        ('kakao', 'Kakao'),
-        ('naver', 'Naver'),
+        ("github", "GitHub"),
+        ("kakao", "Kakao"),
+        ("naver", "Naver"),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='social_accounts')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="social_accounts")
     provider = models.CharField(max_length=50, choices=PROVIDER_CHOICES)
     uid = models.CharField(max_length=100)
     extra_data = models.JSONField(default=dict, blank=True)

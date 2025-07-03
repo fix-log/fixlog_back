@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from app.accounts.models import User
 from app.util.models import CreatedOnlyModel, TimestampModel
@@ -13,10 +14,7 @@ class Fixred(TimestampModel):
     read_permission = models.CharField(
         max_length=10,
         choices=[
-            (
-                "all",
-                "모든 사람",
-            ),
+            ("all", "모든 사람"),
             ("follow", "내가 팔로우 하는 사람만"),
             ("mention", "멘션한 사람만"),
         ],
@@ -25,7 +23,7 @@ class Fixred(TimestampModel):
 
     class Meta:
         db_table = "fixred"
-        ordering = ["-created_at"]  # 최신순
+        ordering = ["-created_at"] # 최신순 정렬
 
     def __str__(self):
         return f"[{self.id}] {self.user.nickname}: {self.content[:20]}..."
@@ -76,12 +74,33 @@ class FixredReport(CreatedOnlyModel):
 
 # 픽레드 차단 모델
 class FixredBlock(CreatedOnlyModel):
-    blocker = models.ForeignKey(User, on_delete=models.CASCADE, related_name="fixred_blocks_made")
-    blocked = models.ForeignKey(User, on_delete=models.CASCADE, related_name="fixred_blocks_received")
+    blocker = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="fixred_blocks_made",
+        verbose_name="차단자",
+    )
+    blocked = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="fixred_blocks_received",
+        verbose_name="차단 대상",
+    )
 
     class Meta:
         db_table = "fixred_block"
-        unique_together = ("blocker", "blocked")  # 동일한 차단 관계는 중복되지 않도록 설정
+        unique_together = ("blocker", "blocked") # 차단 중복 방지
+        verbose_name = "픽레드 차단"
+        verbose_name_plural = "픽레드 차단 목록"
+
+    def clean(self):
+        # 자기 자신 차단 방지
+        if self.blocker == self.blocked:
+            raise ValidationError("자기 자신을 차단할 수 없습니다.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.blocker.nickname} → {self.blocked.nickname} | 차단"

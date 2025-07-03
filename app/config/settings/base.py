@@ -22,8 +22,6 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-ALLOWED_HOSTS = ['*']
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -32,6 +30,15 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG") == "True"
+
+# Application definition
+ALLOWED_HOSTS = ['*']  # 모든 호스트 허용 (개발용)
+
+# CORS 설정
+CORS_ALLOWED_ORIGINS = os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("DJANGO_CORS_ALLOWED_ORIGINS") else []
+
+# 모든 origin 허용 시 (임시 개발용)
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Redis 캐시 설정
 CACHES = {
@@ -44,8 +51,7 @@ CACHES = {
     }
 }
 
-_hosts_env = os.getenv("DJANGO_ALLOWED_HOSTS")
-ALLOWED_HOSTS = _hosts_env.split(",") if _hosts_env else ["*"]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -218,9 +224,3 @@ SPECTACULAR_SETTINGS = {
 
 # User 모델 변경 (이메일)
 AUTH_USER_MODEL = "accounts.User"
-
-# CORS 설정
-CORS_ALLOWED_ORIGINS = os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("DJANGO_CORS_ALLOWED_ORIGINS") else []
-
-# 모든 origin 허용 시 (임시 개발용)
-CORS_ALLOW_ALL_ORIGINS = True

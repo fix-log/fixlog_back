@@ -62,7 +62,8 @@ INSTALLED_APPS += [
     # "app.fixred",  # fixred 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
-    "app.util",  # 유틸 기능
+    "app.util",     # 유틸 기능
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -93,7 +94,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "app.config.wsgi.application"
-ASGI_APPLICATION = "app.config.asgi.application"
+ASGI_APPLICATION = "config.asgi.application"  # Channels ASGI 설정
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",  # Redis 백엔드 설정
+        "CONFIG": {
+            "hosts": [("redis", 6379)],  # docker-compose의 redis 서비스 이름 사용
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -112,7 +122,7 @@ DATABASES = {
         "USER": os.getenv("POSTGRES_USER"),  # 환경변수에서 사용자 이름을 가져온다.
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),  # 환경변수에서 비밀번호를 가져온다.
         "HOST": os.getenv("POSTGRES_HOST", "localhost"),  # 환경변수에서 호스트를 가져온다.
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),  # 환경변수에서 포트를 가져온다.
+        "PORT": os.getenv("POSTGRES_PORT", "5432"), # 환경변수에서 포트를 가져온다.
     }
 }
 
@@ -151,6 +161,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"  # 정적 파일 수집 경로
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

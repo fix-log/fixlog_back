@@ -1,46 +1,93 @@
-version: '3.9'                              # Docker Compose 버전을 지정한다.
+version: '3.8'  # 생략 가능하지만 명시 권장
 
 services:
+  # --------------------------------------------
+  # 1) PostgreSQL DB
+  # --------------------------------------------
   db:
-    image: postgres:15-alpine               # PostgreSQL 15-alpine 이미지를 사용한다.
+    image: postgres:15-alpine
     ports:
-      - "5432:5432"
+      - "5431:5432"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}          # .env 파일의 POSTGRES_DB를 사용한다.
-      POSTGRES_USER: ${POSTGRES_USER}      # .env 파일의 POSTGRES_USER를 사용한다.
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # .env 파일의 POSTGRES_PASSWORD를 사용한다.
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - db_data:/var/lib/postgresql/data    # DB 데이터를 영구 저장한다.
-      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # 필요시 수동 초기화 SQL 작성 가능
+      - db_data:/var/lib/postgresql/data
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
-
+  # --------------------------------------------
+  # 2) Redis
+  # --------------------------------------------
   redis:
-    image: redis:7-alpine                   # Redis 7-alpine 이미지를 사용한다.
+    image: redis:7-alpine
     ports:
-      - '6379:6379'                         # 로컬 6379 포트를 컨테이너로 포워딩한다.
+      - "6379:6379"
     restart: always
 
-  web:
+  # --------------------------------------------
+  # 3) Daphne (ASGI: WebSocket 처리)
+  # --------------------------------------------
+  daphne:
     build:
-      context: .                            # Dockerfile 경로를 현재 디렉토리로 지정한다.
+      context: .
+      dockerfile: Dockerfile
     command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - .:/app                              # 현재 디렉토리를 /app에 마운트한다.
-    ports:
-      - '8000:8000'                         # 로컬 8000 포트를 컨테이너로 포워딩한다.
+      sh -c "./scripts/run_daphne.sh"
     env_file:
-      - .env                                # .env 파일을 환경변수로 로드한다.
+      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
+    volumes:
+      - .:/app
+    environment:
+      PYTHONPATH: /app/app
+    ports:
+      - "8000:8000"
     depends_on:
       - db
       - redis
     restart: always
 
+  # --------------------------------------------
+  # 4) API (Gunicorn WSGI: HTTP 요청 처리)
+  # --------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      sh -c "./scripts/run_api.sh"
+    env_file:
+      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
+    volumes:
+      - .:/app
+    environment:
+      PYTHONPATH: /app/app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+      - redis
+    restart: always
+
+  # --------------------------------------------
+  # 5) Nginx (리버스 프록시 & 정적파일 서빙)
+  # --------------------------------------------
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - static_volume:/app/static
+    depends_on:
+      - daphne
+      - api
+    restart: always
+
 volumes:
-  db_data: {}                               # PostgreSQL 데이터를 저장할 볼륨을 정의한다.
+  db_data: {}
+  static_volume: {}

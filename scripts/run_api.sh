@@ -1,12 +1,20 @@
+#!/bin/sh
+# run_api.sh: migrate → collectstatic → gunicorn 실행 스크립트
 
+set -e  # 에러 발생 시 스크립트 즉시 종료
 
-# /bin/sh
-
-echo "▶️ 정적 파일 수집 시작..."
-python manage.py collectstatic --noinput
+# Django 설정 모듈 지정
+export DJANGO_SETTINGS_MODULE=config.settings.dev
 
 echo "▶️ DB 마이그레이션 시작..."
-python manage.py migrate
+poetry run python manage.py makemigrations
+poetry run python manage.py migrate --noinput
 
-echo "▶️ Gunicorn 서버 시작..."
-exec gunicorn config.wsgi:application --bind 0.0.0.0:8001 --workers 4
+echo "▶️ 정적 파일 수집 시작..."
+poetry run python manage.py collectstatic --noinput
+
+echo "▶️ Gunicorn(WSGI) 서버 시작..."
+exec poetry run gunicorn config.wsgi:application \
+     --bind 0.0.0.0:8001 \
+     --workers 4 \
+     --timeout 60

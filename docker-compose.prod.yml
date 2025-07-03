@@ -1,10 +1,13 @@
-version: "3.9"
+version: '3.8'  # 생략 가능하지만 명시 권장
 
 services:
+  # --------------------------------------------
+  # 1) PostgreSQL DB
+  # --------------------------------------------
   db:
     image: postgres:15-alpine
     ports:
-      - "5432:5432"
+      - "5431:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -17,23 +20,30 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+  # --------------------------------------------
+  # 2) Redis
+  # --------------------------------------------
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     restart: always
 
+  # --------------------------------------------
+  # 3) Daphne (ASGI: WebSocket 처리)
+  # --------------------------------------------
   daphne:
     build:
       context: .
-    # Daphne는 WebSocket 요청만 처리하며 마이그레이션은 하지 않습니다.
+      dockerfile: Dockerfile
     command: >
-      sh ./scripts/run_daphne.sh
+      sh -c "./scripts/run_daphne.sh"
+    env_file:
+      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
     volumes:
       - .:/app
-    env_file:
-      - .env
+    environment:
+      PYTHONPATH: /app/app
     ports:
       - "8000:8000"
     depends_on:
@@ -41,16 +51,21 @@ services:
       - redis
     restart: always
 
+  # --------------------------------------------
+  # 4) API (Gunicorn WSGI: HTTP 요청 처리)
+  # --------------------------------------------
   api:
     build:
       context: .
-    # API 서버는 마이그레이션 및 정적 파일 수집 후 Gunicorn 실행
+      dockerfile: Dockerfile
     command: >
-      sh ./scripts/run_api.sh
+      sh -c "./scripts/run_api.sh"
+    env_file:
+      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
     volumes:
       - .:/app
-    env_file:
-      - .env
+    environment:
+      PYTHONPATH: /app/app
     ports:
       - "8001:8001"
     depends_on:
@@ -58,13 +73,16 @@ services:
       - redis
     restart: always
 
+  # --------------------------------------------
+  # 5) Nginx (리버스 프록시 & 정적파일 서빙)
+  # --------------------------------------------
   nginx:
     image: nginx:1.25-alpine
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./static:/app/static
     ports:
       - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - static_volume:/app/static
     depends_on:
       - daphne
       - api
@@ -72,3 +90,4 @@ services:
 
 volumes:
   db_data: {}
+  static_volume: {}

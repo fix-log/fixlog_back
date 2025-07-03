@@ -9,7 +9,7 @@ from app.util.models import CreatedOnlyModel
 class Fixletter(CreatedOnlyModel):
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_letters")
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_letters")
-    last_message = models.ForeignKey("Message", on_delete=models.CASCADE,related_name="last_fixletters")
+    last_message = models.ForeignKey("Message", on_delete=models.CASCADE, null=True, related_name="last_fixletters")
     last_sent_at = models.DateTimeField()
 
     class Meta:

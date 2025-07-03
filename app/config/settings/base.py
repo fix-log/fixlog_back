@@ -56,10 +56,8 @@ INSTALLED_APPS += [
     "rest_framework",  # drf
     "rest_framework_simplejwt",  # JWT
     "drf_spectacular",  # 스웨거
-    "app.accounts",
-    # "app.fixed",  # Fixed 관리
-    # "app.accounts",  # 회원,인증
-    # "app.fixred",  # fixred 관리
+    "app.accounts", 
+    "app.fixred",  # fixred 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
     # "app.fixletter",  # 픽레터 기능

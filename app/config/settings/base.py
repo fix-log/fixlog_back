@@ -56,13 +56,14 @@ INSTALLED_APPS += [
     "rest_framework",  # drf
     "rest_framework_simplejwt",  # JWT
     "drf_spectacular",  # 스웨거
-    "app.accounts",
     # "app.fixed",  # Fixed 관리
-    # "app.accounts",  # 회원,인증
+    "app.accounts",  # 회원,인증
     # "app.fixred",  # fixred 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
-    "app.util",  # 유틸 기능
+    "app.util",     # 유틸 기능
+    "channels",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -93,7 +94,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "app.config.wsgi.application"
-ASGI_APPLICATION = "app.config.asgi.application"
+ASGI_APPLICATION = "config.asgi.application"  # Channels ASGI 설정
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",  # Redis 백엔드 설정
+        "CONFIG": {
+            "hosts": [("redis", 6379)],  # docker-compose의 redis 서비스 이름 사용
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -112,7 +122,7 @@ DATABASES = {
         "USER": os.getenv("POSTGRES_USER"),  # 환경변수에서 사용자 이름을 가져온다.
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),  # 환경변수에서 비밀번호를 가져온다.
         "HOST": os.getenv("POSTGRES_HOST", "localhost"),  # 환경변수에서 호스트를 가져온다.
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),  # 환경변수에서 포트를 가져온다.
+        "PORT": os.getenv("POSTGRES_PORT", "5432"), # 환경변수에서 포트를 가져온다.
     }
 }
 
@@ -149,8 +159,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -192,6 +200,20 @@ SIMPLE_JWT = {
     "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
     "JTI_CLAIM": "jti",
 }
+
+# AWS S3 설정
+# AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+# AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+AWS_S3_FILE_OVERWRITE = False
+AWS_QUERYSTRING_AUTH = False
 
 # 스웨거
 SPECTACULAR_SETTINGS = {

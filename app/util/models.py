@@ -1,11 +1,13 @@
 from django.db import models
 
+
 # 포지션 정보 모델 (예: 백엔드, 프론트엔드 등)
 class Position(models.Model):
     name = models.CharField(max_length=100)  # 포지션 이름 (예: 백엔드, 프론트엔드 등)
 
     def __str__(self):
         return self.name
+
 
 # 사용 언어 정보 모델 (예: Python, JavaScript 등)
 class Language(models.Model):
@@ -14,12 +16,14 @@ class Language(models.Model):
     def __str__(self):
         return self.name
 
+
 # 기술 스택 정보 모델 (예: Django, React 등)
 class Stack(models.Model):
     name = models.CharField(max_length=100)  # 기술 스택 이름 (예: Django, React 등)
 
     def __str__(self):
         return self.name
+
 
 # 디자인 도구/분야 정보 모델 (예: Figma, UI/UX 등)
 class Design(models.Model):

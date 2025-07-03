@@ -16,9 +16,13 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+# CORS 관련 설정을 위한 라이브러리 추가 설치 필요: django-cors-headers
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
+
+ALLOWED_HOSTS = ['*']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -63,9 +67,11 @@ INSTALLED_APPS += [
     # "app.workroom",  # 워크룸 기능
     "app.util",     # 유틸 기능
     "channels",
+    "corsheaders",  # CORS 처리를 위한 앱
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # CORS 미들웨어는 가장 위에 있어야 함
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -212,3 +218,9 @@ SPECTACULAR_SETTINGS = {
 
 # User 모델 변경 (이메일)
 AUTH_USER_MODEL = "accounts.User"
+
+# CORS 설정
+CORS_ALLOWED_ORIGINS = os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("DJANGO_CORS_ALLOWED_ORIGINS") else []
+
+# 모든 origin 허용 시 (임시 개발용)
+CORS_ALLOW_ALL_ORIGINS = True

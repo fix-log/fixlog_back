@@ -1,10 +1,11 @@
 from django.db import models
 
 from app.util.models import CreatedOnlyModel, TimestampModel
+from app.accounts.models import User
 
 # 픽레드 모델
 class Fixred(TimestampModel):
-    user= models.ForeignKey("users.User",on_delete=models.CASCADE, related_name='fixreds')
+    user= models.ForeignKey(User,on_delete=models.CASCADE, related_name='fixreds')
     content = models.TextField()
     like_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
@@ -35,7 +36,7 @@ class FixredImage(models.Model):
 # 픽레드 댓글 모델
 class FixredComment(CreatedOnlyModel):
     fixred = models.ForeignKey(Fixred, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.CharField(max_length=500)
 
     def __str__(self):
@@ -43,7 +44,7 @@ class FixredComment(CreatedOnlyModel):
 
 # 픽레드 신고 모델
 class FixredReport(CreatedOnlyModel):
-    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     fixred_post = models.ForeignKey(Fixred, on_delete=models.CASCADE)
     reason = models.CharField(
         max_length=100, 
@@ -64,8 +65,8 @@ class FixredReport(CreatedOnlyModel):
     )
 # 픽레드 차단 모델
 class FixredBlock(CreatedOnlyModel):
-    blocker = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='fixred_blocks_made')
-    blocked = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name='fixred_blocks_received')
+    blocker = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fixred_blocks_made')
+    blocked = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fixred_blocks_received')
 
     class Meta:
         db_table = 'fixred_block'

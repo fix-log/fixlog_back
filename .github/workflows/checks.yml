@@ -67,10 +67,22 @@ jobs:
             sleep 2
           done
 
-      - name: Create Test Database
+      - name: Run Black
+        run: poetry run black . --check
+
+      - name: Run Isort
+        run: poetry run isort . --check-only
+
+      - name: Create test database
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
-          export PGPASSWORD=${{ secrets.POSTGRES_PASSWORD }}  # 비밀번호 환경 변수 설정
-          psql -h 127.0.0.1 -U ${{ secrets.POSTGRES_USER }} -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'test_fixlogdb' LIMIT 1;" | grep -q 1 || psql -h 127.0.0.1 -U ${{ secrets.POSTGRES_USER }} -d postgres -c "CREATE DATABASE test_fixlogdb;"
+          psql -h localhost -U ${{ secrets.POSTGRES_USER }} -c "DROP DATABASE IF EXISTS test_fixlogback;"
+          psql -h localhost -U ${{ secrets.POSTGRES_USER }} -c "CREATE DATABASE test_fixlogback;"
+          echo "Test database created successfully"
+
+      - name: Make Migrations
+        run: poetry run python manage.py makemigrations
 
       - name: Run Django Migration
         run: |

@@ -5,7 +5,7 @@ class FixredImageSerializer(serializers.ModelSerializer):
     image_url = serializers.ImageField(source='image', read_only=True)
     class Meta:
         model = FixredImage
-        fields = ['id', 'image']
+        fields = ['image_url']
 
 
 class FixredSerializer(serializers.ModelSerializer):

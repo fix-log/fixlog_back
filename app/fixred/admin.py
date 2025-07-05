@@ -2,7 +2,6 @@ from django.contrib import admin
 
 from .models import Fixred, FixredBlock, FixredComment, FixredImage, FixredReport
 
-
 class FixredImageInline(admin.TabularInline):
     model = FixredImage
     extra = 0

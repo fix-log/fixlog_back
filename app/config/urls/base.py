@@ -27,5 +27,5 @@ urlpatterns = [
     path("", include("app.util.urls")),
     # path("", include("app.workroom.urls")),
     # path("", include("app.accounts.urls")),
-    path("", include("app.fixred.urls")),
+    path("fixred/", include("app.fixred.urls")),
 ]

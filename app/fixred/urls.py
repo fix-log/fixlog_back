@@ -1,7 +1,7 @@
-from django.urls import include, path
+from django.urls import path
 
 from .views import FixredListView
 
 urlpatterns = [
-    path("fixred/", FixredListView.as_view(), name="fixred-list"),
+    path("list/", FixredListView.as_view(), name="fixred-list"),
 ]

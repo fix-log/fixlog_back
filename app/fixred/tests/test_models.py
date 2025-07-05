@@ -14,11 +14,11 @@ class TestFixredModel(TestCase):
         )
 
     def test_fixred_create(self):
-            post = Fixred.objects.create(
-                user=self.user,
-                content="픽레드 테스트",
-            )
-            # 로그 출력
-            print(f"생성된 Fixred: id={post.id}, user={post.user.nickname}, content={post.content}")
-            self.assertEqual(post.user.nickname, "testuser")
-            self.assertEqual(post.content, "픽레드 테스트")
+        post = Fixred.objects.create(
+            user=self.user,
+            content="픽레드 테스트",
+        )
+        # 로그 출력
+        print(f"생성된 Fixred: id={post.id}, user={post.user.nickname}, content={post.content}")
+        self.assertEqual(post.user.nickname, "testuser")
+        self.assertEqual(post.content, "픽레드 테스트")

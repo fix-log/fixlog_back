@@ -9,13 +9,12 @@ from .serializers import FixredSerializer
 @extend_schema(
     summary="픽레드 게시글 목록 조회",
     description="Fixred 게시글을 최신순으로 조회합니다.",
-    #"following 쿼리파라미터를 주면 팔로잉한 사용자의 글만 조회됩니다.",
+    # "following 쿼리파라미터를 주면 팔로잉한 사용자의 글만 조회됩니다.",
     # parameters=[
     #     OpenApiParameter(
     #         name="filter",
     #         #description="'all' 또는 'following' 선택",
     #         required=False,
-            
     #         location=OpenApiParameter.QUERY,
     #     ),
     # ],
@@ -33,7 +32,10 @@ from .serializers import FixredSerializer
 class FixredListView(generics.ListAPIView):
     queryset = Fixred.objects.all()
     permission_classes = [permissions.IsAuthenticated]  # 로그인 사용자만
-    serializer_class = FixredSerializer  
+    serializer_class = FixredSerializer
+
     def get_queryset(self):
         return super().get_queryset()
+
+
 # Fixred 게시글 상세

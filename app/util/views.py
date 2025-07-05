@@ -1,8 +1,10 @@
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from app.util.models import Position, Language, Stack, Design
-from app.util.serializers import PositionSerializer, LanguageSerializer, StackSerializer, DesignSerializer
+
+from app.util.models import Design, Language, Position, Stack
+from app.util.serializers import DesignSerializer, LanguageSerializer, PositionSerializer, StackSerializer
+
 
 # 포지션 전체 목록 조회 및 생성
 @extend_schema(
@@ -14,12 +16,13 @@ from app.util.serializers import PositionSerializer, LanguageSerializer, StackSe
         401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
         403: OpenApiResponse(description="권한이 없습니다."),
         500: OpenApiResponse(description="서버 내부 오류"),
-    }
+    },
 )
 class PositionListView(generics.ListCreateAPIView):
     queryset = Position.objects.all()
     serializer_class = PositionSerializer
     permission_classes = [permissions.AllowAny]
+
 
 # 포지션 단건 조회, 수정(PATCH), 삭제
 @extend_schema(methods=["put"], exclude=True)
@@ -37,7 +40,7 @@ class PositionDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -53,7 +56,7 @@ class PositionDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
@@ -70,7 +73,7 @@ class PositionDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -90,12 +93,13 @@ class PositionDetailView(generics.RetrieveUpdateDestroyAPIView):
         401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
         403: OpenApiResponse(description="권한이 없습니다."),
         500: OpenApiResponse(description="서버 내부 오류"),
-    }
+    },
 )
 class LanguageListView(generics.ListCreateAPIView):
     queryset = Language.objects.all()
     serializer_class = LanguageSerializer
     permission_classes = [permissions.AllowAny]
+
 
 # 언어 단건 조회, 수정(PATCH), 삭제
 @extend_schema(methods=["put"], exclude=True)
@@ -113,7 +117,7 @@ class LanguageDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -129,7 +133,7 @@ class LanguageDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
@@ -146,7 +150,7 @@ class LanguageDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -154,6 +158,7 @@ class LanguageDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
         return Response({"message": "언어가 삭제되었습니다."}, status=status.HTTP_200_OK)
+
 
 # 기술스택 전체 목록 조회 및 생성
 @extend_schema(
@@ -165,12 +170,13 @@ class LanguageDetailView(generics.RetrieveUpdateDestroyAPIView):
         401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
         403: OpenApiResponse(description="권한이 없습니다."),
         500: OpenApiResponse(description="서버 내부 오류"),
-    }
+    },
 )
 class StackListView(generics.ListCreateAPIView):
     queryset = Stack.objects.all()
     serializer_class = StackSerializer
     permission_classes = [permissions.AllowAny]
+
 
 # 기술스택 단건 조회, 수정(PATCH), 삭제
 @extend_schema(methods=["put"], exclude=True)
@@ -188,7 +194,7 @@ class StackDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -204,7 +210,7 @@ class StackDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
@@ -221,7 +227,7 @@ class StackDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -229,6 +235,7 @@ class StackDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
         return Response({"message": "기술스택이 삭제되었습니다."}, status=status.HTTP_200_OK)
+
 
 # 디자인 전체 목록 조회 및 생성
 @extend_schema(
@@ -240,12 +247,13 @@ class StackDetailView(generics.RetrieveUpdateDestroyAPIView):
         401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
         403: OpenApiResponse(description="권한이 없습니다."),
         500: OpenApiResponse(description="서버 내부 오류"),
-    }
+    },
 )
 class DesignListView(generics.ListCreateAPIView):
     queryset = Design.objects.all()
     serializer_class = DesignSerializer
     permission_classes = [permissions.AllowAny]
+
 
 # 디자인 단건 조회, 수정(PATCH), 삭제
 @extend_schema(methods=["put"], exclude=True)
@@ -263,7 +271,7 @@ class DesignDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -279,7 +287,7 @@ class DesignDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
@@ -296,7 +304,7 @@ class DesignDetailView(generics.RetrieveUpdateDestroyAPIView):
             403: OpenApiResponse(description="권한이 없습니다."),
             404: OpenApiResponse(description="해당 ID가 없습니다."),
             500: OpenApiResponse(description="서버 내부 오류"),
-        }
+        },
     )
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()

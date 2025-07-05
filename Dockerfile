@@ -7,12 +7,8 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 # 의존성 파일 복사 및 Poetry 설치
-COPY pyproject.toml poetry.lock* /app/
-RUN pip install --upgrade pip && \
-    pip install poetry && \
-    poetry config virtualenvs.create false && \
-    poetry install --no-interaction
-
+COPY ./pyproject.toml ./poetry.lock ./
+RUN pip install -upgrade pip && pip install poetry && poetry config virtualenvs.create false && poetry install -no-interaction
 
 # .env 파일 복사 (환경 변수 설정용)
 COPY .env /app/.env

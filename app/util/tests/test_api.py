@@ -2,7 +2,8 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from app.util.models import Position, Language, Stack, Design
+
+from app.util.models import Design, Language, Position, Stack
 
 
 class UtilViewTestCase(TestCase):
@@ -12,7 +13,7 @@ class UtilViewTestCase(TestCase):
     # Position API 테스트
     def test_create_position(self):  # 포지션 생성 테스트
         response = self.client.post(reverse("position-list"), {"name": "백엔드"})  # 포지션 생성 요청
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)# 생성 성공 코드 확인
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)  # 생성 성공 코드 확인
         self.assertEqual(response.data["name"], "백엔드")  # 반환된 name 확인
 
     def test_list_position(self):  # 포지션 목록 조회 테스트
@@ -39,7 +40,7 @@ class UtilViewTestCase(TestCase):
     def test_create_language(self):  # 언어 생성 테스트
         response = self.client.post(reverse("language-list"), {"name": "Python"})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)  # 생성 성공 코드 확인
-        self.assertEqual(response.data["name"], "Python")   # 응답 데이터 확인
+        self.assertEqual(response.data["name"], "Python")  # 응답 데이터 확인
 
     def test_list_language(self):  # 언어 목록 조회 테스트
         Language.objects.create(name="JavaScript")

@@ -33,7 +33,7 @@ class Design(models.Model):
 # 이 모델들은 다른 모델에서 상속받아 사용할 수 있도록 추상 클래스로 정의합니다.
 class TimestampModel(models.Model):
     created_at = models.DateTimeField('작성일자', auto_now_add=True)
-    updated_At = models.DateTimeField('수정일자', auto_now=True)
+    updated_at = models.DateTimeField('수정일자', auto_now=True)
 
     class Meta:
         abstract = True # 이 모델은 데이터베이스에 테이블을 생성하지 않음

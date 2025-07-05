@@ -3,8 +3,9 @@ from django.test import TestCase
 from app.accounts.models import User
 from app.fixred.models import Fixred
 
-class TestFixredModel(TestCase):    
-    def setUp(self): 
+
+class TestFixredModel(TestCase):
+    def setUp(self):
         # 테스트용 유저 생성
         self.user = User.objects.create_user(
             email="testuser@test.com",

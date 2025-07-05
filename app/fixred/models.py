@@ -101,6 +101,6 @@ class FixredBlock(CreatedOnlyModel):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
-
+        
     def __str__(self):
         return f"{self.blocker.nickname} → {self.blocked.nickname} | 차단"

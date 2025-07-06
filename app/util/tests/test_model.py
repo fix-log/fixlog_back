@@ -1,6 +1,5 @@
 from django.test import TestCase
-
-from app.util.models import Design, Language, Position, Stack
+from app.util.models import Position, Language, Stack, Design
 
 
 class TestMasterModel(TestCase):

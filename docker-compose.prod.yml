@@ -68,6 +68,7 @@ services:
       PYTHONPATH: /app/app
     ports:
       - "8001:8001"
+    container_name: api
     depends_on:
       - db
       - redis

@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class FixedConfig(AppConfig):
+class fixredConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "app.fixed"
+    name = "app.fixred"

@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+from django.db.models import F
 from .models import Project, UserBookmark
 from .serializers import ProjectSerializer
 
@@ -17,6 +18,11 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
             "projectposition_set__position", "projectlanguage_set__language", "projectskilltool_set__skill_tool"
         )
 
+        # 제목 검색 기능
+        search = self.request.query_params.get("search")
+        if search:
+            queryset = queryset.filter(title__icontains=search)
+
         # 모집구분 필터링 (status)
         status_param = self.request.query_params.get("status")
         if status_param:
@@ -26,19 +32,19 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
         skill_tools = self.request.query_params.getlist("skill_tools")
         if skill_tools:
             for skill_tool in skill_tools:
-                queryset = queryset.filter(skill_tools__id=skill_tool)
+                queryset = queryset.filter(projectskilltool__skill_tool__id=skill_tool)
 
         # 포지션 필터링 (positions) - AND 조건
         positions = self.request.query_params.getlist("positions")
         if positions:
             for position in positions:
-                queryset = queryset.filter(positions__id=position)
+                queryset = queryset.filter(projectposition__position__id=position)
 
         # 언어 필터링 (languages) - AND 조건
         languages = self.request.query_params.getlist("languages")
         if languages:
             for language in languages:
-                queryset = queryset.filter(languages__id=language)
+                queryset = queryset.filter(projectlanguage__language__id=language)
 
         # 정렬 (인기많은것부터 역순, 기본은 최신순)
         ordering = self.request.query_params.get("ordering", "-created_at")
@@ -59,6 +65,18 @@ class ProjectDetailAPIView(generics.RetrieveAPIView):
     )
     serializer_class = ProjectSerializer
     lookup_field = "pk"
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # 조회수 자동 증가 (F() 사용으로 race condition 방지)
+        Project.objects.filter(pk=instance.pk).update(count=F("count") + 1)
+
+        # 증가된 조회수로 다시 조회
+        instance.refresh_from_db()
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class ProjectUpdateAPIView(generics.UpdateAPIView):

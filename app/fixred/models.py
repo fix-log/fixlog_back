@@ -1,5 +1,5 @@
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 
 from app.accounts.models import User
 from app.util.models import CreatedOnlyModel, TimestampModel
@@ -23,7 +23,7 @@ class Fixred(TimestampModel):
 
     class Meta:
         db_table = "fixred"
-        ordering = ["-created_at"] # 최신순 정렬
+        ordering = ["-created_at"]  # 최신순 정렬
 
     def __str__(self):
         return f"[{self.id}] {self.user.nickname}: {self.content[:20]}..."
@@ -89,7 +89,7 @@ class FixredBlock(CreatedOnlyModel):
 
     class Meta:
         db_table = "fixred_block"
-        unique_together = ("blocker", "blocked") # 차단 중복 방지
+        unique_together = ("blocker", "blocked")  # 차단 중복 방지
         verbose_name = "픽레드 차단"
         verbose_name_plural = "픽레드 차단 목록"
 
@@ -101,6 +101,6 @@ class FixredBlock(CreatedOnlyModel):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
-        
+
     def __str__(self):
         return f"{self.blocker.nickname} → {self.blocked.nickname} | 차단"

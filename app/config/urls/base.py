@@ -25,4 +25,5 @@ urlpatterns = [
     path("schema/", SpectacularAPIView.as_view(), name="schema"),  # JSON
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="ui"),  # Swagger UI
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path("", include("app.util.urls")),
 ]

@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "app.crew",
 ]
 INSTALLED_APPS += [
     "rest_framework",  # drf
@@ -61,7 +60,7 @@ INSTALLED_APPS += [
     # "app.fixed",  # Fixed 관리
     # "app.accounts",  # 회원,인증
     # "app.fixred",  # fixred 관리
-    # "app.crew",  # 크루(팀) 관리
+    "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
     "app.util",  # 유틸 기능
 ]
@@ -203,6 +202,3 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
-
-# User 모델 변경 (이메일)
-AUTH_USER_MODEL = "accounts.User"

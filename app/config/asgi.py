@@ -14,19 +14,18 @@ from app import config
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.base")
 
 import django
-from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
+
 import app.config.routing
 
 django.setup()
 
 # ProtocolTypeRouter enables WebSocket handling via Channels
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
-        URLRouter(
-            config.routing.websocket_urlpatterns
-        )
-    ),
-})
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+        "websocket": AuthMiddlewareStack(URLRouter(config.routing.websocket_urlpatterns)),
+    }
+)

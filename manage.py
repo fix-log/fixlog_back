@@ -3,9 +3,10 @@
 import os
 import sys
 from pathlib import Path
+
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent # manage.py가 있는 루트 경로
+BASE_DIR = Path(__file__).resolve().parent  # manage.py가 있는 루트 경로
 load_dotenv(BASE_DIR / ".env")  # 확실하게 경로 지정
 
 
@@ -24,5 +25,5 @@ def main():
 
 
 if __name__ == "__main__":
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.config.settings.base')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.config.settings.base")
     main()

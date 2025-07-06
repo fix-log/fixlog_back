@@ -77,8 +77,7 @@ jobs:
         env:
           PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
-          psql -h localhost -U ${{ secrets.POSTGRES_USER }} -c "DROP DATABASE IF EXISTS test_fixlogback;"
-          psql -h localhost -U ${{ secrets.POSTGRES_USER }} -c "CREATE DATABASE test_fixlogback;"
+          psql -h localhost -U $POSTGRES_USER -d postgres -c "DROP DATABASE IF EXISTS test_fixlogback;"
           echo "Test database created successfully"
 
       - name: Make Migrations

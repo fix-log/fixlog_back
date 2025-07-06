@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, ProjectPosition, ProjectLanguage, ProjectSkillTool
+from .models import Project, ProjectPosition, ProjectLanguage, ProjectSkillTool, Application
 from app.util.models import Position, Language, Stack
 
 
@@ -125,3 +125,13 @@ class ProjectSerializer(serializers.ModelSerializer):
             ProjectSkillTool.objects.filter(project=project).delete()
             for skill_tool_id in skill_tool_ids:
                 ProjectSkillTool.objects.create(project=project, skill_tool_id=skill_tool_id)
+
+
+class ApplicationSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
+    project_id = serializers.IntegerField(source="project.id", read_only=True)
+
+    class Meta:
+        model = Application
+        fields = ["id", "user_id", "project_id"]
+        read_only_fields = ["id", "user_id", "project_id"]

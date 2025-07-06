@@ -58,3 +58,17 @@ class ProjectSkillTool(models.Model):
     class Meta:
         unique_together = ("project", "skill_tool")
         db_table = "project_skill_tool"
+
+
+class Application(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="applications")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="applications")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("user", "project")
+        db_table = "application"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.project.title}"

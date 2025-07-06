@@ -3,8 +3,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from django.db.models import F
-from .models import Project
-from .serializers import ProjectSerializer
+from django.shortcuts import get_object_or_404
+from .models import Project, Application
+from .serializers import ProjectSerializer, ApplicationSerializer
 
 
 class ProjectListCreateAPIView(generics.ListCreateAPIView):
@@ -101,3 +102,79 @@ class ProjectDeleteAPIView(generics.DestroyAPIView):
         if obj.user != self.request.user:
             raise PermissionDenied("본인이 생성한 프로젝트만 삭제할 수 있습니다.")
         return obj
+
+
+class ProjectApplyAPIView(generics.CreateAPIView, generics.DestroyAPIView):
+    queryset = Application.objects.all()
+    serializer_class = ApplicationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        project_id = self.kwargs.get('project_id')
+        project = get_object_or_404(Project, id=project_id)
+        user = self.request.user
+        
+        try:
+            return Application.objects.get(user=user, project=project)
+        except Application.DoesNotExist:
+            return None
+
+    def create(self, request, *args, **kwargs):
+        project_id = self.kwargs.get('project_id')
+        project = get_object_or_404(Project, id=project_id)
+        user = request.user
+
+        # 자신의 프로젝트에는 지원할 수 없음
+        if project.user == user:
+            return Response(
+                {"message": "지원 실패"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 이미 지원한 프로젝트인지 확인
+        if Application.objects.filter(user=user, project=project).exists():
+            return Response(
+                {"message": "지원 실패"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 지원 생성
+        Application.objects.create(user=user, project=project)
+        return Response(
+            {"message": "지원 성공"},
+            status=status.HTTP_201_CREATED
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        project_id = self.kwargs.get('project_id')
+        project = get_object_or_404(Project, id=project_id)
+        user = request.user
+
+        # 지원 내역 확인
+        try:
+            application = Application.objects.get(user=user, project=project)
+            application.delete()
+            return Response(
+                {"message": "지원 취소"},
+                status=status.HTTP_200_OK
+            )
+        except Application.DoesNotExist:
+            return Response(
+                {"message": "지원 취소 성공"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class ProjectApplicantsAPIView(generics.ListAPIView):
+    serializer_class = ApplicationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        project_id = self.kwargs.get('project_id')
+        project = get_object_or_404(Project, id=project_id)
+        
+        # 프로젝트 소유자만 지원자 목록을 볼 수 있음
+        if project.user != self.request.user:
+            raise PermissionDenied("프로젝트 소유자만 지원자 목록을 볼 수 있습니다.")
+
+        return Application.objects.filter(project=project)

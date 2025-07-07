@@ -27,6 +27,7 @@ jobs:
       DJANGO_DEBUG: "False"
       DJANGO_ALLOWED_HOSTS: "localhost"
       POSTGRES_DB: "test_fixlogback"
+      POSTGRES_DB_TEST: "test_fixlogback_test"
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_HOST: "localhost"
@@ -77,8 +78,10 @@ jobs:
         env:
           PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
-          psql -h localhost -U $POSTGRES_USER -d postgres -c "DROP DATABASE IF EXISTS test_fixlogback;"
+          psql -h localhost -U $POSTGRES_USER -d postgres -c "DROP DATABASE IF EXISTS $POSTGRES_DB_TEST;"
+          psql -h localhost -U $POSTGRES_USER -d postgres -c "CREATE DATABASE $POSTGRES_DB_TEST;"
           echo "Test database created successfully"
+
 
       - name: Make Migrations
         run: poetry run python manage.py makemigrations

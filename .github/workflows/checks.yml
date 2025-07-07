@@ -35,6 +35,7 @@ jobs:
       POSTGRES_PORT: "5432"
       CORS_ALLOWED_ORIGINS: "http://localhost:3000"
       CSRF_TRUSTED_ORIGINS: "http://localhost:8000"
+      REDIS_URL: redis://localhost:6379/0
 
     steps:
       - name: Checkout code

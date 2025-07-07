@@ -127,16 +127,23 @@ CHANNEL_LAYERS = {
 #     }
 # }
 
+import sys
+IS_TEST = "test" in sys.argv
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",  # PostgreSQL 백엔드를 사용한다.
-        "NAME": os.getenv("POSTGRES_DB"),  # 환경변수에서 DB 이름을 가져온다.
-        "USER": os.getenv("POSTGRES_USER"),  # 환경변수에서 사용자 이름을 가져온다.
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),  # 환경변수에서 비밀번호를 가져온다.
-        "HOST": os.getenv("POSTGRES_HOST", "localhost"),  # 환경변수에서 호스트를 가져온다.
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),  # 환경변수에서 포트를 가져온다.
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB_TEST") if IS_TEST else os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT"),
+        "OPTIONS": {
+            "sslmode": "disable",
+        },
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

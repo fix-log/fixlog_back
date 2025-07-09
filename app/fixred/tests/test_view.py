@@ -1,13 +1,15 @@
 import json
-import shutil
 import tempfile
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+
+import shutil
+from django.test import override_settings
+import tempfile
 
 TEST_MEDIA_ROOT = tempfile.mkdtemp()
 
@@ -43,21 +45,17 @@ class FixredFeedViewTest(APITestCase):
         self.client.force_authenticate(self.user1)
 
     def test_unauthenticated(self):
-        """인증되지 않은 사용자로 접근 시 401을 반환하는지 테스트"""
         client = APIClient()
         resp = client.get(reverse("fixred-list"))
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
-        print("test_unauthenticated: 성공 - 인증 없이 접근 시 401을 반환함")
 
     def test_list_all(self):
-        """로그인 사용자가 모든 피드를 조회할 때 모든 게시물이 반환되는지 테스트"""
         resp = self.client.get(reverse("fixred-list"), {"filter": "all"})
         print("test_list_all response:", json.dumps(resp.json(), indent=2, ensure_ascii=False))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         ids = {item["id"] for item in resp.json()}
         # 두 글이 모두 반환돼야 함
         self.assertSetEqual(ids, {self.post2.id, self.post3.id})
-        print("test_list_all: 성공 - 모든 피드 조회 시 게시물 ID 집합이 일치함")
 
 
 @override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
@@ -84,14 +82,11 @@ class FixredDetailViewTest(APITestCase):
         self.client.force_authenticate(self.user)
 
     def test_unauthenticated_detail(self):
-        """인증되지 않은 사용자로 상세 조회 시 401을 반환하는지 테스트"""
         client = APIClient()
         resp = client.get(reverse("fixred-detail", args=[self.post.id]))
         self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
-        print("test_unauthenticated_detail: 성공 - 인증 없이 상세 조회 시 401을 반환함")
 
     def test_detail_success(self):
-        """로그인 사용자가 상세 조회 시 이미지 포함 여부 및 댓글 순서를 올바르게 반환하는지 테스트"""
         resp = self.client.get(reverse("fixred-detail", args=[self.post.id]))
         data = resp.json()
         print("test_detail_success response:", json.dumps(data, indent=2, ensure_ascii=False))
@@ -109,4 +104,3 @@ class FixredDetailViewTest(APITestCase):
         # 첫 댓글은 c2 (user) 이어야 함 (최신순)
         self.assertEqual(comments[0]["comment"], "world")
         self.assertEqual(comments[1]["comment"], "hello")
-        print("test_detail_success: 성공 - 상세 조회 시 올바른 필드와 순서를 반환함")

@@ -1,9 +1,11 @@
 import json
+import shutil
+import tempfile
 from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from app.fixred.models import Fixred, FixredComment, FixredImage
 from app.fixred.serializers import (
@@ -12,8 +14,6 @@ from app.fixred.serializers import (
     FixredImageSerializer,
     FixredListSerializer,
 )
-import tempfile, shutil
-from django.test import override_settings
 
 # 테스트 전용 임시 MEDIA_ROOT
 TEST_MEDIA_ROOT = tempfile.mkdtemp()
@@ -28,9 +28,9 @@ class FixredImageSerializerTest(TestCase):
         img = FixredImage()
         img.image = SimpleNamespace(url="/media/path/to/img.png")
         data = FixredImageSerializer(img).data
-        print(f"\n{self.__class__.__name__} data:")
-        print(json.dumps(data, indent=2, ensure_ascii=False))
+        print(f"{self.__class__.__name__}.{self._testMethodName}: 성공")
         self.assertEqual(data["image_url"], "/media/path/to/img.png")
+
 
 @override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class FixredListSerializerTest(TestCase):
@@ -39,6 +39,7 @@ class FixredListSerializerTest(TestCase):
         super().tearDownClass()
         # 테스트 후 임시 MEDIA_ROOT 삭제
         shutil.rmtree(TEST_MEDIA_ROOT, ignore_errors=True)
+
     def test_list_serializer_fields(self):
         user = User.objects.create_user(email="testuser@test.com", password="pw", nickname="nick")
         fixred = Fixred.objects.create(user=user, content="hello world", like_count=5, comment_count=2)
@@ -48,8 +49,7 @@ class FixredListSerializerTest(TestCase):
         fixred.fixredimage_set.set([img])
 
         data = FixredListSerializer(fixred).data
-        print(f"\n{self.__class__.__name__} data:")
-        print(json.dumps(data, indent=2, ensure_ascii=False))
+        print(f"{self.__class__.__name__}.{self._testMethodName}: 성공")
         self.assertEqual(data["id"], fixred.id)
         self.assertEqual(data["user"]["id"], user.id)
         self.assertEqual(data["user"]["nickname"], user.nickname)
@@ -65,8 +65,7 @@ class FixredCommentSerializerTest(TestCase):
         fixred = Fixred.objects.create(user=user, content="hi")
         comment = FixredComment.objects.create(fixred=fixred, user=user, comment="great")
         data = FixredCommentSerializer(comment).data
-        print(f"\n{self.__class__.__name__} data:")
-        print(json.dumps(data, indent=2, ensure_ascii=False))
+        print(f"{self.__class__.__name__}.{self._testMethodName}: 성공")
         self.assertEqual(data["id"], comment.id)
         self.assertEqual(data["user"]["id"], user.id)
         self.assertEqual(data["comment"], "great")
@@ -80,8 +79,7 @@ class FixredDetailSerializerTest(TestCase):
         c1 = FixredComment.objects.create(fixred=fixred, user=user, comment="first")
         c2 = FixredComment.objects.create(fixred=fixred, user=user, comment="second")
         data = FixredDetailSerializer(fixred).data
-        print(f"\n{self.__class__.__name__} data:")
-        print(json.dumps(data, indent=2, ensure_ascii=False))
+        print(f"{self.__class__.__name__}.{self._testMethodName}: 성공")
         # 댓글 필드 포함 여부 및 개수 확인
         self.assertIn("comments", data)
         self.assertEqual(len(data["comments"]), 2)

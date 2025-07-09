@@ -16,6 +16,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+# CORS 관련 설정을 위한 라이브러리 추가 설치 필요: django-cors-headers
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
@@ -29,6 +31,15 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG") == "True"
 
+# Application definition
+ALLOWED_HOSTS = ['*']  # 모든 호스트 허용 (개발용)
+
+# CORS 설정
+CORS_ALLOWED_ORIGINS = os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("DJANGO_CORS_ALLOWED_ORIGINS") else []
+
+# 모든 origin 허용 시 (임시 개발용)
+CORS_ALLOW_ALL_ORIGINS = True
+
 # Redis 캐시 설정
 CACHES = {
     "default": {
@@ -40,8 +51,7 @@ CACHES = {
     }
 }
 
-_hosts_env = os.getenv("DJANGO_ALLOWED_HOSTS")
-ALLOWED_HOSTS = _hosts_env.split(",") if _hosts_env else ["*"]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -63,10 +73,11 @@ INSTALLED_APPS += [
     # "app.workroom",  # 워크룸 기능
     "app.util",     # 유틸 기능
     "channels",
-    "storages",
+    "corsheaders",  # CORS 처리를 위한 앱
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # CORS 미들웨어는 가장 위에 있어야 함
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -160,6 +171,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -200,20 +214,6 @@ SIMPLE_JWT = {
     "TOKEN_USER_CLASS": "rest_framework_simplejwt.models.TokenUser",
     "JTI_CLAIM": "jti",
 }
-
-# AWS S3 설정
-# AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-# AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
-
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
-AWS_S3_FILE_OVERWRITE = False
-AWS_QUERYSTRING_AUTH = False
 
 # 스웨거
 SPECTACULAR_SETTINGS = {

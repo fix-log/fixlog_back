@@ -1,9 +1,11 @@
 import json
+import shutil
+import tempfile
 from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from app.fixred.models import Fixred, FixredComment, FixredImage
 from app.fixred.serializers import (
@@ -12,8 +14,6 @@ from app.fixred.serializers import (
     FixredImageSerializer,
     FixredListSerializer,
 )
-import tempfile, shutil
-from django.test import override_settings
 
 # 테스트 전용 임시 MEDIA_ROOT
 TEST_MEDIA_ROOT = tempfile.mkdtemp()
@@ -32,6 +32,7 @@ class FixredImageSerializerTest(TestCase):
         print(json.dumps(data, indent=2, ensure_ascii=False))
         self.assertEqual(data["image_url"], "/media/path/to/img.png")
 
+
 @override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class FixredListSerializerTest(TestCase):
     @classmethod
@@ -39,6 +40,7 @@ class FixredListSerializerTest(TestCase):
         super().tearDownClass()
         # 테스트 후 임시 MEDIA_ROOT 삭제
         shutil.rmtree(TEST_MEDIA_ROOT, ignore_errors=True)
+
     def test_list_serializer_fields(self):
         user = User.objects.create_user(email="testuser@test.com", password="pw", nickname="nick")
         fixred = Fixred.objects.create(user=user, content="hello world", like_count=5, comment_count=2)

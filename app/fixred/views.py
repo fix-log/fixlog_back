@@ -1,9 +1,10 @@
 from django.db.models import Prefetch
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import generics, permissions
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Fixred, FixredComment, FixredImage
-from .serializers import FixredListSerializer
+from .serializers import FixredDetailSerializer, FixredListSerializer
 
 
 # Fixred 게시글 목록 (픽레드 피드)
@@ -28,7 +29,8 @@ from .serializers import FixredListSerializer
     tags=["픽레드 피드"],
 )
 class FixredListView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]  # 로그인 사용자만
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = FixredListSerializer
 
     def get_queryset(self):
@@ -58,14 +60,14 @@ class FixredListView(generics.ListAPIView):
     tags=["픽레드 게시글"],
 )
 class FixredDetailView(generics.RetrieveAPIView):
+    authentication_classes = [JWTAuthentication]
     queryset = Fixred.objects.select_related("user").prefetch_related("fixredimage_set", "comments")
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = FixredListSerializer
+    serializer_class = FixredDetailSerializer
     lookup_field = "pk"
 
     def get_queryset(self):
-        queryset = Fixred.objects.select_related("user").prefetch_related(
-            Prefetch("fixredimage_set", queryset=FixredImage.object.all()),
+        return Fixred.objects.select_related("user").prefetch_related(
+            Prefetch("fixredimage_set", queryset=FixredImage.objects.all()),
             Prefetch("comments", queryset=FixredComment.objects.select_related("user").order_by("-created_at")),
         )
-        return queryset

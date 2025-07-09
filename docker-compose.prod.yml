@@ -54,21 +54,34 @@ services:
   # --------------------------------------------
   # 4) API (Gunicorn WSGI: HTTP 요청 처리)
   # --------------------------------------------
-  api:
+  api-blue:
     build:
       context: .
-      dockerfile: Dockerfile
+    # API 서버는 마이그레이션 및 정적 파일 수집 후 Gunicorn 실행
     command: >
-      sh -c "./scripts/run_api.sh"
-    env_file:
-      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
+      sh ./scripts/run_api.sh
     volumes:
       - .:/app
-    environment:
-      PYTHONPATH: /app/app
+    env_file:
+      - .env
     ports:
       - "8001:8001"
-    container_name: api
+    depends_on:
+      - db
+      - redis
+    restart: always
+
+  api-green:
+    build:
+      context: .
+    command: >
+      sh ./scripts/run_api.sh
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    ports:
+      - "8002:8001"  # host만 다르게 (충돌 방지)
     depends_on:
       - db
       - redis
@@ -86,7 +99,8 @@ services:
       - static_volume:/app/static
     depends_on:
       - daphne
-      - api
+      - api-blue
+      - api-green
     restart: always
 
 volumes:

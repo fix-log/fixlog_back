@@ -138,7 +138,7 @@ DATABASES = {
         "PORT": os.getenv("POSTGRES_PORT", "5432"),  # 환경변수에서 포트를 가져온다.
         # ─── 테스트 시 기존 DB 이름 그대로 쓰기 ───
         "TEST": {
-            "NAME": os.getenv("POSTGRES_DB"),
+            "NAME": os.getenv("POSTGRES_DB") + "_test",  # 테스트용 DB 이름은 기존 DB 이름에 "_test"를 붙인다.
         },
     }
 }

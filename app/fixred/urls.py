@@ -4,5 +4,5 @@ from .views import FixredDetailView, FixredListView
 
 urlpatterns = [
     path("", FixredListView.as_view(), name="fixred-list"),
-    path("/<int:pk>/", FixredDetailView.as_view(), name="fixred-detail"),
+    path("<int:pk>/", FixredDetailView.as_view(), name="fixred-detail"),
 ]

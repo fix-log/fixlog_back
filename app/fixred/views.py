@@ -21,7 +21,7 @@ from .serializers import FixredDetailSerializer, FixredListSerializer
     #     ),
     # ],
     responses={
-        200: FixredListSerializer(many=True),
+        200: FixredDetailSerializer(many=True),
         401: OpenApiResponse(
             description="인증 실패 : 로그인 필요",
         ),
@@ -53,7 +53,7 @@ class FixredListView(generics.ListAPIView):
     summary="픽레드 게시글 상세 조회",
     description="Fixred 게시글의 상세 정보를 조회합니다.",
     responses={
-        200: FixredListSerializer,
+        200: FixredDetailSerializer,
         401: OpenApiResponse(description="인증 실패 : 로그인 필요"),
         404: OpenApiResponse(description="게시글을 찾을 수 없음"),
     },

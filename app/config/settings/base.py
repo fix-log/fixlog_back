@@ -70,6 +70,7 @@ INSTALLED_APPS += [
     "drf_spectacular",  # 스웨거
     "app.accounts",
     "app.fixred",  # fixred 관리
+    "app.fixletter",  # 픽레터 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
     "app.util",  # 유틸 기능
@@ -135,6 +136,10 @@ DATABASES = {
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),  # 환경변수에서 비밀번호를 가져온다.
         "HOST": os.getenv("POSTGRES_HOST", "localhost"),  # 환경변수에서 호스트를 가져온다.
         "PORT": os.getenv("POSTGRES_PORT", "5432"),  # 환경변수에서 포트를 가져온다.
+        # ─── 테스트 시 기존 DB 이름 그대로 쓰기 ───
+        "TEST": {
+            "NAME": os.getenv("POSTGRES_DB"),
+        },
     }
 }
 

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -21,6 +22,9 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
+
+# 테스트 환경 설정
+IS_TEST = "test" in sys.argv
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -73,6 +77,7 @@ INSTALLED_APPS += [
     "app.fixletter",  # 픽레터 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
+    "app.fixletter",
     "app.util",  # 유틸 기능
     "channels",
     "corsheaders",  # CORS 처리를 위한 앱
@@ -117,6 +122,20 @@ CHANNEL_LAYERS = {
         },
     },
 }
+# 레디스 설정
+if IS_TEST:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "LOCATION": "test-cache"}}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.getenv("REDIS_URL"),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
+        }
+    }
+
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -130,18 +149,18 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",  # PostgreSQL 백엔드를 사용한다.
-        "NAME": os.getenv("POSTGRES_DB"),  # 환경변수에서 DB 이름을 가져온다.
-        "USER": os.getenv("POSTGRES_USER"),  # 환경변수에서 사용자 이름을 가져온다.
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),  # 환경변수에서 비밀번호를 가져온다.
-        "HOST": os.getenv("POSTGRES_HOST", "localhost"),  # 환경변수에서 호스트를 가져온다.
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),  # 환경변수에서 포트를 가져온다.
-        # ─── 테스트 시 기존 DB 이름 그대로 쓰기 ───
-        "TEST": {
-            "NAME": os.getenv("POSTGRES_DB") + "_test",  # 테스트용 DB 이름은 기존 DB 이름에 "_test"를 붙인다.
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB_TEST") if IS_TEST else os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT"),
+        "OPTIONS": {
+            "sslmode": "disable",
         },
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

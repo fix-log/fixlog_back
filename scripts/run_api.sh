@@ -19,4 +19,5 @@ exec poetry run gunicorn config.wsgi:application \
      --bind 0.0.0.0:8001 \
      --workers 4 \
      --timeout 60 \
-     --log-level debug
+     --log-level debug \
+     --reload

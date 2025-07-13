@@ -37,9 +37,9 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      sh -c "cd /app && python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
-
+      sh -c "./scripts/run_daphne.sh"
+    env_file:
+      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
     volumes:
       - .:/app
     environment:
@@ -68,6 +68,7 @@ services:
       PYTHONPATH: /app/app
     ports:
       - "8001:8001"
+    container_name: api
     depends_on:
       - db
       - redis

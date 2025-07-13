@@ -63,6 +63,10 @@ class Workroom(CreatedOnlyModel):
         # 관리 화면 등에서 객체를 문자열로 표현할 때 사용
         return self.name
 
+    class Meta:
+        verbose_name = "워크룸"
+        verbose_name_plural = "워크룸"
+
 
 # 워크룸-포지션 중간테이블 모델
 class WorkroomPosition(models.Model):
@@ -73,6 +77,8 @@ class WorkroomPosition(models.Model):
 
     class Meta:
         unique_together = ("workroom", "position")  # 워크룸-포지션 중복 방지
+        verbose_name = "워크룸-포지션"
+        verbose_name_plural = "워크룸-포지션"
 
     def clean(self):
         # current_count가 count를 초과하면 오류 발생
@@ -87,6 +93,8 @@ class WorkroomLanguage(models.Model):
 
     class Meta:
         unique_together = ("workroom", "language")  # 중복 방지
+        verbose_name = "워크룸-언어"
+        verbose_name_plural = "워크룸-언어"
 
 
 # 워크룸-스택 중간테이블 모델
@@ -96,6 +104,8 @@ class WorkroomStack(models.Model):
 
     class Meta:
         unique_together = ("workroom", "stack")  # 중복 방지
+        verbose_name = "워크룸-스택"
+        verbose_name_plural = "워크룸-스택"
 
 
 # 워크룸-디자인 중간테이블 모델
@@ -105,6 +115,8 @@ class WorkroomDesign(models.Model):
 
     class Meta:
         unique_together = ("workroom", "design")  # 중복 방지
+        verbose_name = "워크룸-디자인"
+        verbose_name_plural = "워크룸-디자인"
 
 
 # 워크룸 멤버 모델
@@ -122,6 +134,8 @@ class WorkroomMember(CreatedOnlyModel):
 
     class Meta:
         unique_together = ("user", "workroom")  # 중복 가입 방지
+        verbose_name = "워크룸-멤버"
+        verbose_name_plural = "워크룸-멤버"
 
     def clean(self):
         # 부관리자는 최대 3명까지 허용
@@ -151,6 +165,10 @@ class Issue(CreatedOnlyModel):
     def __str__(self):
         return f"{self.title} - {self.get_status_display()}"
 
+    class Meta:
+        verbose_name = "워크룸 이슈"
+        verbose_name_plural = "워크룸 이슈"
+
 
 # 일정 모델
 class CalendarEvent(CreatedOnlyModel):
@@ -170,6 +188,10 @@ class CalendarEvent(CreatedOnlyModel):
     def __str__(self):
         return f"{self.title} ({self.start.date()}~{self.end.date()})"
 
+    class Meta:
+        verbose_name = "워크룸 일정"
+        verbose_name_plural = "워크룸 일정"
+
 
 # 워크룸 리뷰
 # todo positive negative 리뷰 내용 PR 되면 수정예정
@@ -183,7 +205,7 @@ class WorkroomReview(CreatedOnlyModel):
     class Meta:
         unique_together = ("workroom", "reviewer", "reviewee")
         verbose_name = "워크룸 리뷰"
-        verbose_name_plural = "워크룸 리뷰 목록"
+        verbose_name_plural = "워크룸 리뷰"
 
     def __str__(self):
         return f"{self.reviewer} → {self.reviewee} : {self.rating}"

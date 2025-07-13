@@ -37,16 +37,10 @@ class Design(models.Model):
 # 이 모델들은 다른 모델에서 상속받아 사용할 수 있도록 추상 클래스로 정의합니다.
 class TimestampModel(models.Model):
     created_at = models.DateTimeField(
-        '작성일자',
-        auto_now_add=True,
-        null = True,  # 기존 레코드에 NULL 허용
-        blank = True  # 폼 검증 시 빈 값 허용
+        "작성일자", auto_now_add=True, null=True, blank=True  # 기존 레코드에 NULL 허용  # 폼 검증 시 빈 값 허용
     )
     updated_at = models.DateTimeField(
-        '수정일자',
-        auto_now=True,
-        null = True,  # 기존 레코드에 NULL 허용
-        blank = True  # 폼 검증 시 빈 값 허용
+        "수정일자", auto_now=True, null=True, blank=True  # 기존 레코드에 NULL 허용  # 폼 검증 시 빈 값 허용
     )
 
     class Meta:
@@ -56,10 +50,7 @@ class TimestampModel(models.Model):
 # 작성일자만 있는 모델
 class CreatedOnlyModel(models.Model):
     created_at = models.DateTimeField(
-        '작성일자',
-        auto_now_add=True,
-        null = True,  # 기존 레코드에 NULL 허용
-        blank = True  # 폼 검증 시 빈 값 허용
+        "작성일자", auto_now_add=True, null=True, blank=True  # 기존 레코드에 NULL 허용  # 폼 검증 시 빈 값 허용
     )
 
     class Meta:

@@ -77,10 +77,10 @@ INSTALLED_APPS += [
     # "app.crew",  # 크루(팀) 관리
     "app.fixletter",
     "app.workroom",  # 워크룸 기능
-    "app.util",     # 유틸 기능
+    "app.util",  # 유틸 기능
     "channels",
     "corsheaders",  # CORS 처리를 위한 앱
-    'django_filters', # 필터
+    "django_filters",  # 필터
 ]
 
 MIDDLEWARE = [
@@ -205,7 +205,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'app.util.exceptions.custom_exception_handler',
+    "EXCEPTION_HANDLER": "app.util.exceptions.custom_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",

@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework import serializers
+
 from app.workroom.models import (
     CalendarEvent,
     Issue,
@@ -175,6 +176,7 @@ class WorkroomSerializer(serializers.ModelSerializer):
 
         return instance
 
+
 class WorkroomMemberInviteSerializer(serializers.Serializer):  # 워크룸 멤버 이메일 초대용 시리얼라이저
     email = serializers.EmailField()  # 초대할 사용자 이메일 입력 필드
     role = serializers.ChoiceField(choices=WorkroomMember._meta.get_field("role").choices)  # 부여할 역할 입력 필드
@@ -188,6 +190,7 @@ class WorkroomMemberInviteSerializer(serializers.Serializer):  # 워크룸 멤�
         except User.DoesNotExist:
             raise serializers.ValidationError("해당 이메일의 사용자가 존재하지 않습니다.")  # 사용자 없을 때 예외 발생
 
+
 class WorkroomMemberSerializer(serializers.ModelSerializer):
     nickname = serializers.CharField(source="user.nickname", read_only=True)  # 사용자 닉네임 출력 필드 추가
 
@@ -195,6 +198,7 @@ class WorkroomMemberSerializer(serializers.ModelSerializer):
         model = WorkroomMember  # 직렬화할 모델 지정
         fields = ["id", "user", "nickname", "workroom", "role", "permission", "status"]  # nickname 필드 포함
         read_only_fields = ["status"]  # 상태 필드는 읽기 전용으로 설정
+
 
 class WorkroomReviewSerializer(serializers.ModelSerializer):  # 워크룸 리뷰 모델 직렬화 클래스
     class Meta:
@@ -208,6 +212,7 @@ class WorkroomReviewSerializer(serializers.ModelSerializer):  # 워크룸 리뷰
             raise serializers.ValidationError("워크룸 종료 이후에만 리뷰를 작성할 수 있습니다.")  # 예외 발생
         return data  # 검증 통과 시 데이터 반환
 
+
 class IssueSerializer(serializers.ModelSerializer):  # 이슈 모델 직렬화 클래스
     class Meta:
         model = Issue  # 직렬화할 모델 지정
@@ -218,6 +223,7 @@ class IssueSerializer(serializers.ModelSerializer):  # 이슈 모델 직렬화 �
         if data["due_date"] < data.get("workroom").start_date:  # 마감일이 워크룸 시작일 이전이면
             raise serializers.ValidationError("마감일은 워크룸 시작일 이후여야 합니다.")  # 예외 발생
         return data  # 검증 통과 시 데이터 반환
+
 
 class CalendarEventSerializer(serializers.ModelSerializer):  # 일정 모델 직렬화 클래스
     created_by = serializers.SerializerMethodField(read_only=True)
@@ -256,6 +262,7 @@ class CalendarEventSerializer(serializers.ModelSerializer):  # 일정 모델 직
         # CalendarEvent 객체를 DB에 저장
         return CalendarEvent.objects.create(**validated_data)
 
+
 class WorkroomDetailSerializer(serializers.ModelSerializer):  # 전체 워크룸 정보를 통합 직렬화하는 클래스
     issues = serializers.SerializerMethodField()  # 이슈 목록
     events = serializers.SerializerMethodField()  # 일정 목록
@@ -287,7 +294,7 @@ class WorkroomDetailSerializer(serializers.ModelSerializer):  # 전체 워크룸
         ]
         read_only_fields = fields  # 모든 필드는 읽기 전용
 
-# related_name으로 연결된 이슈/멤버/일정 쿼리셋 반환 후 시리얼라이즈
+    # related_name으로 연결된 이슈/멤버/일정 쿼리셋 반환 후 시리얼라이즈
     def get_issues(self, obj):
         try:
             issues = obj.issues.all()

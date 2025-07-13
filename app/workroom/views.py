@@ -3,12 +3,13 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import ListCreateAPIView, RetrieveAPIView, RetrieveUpdateDestroyAPIView, UpdateAPIView
 from rest_framework.response import Response
-from drf_spectacular.types import OpenApiTypes
+
 from app.workroom.models import CalendarEvent, Issue, Workroom, WorkroomMember, WorkroomReview
 from app.workroom.permissions import WorkroomPermission
 from app.workroom.serializers import (
@@ -129,7 +130,8 @@ class WorkroomMemberListCreateAPIView(ListCreateAPIView):
         if self.request.method == "POST":
             return WorkroomMemberInviteSerializer  # 초대 생성 시에는 이메일 전용 시리얼라이저 사용
         return WorkroomMemberSerializer  # 조회 시에는 일반 시리얼라이저 사용
-# todo 이메일로 검색 후 초대하는방식 -> 이메일로 메일을 전송하는 로직이 아님 nofitication 이후에 구현해야함
+
+    # todo 이메일로 검색 후 초대하는방식 -> 이메일로 메일을 전송하는 로직이 아님 nofitication 이후에 구현해야함
     def create(self, request, *args, **kwargs):
         # 이메일 초대용 커스텀 로직
         invite_ser = WorkroomMemberInviteSerializer(data=request.data)

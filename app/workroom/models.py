@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+
 from app.util.models import CreatedOnlyModel, Design, Language, Position, Stack
 
 # 커스텀 유저 할당

@@ -13,6 +13,9 @@ poetry run python manage.py migrate --noinput
 echo "▶️ 정적 파일 수집 시작..."
 poetry run python manage.py collectstatic --noinput
 
+echo "▶️ S3 static 파일 확인..."
+poetry run python scripts/verify_static.py
+
 echo "▶️ Gunicorn 프로세스 실행 직전 디버깅 정보:"
 if [ "$DJANGO_ENV" = "dev" ]; then
   echo "▶️ 개발 모드로 Gunicorn --reload 실행"

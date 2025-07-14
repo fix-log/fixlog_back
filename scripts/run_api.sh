@@ -3,8 +3,9 @@
 
 set -e  # 에러 발생 시 스크립트 즉시 종료
 
-# Django 설정 모듈 지정
-export DJANGO_SETTINGS_MODULE=config.settings.prod
+# Django 설정 모듈 지정 (기본값: prod)
+DJANGO_ENV=${DJANGO_ENV:-prod}
+export DJANGO_SETTINGS_MODULE=config.settings.$DJANGO_ENV
 
 echo "▶️ DB 마이그레이션 시작..."
 poetry run python manage.py makemigrations
@@ -14,9 +15,17 @@ echo "▶️ 정적 파일 수집 시작..."
 poetry run python manage.py collectstatic --noinput
 
 echo "▶️ Gunicorn 프로세스 실행 직전 디버깅 정보:"
-echo "▶️ Gunicorn(WSGI) 서버 시작..."
+if [ "$DJANGO_ENV" = "dev" ]; then
+  echo "▶️ 개발 모드로 Gunicorn --reload 실행"
+  RELOAD="--reload"
+else
+  echo "▶️ 배포 모드로 Gunicorn 실행"
+  RELOAD=""
+fi
+
 exec poetry run gunicorn config.wsgi:application \
      --bind 0.0.0.0:8001 \
      --workers 4 \
      --timeout 60 \
-     --log-level debug
+     --log-level debug \
+     $RELOAD

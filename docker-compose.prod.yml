@@ -5,6 +5,8 @@ services:
   # 1) PostgreSQL DB
   # --------------------------------------------
   db:
+    env_file:
+      - .env.prod
     image: postgres:15-alpine
     ports:
       - "5431:5432"

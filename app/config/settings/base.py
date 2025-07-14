@@ -21,7 +21,13 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-load_dotenv(BASE_DIR / ".env")
+DJANGO_ENV = os.getenv("DJANGO_ENV", "prod")  # 기본값은 prod
+
+if DJANGO_ENV == "dev":
+    load_dotenv(BASE_DIR / ".env.local")
+else:
+    load_dotenv(BASE_DIR / ".env.prod")
+
 
 # 테스트 환경 설정
 IS_TEST = "test" in sys.argv
@@ -111,7 +117,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "app.config.wsgi.application"
-ASGI_APPLICATION = "config.asgi.application"  # Channels ASGI 설정
+ASGI_APPLICATION = "app.config.asgi.application"  # Channels ASGI 설정
 
 CHANNEL_LAYERS = {
     "default": {

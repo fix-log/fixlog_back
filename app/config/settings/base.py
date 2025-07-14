@@ -94,7 +94,7 @@ INSTALLED_APPS += [
     "app.fixletter",
     "app.util",  # 유틸 기능
     "channels",
-    "corsheaders",# CORS 처리를 위한 앱
+    "corsheaders",  # CORS 처리를 위한 앱
     "storages",
 ]
 

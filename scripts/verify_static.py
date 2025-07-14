@@ -11,4 +11,4 @@ def verify_static_files(bucket_name, prefix="static/"):
 
 # 실행 예시
 if __name__ == "__main__":
-    verify_static_files("your-bucket-name")
+    verify_static_files("fixlogback")

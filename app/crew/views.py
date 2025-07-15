@@ -1,8 +1,9 @@
-from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.response import Response
 from django.db.models import F
+from rest_framework import generics, status
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from app.crew.models import Project
 from app.crew.serializers import ProjectSerializer
 

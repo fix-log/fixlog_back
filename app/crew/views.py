@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from django.db.models import F
-from .models import Project
-from .serializers import ProjectSerializer
+from app.crew.models import Project
+from app.crew.serializers import ProjectSerializer
 
 
 class ProjectListCreateAPIView(generics.ListCreateAPIView):

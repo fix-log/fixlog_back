@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.db.models import F
-from .models import Project, UserBookmark
-from .serializers import ProjectSerializer
+from app.crew.models import Project, UserBookmark
+from app.crew.serializers import ProjectSerializer
 
 
 class ProjectListCreateAPIView(generics.ListCreateAPIView):

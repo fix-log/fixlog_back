@@ -39,9 +39,7 @@ DEBUG = os.getenv("DJANGO_DEBUG") == "True"
 ALLOWED_HOSTS = ["*"]  # 모든 호스트 허용 (개발용)
 
 # CORS 설정
-CORS_ALLOWED_ORIGINS = (
-    os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("DJANGO_CORS_ALLOWED_ORIGINS") else []
-)
+CORS_ALLOWED_ORIGINS = os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("DJANGO_CORS_ALLOWED_ORIGINS") else []
 
 # 모든 origin 허용 시 (임시 개발용)
 CORS_ALLOW_ALL_ORIGINS = True
@@ -74,10 +72,10 @@ INSTALLED_APPS += [
     "drf_spectacular",  # 스웨거
     "app.accounts",
     # "app.fixed",  # Fixed 관리
-    # "app.accounts",  # 회원,인증
-    # "app.fixred",  # fixred 관리
+    "app.accounts",  # 회원,인증
+    "app.fixred",  # fixred 관리
     "app.crew",  # 크루(팀) 관리
-    # "app.workroom",  # 워크룸 기능
+    "app.workroom",  # 워크룸 기능
     "app.fixletter",
     "app.util",  # 유틸 기능
     "channels",

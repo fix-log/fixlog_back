@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, ProjectPosition, ProjectLanguage, ProjectSkillTool
+from app.crew.models import Project, ProjectPosition, ProjectLanguage, ProjectSkillTool
 
 
 class ProjectPositionInline(admin.TabularInline):

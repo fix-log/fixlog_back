@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, ProjectPosition, ProjectLanguage, ProjectSkillTool
+from app.crew.models import Project, ProjectPosition, ProjectLanguage, ProjectSkillTool
 from app.util.models import Position, Language, Stack
 
 
@@ -30,7 +30,7 @@ class ProjectSkillToolSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     # 유저 닉네임 추가
     user_nickname = serializers.CharField(source="user.nickname", read_only=True)
-    
+
     # 중간 테이블 정보를 포함한 필드들
     project_positions = ProjectPositionSerializer(source="projectposition_set", many=True, read_only=True)
     project_languages = ProjectLanguageSerializer(source="projectlanguage_set", many=True, read_only=True)

@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from app.crew.models import Project, ProjectPosition, ProjectLanguage, ProjectSkillTool
-from app.util.models import Position, Language, Stack
+
+from app.crew.models import Project, ProjectLanguage, ProjectPosition, ProjectSkillTool
+from app.util.models import Language, Position, Stack
 
 
 class ProjectPositionSerializer(serializers.ModelSerializer):

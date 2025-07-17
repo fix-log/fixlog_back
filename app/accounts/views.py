@@ -1,18 +1,18 @@
 import random
+
 from django.core.cache import cache
 from django.core.mail import send_mail
-from rest_framework_simplejwt.tokens import RefreshToken
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-from drf_spectacular.utils import extend_schema, OpenApiResponse
-
-from app.accounts.serializer import SignupSerializer, UserSerializer
 from app.accounts.models import User
+from app.accounts.serializer import SignupSerializer, UserSerializer
 
 
 # ✅ 회원가입
@@ -91,6 +91,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
         data["nickname"] = self.user.nickname
         return data
+
 
 @extend_schema(
     summary="JWT 로그인",

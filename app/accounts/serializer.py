@@ -1,7 +1,10 @@
 import re
+
 from rest_framework import serializers
-from app.accounts.models import User, CoopTool, InterestField, InterestTrend, Career
-from app.util.models import Position, Language, Stack
+
+from app.accounts.models import Career, CoopTool, InterestField, InterestTrend, User
+from app.util.models import Language, Position, Stack
+
 
 class SignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -20,10 +23,20 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "email", "password", "nickname", "phone_number", "birth",
-            "portfolio", "ref_link",
-            "position", "language", "tech", "coop_tool",
-            "interest_field", "interest_trend", "career"
+            "email",
+            "password",
+            "nickname",
+            "phone_number",
+            "birth",
+            "portfolio",
+            "ref_link",
+            "position",
+            "language",
+            "tech",
+            "coop_tool",
+            "interest_field",
+            "interest_trend",
+            "career",
         ]
         extra_kwargs = {
             "portfolio": {"required": False},
@@ -33,10 +46,7 @@ class SignupSerializer(serializers.ModelSerializer):
     # 기존 validation 메서드들은 그대로 유지!
 
     def create(self, validated_data):
-        m2m_fields = [
-            "position", "language", "tech", "coop_tool",
-            "interest_field", "interest_trend", "career"
-        ]
+        m2m_fields = ["position", "language", "tech", "coop_tool", "interest_field", "interest_trend", "career"]
         m2m_data = {field: validated_data.pop(field, []) for field in m2m_fields}
 
         user = User.objects.create_user(**validated_data)
@@ -76,6 +86,7 @@ class SignupSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("포트폴리오는 PDF 파일이어야 합니다.")
         return value
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -85,6 +96,11 @@ class UserSerializer(serializers.ModelSerializer):
             "birth",
             "portfolio",
             "ref_link",
-            "position", "language", "tech", "coop_tool",
-            "interest_field", "interest_trend", "career",
+            "position",
+            "language",
+            "tech",
+            "coop_tool",
+            "interest_field",
+            "interest_trend",
+            "career",
         ]

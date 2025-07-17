@@ -15,13 +15,13 @@ from app.accounts.views import (
 urlpatterns = []
 
 urlpatterns += [
-    path("signup/", signup_view),
+    path("register/", signup_view),
     path("verify-code/", verify_code),
     path("login/", LoginView.as_view()),
     path("profile/", get_profile_view),
     path("user/<int:user_id>/", get_user_profile_view),
     path("profile/update/", update_profile_view),
-    path("delete-account/", delete_account_view),
+    path("delete/", delete_account_view),
     path("logout/", logout_view),
     path("token/refresh/", TokenRefreshView.as_view()),
 ]

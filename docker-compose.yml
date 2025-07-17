@@ -5,13 +5,14 @@ services:
   # 1) PostgreSQL DB
   # --------------------------------------------
   db:
+    env_file: ./.env.local
     image: postgres:15-alpine
     ports:
-      - "5431:5432"
+      - "5432"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
     volumes:
       - db_data:/var/lib/postgresql/data
     restart: always
@@ -37,13 +38,14 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      sh -c "./scripts/run_daphne.sh"
+      sh -c "/app/scripts/run_daphne.sh"
     env_file:
-      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
+      - .env.local   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
     volumes:
       - .:/app
     environment:
       PYTHONPATH: /app/app
+      DJANGO_ENV: dev
     ports:
       - "8000:8000"
     depends_on:
@@ -61,10 +63,11 @@ services:
     command: >
       sh -c "./scripts/run_api.sh"
     env_file:
-      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
+      - .env.local   # DB 연결용 POSTGRES_* 를 .env.local 로 읽도록
     volumes:
       - .:/app
     environment:
+      DJANGO_ENV: dev
       PYTHONPATH: /app/app
     ports:
       - "8001:8001"

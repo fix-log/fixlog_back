@@ -47,7 +47,7 @@ services:
       PYTHONPATH: /app/app
       DJANGO_ENV: dev
     ports:
-      - "8000:8000"
+      - "8010:8000"
     depends_on:
       - db
       - redis
@@ -70,7 +70,7 @@ services:
       DJANGO_ENV: dev
       PYTHONPATH: /app/app
     ports:
-      - "8000:8000"
+      - "8001:8001"
     depends_on:
       - db
       - redis

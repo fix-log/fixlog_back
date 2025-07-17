@@ -74,6 +74,7 @@ INSTALLED_APPS += [
     "drf_spectacular",  # 스웨거
     "app.accounts",
     "app.fixred",  # fixred 관리
+    "app.fixletter",  # 픽레터 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
     "app.fixletter",

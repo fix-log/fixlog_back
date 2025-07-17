@@ -75,3 +75,16 @@ class SignupSerializer(serializers.ModelSerializer):
         if value and not value.lower().endswith(".pdf"):
             raise serializers.ValidationError("포트폴리오는 PDF 파일이어야 합니다.")
         return value
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "nickname",
+            "phone_number",
+            "birth",
+            "portfolio",
+            "ref_link",
+            "position", "language", "tech", "coop_tool",
+            "interest_field", "interest_trend", "career",
+        ]

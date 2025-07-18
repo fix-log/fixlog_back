@@ -16,15 +16,15 @@ urlpatterns = [
     path("designs/", views.DesignListView.as_view(), name="design-list"),
     path("designs/<int:pk>/", views.DesignDetailView.as_view(), name="design-detail"),
     # CoopTool 관련 URL
-    path("coop-tools/", views.CoopToolListView.as_view(), name="cooptool-list"),
-    path("coop-tools/<int:pk>/", views.CoopToolDetailView.as_view(), name="cooptool-detail"),
+    path("coop-tool/", views.CoopToolListView.as_view(), name="cooptool-list"),
+    path("coop-tool/<int:pk>/", views.CoopToolDetailView.as_view(), name="cooptool-detail"),
     # InterestField 관련 URL
-    path("interest-fields/", views.InterestFieldListView.as_view(), name="interestfield-list"),
-    path("interest-fields/<int:pk>/", views.InterestFieldDetailView.as_view(), name="interestfield-detail"),
+    path("interest-field/", views.InterestFieldListView.as_view(), name="interestfield-list"),
+    path("interest-field/<int:pk>/", views.InterestFieldDetailView.as_view(), name="interestfield-detail"),
     # InterestTrend 관련 URL
-    path("interest-trends/", views.InterestTrendListView.as_view(), name="interesttrend-list"),
-    path("interest-trends/<int:pk>/", views.InterestTrendDetailView.as_view(), name="interesttrend-detail"),
+    path("interest-trend/", views.InterestTrendListView.as_view(), name="interesttrend-list"),
+    path("interest-trend/<int:pk>/", views.InterestTrendDetailView.as_view(), name="interesttrend-detail"),
     # Career 관련 URL
-    path("careers/", views.CareerListView.as_view(), name="career-list"),
-    path("careers/<int:pk>/", views.CareerDetailView.as_view(), name="career-detail"),
+    path("career/", views.CareerListView.as_view(), name="career-list"),
+    path("career/<int:pk>/", views.CareerDetailView.as_view(), name="career-detail"),
 ]

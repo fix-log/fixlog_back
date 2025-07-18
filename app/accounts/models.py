@@ -33,7 +33,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     position = models.ManyToManyField(Position, blank=True)
     experience = models.CharField(max_length=255, blank=True, null=True)
     language = models.ManyToManyField(Language, blank=True)
-    tech = models.ManyToManyField(Stack, blank=True)
+    stack = models.ManyToManyField(Stack, blank=True)
     coop_tool = models.ManyToManyField(CoopTool, blank=True)
     interest_field = models.ManyToManyField(InterestField, blank=True)
     interest_trend = models.ManyToManyField(InterestTrend, blank=True)

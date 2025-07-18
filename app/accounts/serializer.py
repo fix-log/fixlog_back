@@ -14,7 +14,7 @@ class SignupSerializer(serializers.ModelSerializer):
     # ManyToMany 필드용 PK 입력 받기
     position = serializers.PrimaryKeyRelatedField(queryset=Position.objects.all(), many=True)
     language = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), many=True)
-    tech = serializers.PrimaryKeyRelatedField(queryset=Stack.objects.all(), many=True)
+    stack = serializers.PrimaryKeyRelatedField(queryset=Stack.objects.all(), many=True)
     coop_tool = serializers.PrimaryKeyRelatedField(queryset=CoopTool.objects.all(), many=True)
     interest_field = serializers.PrimaryKeyRelatedField(queryset=InterestField.objects.all(), many=True)
     interest_trend = serializers.PrimaryKeyRelatedField(queryset=InterestTrend.objects.all(), many=True)
@@ -32,7 +32,7 @@ class SignupSerializer(serializers.ModelSerializer):
             "ref_link",
             "position",
             "language",
-            "tech",
+            "stack",
             "coop_tool",
             "interest_field",
             "interest_trend",
@@ -46,7 +46,7 @@ class SignupSerializer(serializers.ModelSerializer):
     # 기존 validation 메서드들은 그대로 유지!
 
     def create(self, validated_data):
-        m2m_fields = ["position", "language", "tech", "coop_tool", "interest_field", "interest_trend", "career"]
+        m2m_fields = ["position", "language", "stack", "coop_tool", "interest_field", "interest_trend", "career"]
         m2m_data = {field: validated_data.pop(field, []) for field in m2m_fields}
 
         user = User.objects.create_user(**validated_data)
@@ -98,7 +98,7 @@ class UserSerializer(serializers.ModelSerializer):
             "ref_link",
             "position",
             "language",
-            "tech",
+            "stack",
             "coop_tool",
             "interest_field",
             "interest_trend",

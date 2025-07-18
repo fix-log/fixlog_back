@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 
-from app.util.models import Language, Position, Stack, CoopTool, InterestField, InterestTrend, Career
+from app.util.models import Career, CoopTool, InterestField, InterestTrend, Language, Position, Stack
 
 
 class UserManager(BaseUserManager):

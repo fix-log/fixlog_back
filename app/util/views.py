@@ -2,8 +2,17 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
-from app.util.models import Design, Language, Position, Stack, CoopTool, InterestField, InterestTrend, Career
-from app.util.serializers import DesignSerializer, LanguageSerializer, PositionSerializer, StackSerializer, CoopToolSerializer, InterestFieldSerializer, InterestTrendSerializer, CareerSerializer
+from app.util.models import Career, CoopTool, Design, InterestField, InterestTrend, Language, Position, Stack
+from app.util.serializers import (
+    CareerSerializer,
+    CoopToolSerializer,
+    DesignSerializer,
+    InterestFieldSerializer,
+    InterestTrendSerializer,
+    LanguageSerializer,
+    PositionSerializer,
+    StackSerializer,
+)
 
 
 # 포지션 전체 목록 조회 및 생성
@@ -313,6 +322,7 @@ class DesignDetailView(generics.RetrieveUpdateDestroyAPIView):
         self.perform_destroy(instance)
         return Response({"message": "디자인이 삭제되었습니다."}, status=status.HTTP_200_OK)
 
+
 # -------------------- CoopTool --------------------
 @extend_schema(
     summary="협업 툴 목록 조회 및 생성",
@@ -387,6 +397,7 @@ class CoopToolDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
         return Response({"message": "협업 툴이 삭제되었습니다."}, status=status.HTTP_200_OK)
+
 
 # -------------------- InterestField --------------------
 @extend_schema(
@@ -463,6 +474,7 @@ class InterestFieldDetailView(generics.RetrieveUpdateDestroyAPIView):
         self.perform_destroy(instance)
         return Response({"message": "관심 분야가 삭제되었습니다."}, status=status.HTTP_200_OK)
 
+
 # -------------------- InterestTrend --------------------
 @extend_schema(
     summary="관심 트렌드 목록 조회 및 생성",
@@ -537,6 +549,7 @@ class InterestTrendDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
         return Response({"message": "관심 트렌드가 삭제되었습니다."}, status=status.HTTP_200_OK)
+
 
 @extend_schema(
     summary="커리어 목록 조회 및 생성",

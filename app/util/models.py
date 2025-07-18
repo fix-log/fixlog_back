@@ -49,3 +49,30 @@ class CreatedOnlyModel(models.Model):
 
     class Meta:
         abstract = True  # 이 모델은 데이터베이스에 테이블을 생성하지 않음
+
+class CoopTool(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class InterestField(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class InterestTrend(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class Career(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from app.util.models import Design, Language, Position, Stack
+from app.util.models import Design, Language, Position, Stack, CoopTool, InterestField, InterestTrend, Career
 
 
 # 포지션 모델 직렬화기
@@ -28,4 +28,24 @@ class StackSerializer(serializers.ModelSerializer):
 class DesignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Design  # 직렬화 대상 모델
+        fields = ["id", "name"]
+
+class CoopToolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CoopTool
+        fields = ["id", "name"]
+
+class InterestFieldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InterestField
+        fields = ["id", "name"]
+
+class InterestTrendSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InterestTrend
+        fields = ["id", "name"]
+
+class CareerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Career
         fields = ["id", "name"]

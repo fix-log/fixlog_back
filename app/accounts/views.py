@@ -94,6 +94,35 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 @extend_schema(
+    summary="내 프로필 조회 및 수정",
+    description="로그인된 사용자의 정보를 조회하거나 수정합니다.",
+    request=UserSerializer,
+    responses={
+        200: UserSerializer,
+        400: OpenApiResponse(description="입력값 오류"),
+        401: OpenApiResponse(description="인증 필요"),
+    },
+    tags=["회원"],
+)
+@api_view(["GET", "PATCH"])
+@permission_classes([IsAuthenticated])
+def profile_view(request):
+    user = request.user
+
+    if request.method == "GET":
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == "PATCH":
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "회원정보가 수정되었습니다."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response({"error": "허용되지 않은 요청입니다."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@extend_schema(
     summary="JWT 로그인",
     description="이메일과 비밀번호를 사용하여 JWT 토큰을 발급합니다.",
     request=CustomTokenObtainPairSerializer,
@@ -105,29 +134,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 )
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
-
-
-# 🧑‍💼 회원정보 수정
-@extend_schema(
-    summary="회원정보 수정",
-    description="로그인된 사용자가 자신의 프로필 정보를 수정합니다.",
-    request=UserSerializer,
-    responses={
-        200: OpenApiResponse(description="수정 완료"),
-        400: OpenApiResponse(description="입력값 오류"),
-        401: OpenApiResponse(description="인증 필요"),
-    },
-    tags=["회원"],
-)
-@api_view(["PATCH"])
-@permission_classes([IsAuthenticated])
-def update_profile_view(request):
-    user = request.user
-    serializer = UserSerializer(user, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response({"message": "회원정보가 수정되었습니다."})
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # ❌ 회원 탈퇴
@@ -175,24 +181,6 @@ def logout_view(request):
         return Response({"message": "로그아웃되었습니다."})
     except Exception:
         return Response({"error": "잘못된 토큰입니다."}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# 📥 내 프로필 조회
-@extend_schema(
-    summary="내 프로필 조회",
-    description="로그인된 사용자의 정보를 조회합니다.",
-    responses={
-        200: UserSerializer,
-        401: OpenApiResponse(description="인증 실패"),
-    },
-    tags=["회원"],
-)
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def get_profile_view(request):
-    user = request.user
-    serializer = UserSerializer(user)
-    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # 🔍 다른 사용자 프로필 조회

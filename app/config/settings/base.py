@@ -87,6 +87,7 @@ INSTALLED_APPS += [
     "rest_framework",  # drf
     "rest_framework_simplejwt",  # JWT
     "drf_spectacular",  # 스웨거
+    "rest_framework_simplejwt.token_blacklist", # 토큰 블랙리스트 처리
     "app.accounts",
     "app.fixred",  # fixred 관리
     # "app.crew",  # 크루(팀) 관리

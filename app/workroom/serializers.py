@@ -204,29 +204,34 @@ class WorkroomReviewSerializer(serializers.ModelSerializer):  # 워크룸 리뷰
     class Meta:
         model = WorkroomReview  # 직렬화할 모델 지정
         fields = ["id", "workroom", "reviewer", "reviewee", "rating", "comment", "created_at"]  # 포함할 필드 지정
-        read_only_fields = ["created_at"]  # 작성 시각은 읽기 전용으로 설정
+        read_only_fields = ["workroom","created_at"]  # 작성 시각은 읽기 전용으로 설정
 
-    def validate(self, data):  # 리뷰 작성 가능 여부 검증 메서드
-        workroom = data.get("workroom")  # 입력 데이터에서 워크룸 객체 가져오기
-        if workroom.end_date > timezone.now().date():  # 워크룸 종료일이 오늘 이후인 경우
-            raise serializers.ValidationError("워크룸 종료 이후에만 리뷰를 작성할 수 있습니다.")  # 예외 발생
-        return data  # 검증 통과 시 데이터 반환
+    def validate(self, data):
+        workroom = self.context.get("workroom")  # context에서 workroom 가져오기
+        if not workroom:  # workroom 정보가 없는 경우
+            raise serializers.ValidationError("워크룸 정보가 필요합니다.")  # 오류 반환
+        if workroom.end_date > timezone.now().date():  # 워크룸 종료일이 아직 안 지난 경우
+            raise serializers.ValidationError("워크룸 종료 이후에만 리뷰를 작성할 수 있습니다.")  # 유효성 오류 반환
+        return data  # 유효성 검사 통과
 
 
 class IssueSerializer(serializers.ModelSerializer):  # 이슈 모델 직렬화 클래스
     class Meta:
         model = Issue  # 직렬화할 모델 지정
         fields = ["id", "workroom", "user", "title", "status", "content", "due_date", "created_at"]  # 포함할 필드 지정
-        read_only_fields = ["created_at"]  # 작성/수정 시각은 읽기 전용으로 설정
+        read_only_fields = ["workroom", "created_at"]  # 작성/수정 시각은 읽기 전용으로 설정
 
-    def validate(self, data):  # 이슈 생성/수정 시 검증 메서드
-        if data["due_date"] < data.get("workroom").start_date:  # 마감일이 워크룸 시작일 이전이면
-            raise serializers.ValidationError("마감일은 워크룸 시작일 이후여야 합니다.")  # 예외 발생
-        return data  # 검증 통과 시 데이터 반환
+    def validate(self, data):
+        due = data.get("due_date")
+        workroom = self.context.get("workroom")  # context에서 workroom 가져오기
+        if due and workroom and due < workroom.start_date:  # 마감일이 워크룸 시작일보다 이른 경우
+            raise serializers.ValidationError("마감일은 워크룸 시작일 이후여야 합니다.")  # 유효성 오류 반환
+        return data  # 유효성 검사 통과
 
 
 class CalendarEventSerializer(serializers.ModelSerializer):  # 일정 모델 직렬화 클래스
     created_by = serializers.SerializerMethodField(read_only=True)
+    recurrence = serializers.JSONField(default=dict)  # recurrence 필드에 기본값으로 빈 딕셔너리 설정
 
     class Meta:
         model = CalendarEvent  # 직렬화할 모델 지정
@@ -246,7 +251,7 @@ class CalendarEventSerializer(serializers.ModelSerializer):  # 일정 모델 직
             "created_by",
             "created_at",
         ]
-        read_only_fields = ["created_by", "created_at"]  # 작성자와 작성일시는 읽기 전용
+        read_only_fields = ["workroom", "created_by", "created_at"]  # 작성자와 작성일시는 읽기 전용
 
     def get_created_by(self, obj):
         if obj.created_by:
@@ -254,7 +259,9 @@ class CalendarEventSerializer(serializers.ModelSerializer):  # 일정 모델 직
         return None
 
     def validate(self, data):  # 일정 생성/수정 시 검증 메서드
-        if data["start"] >= data["end"]:  # 시작 시각이 종료 시각 이후이거나 같으면
+        start = data.get("start")
+        end = data.get("end")
+        if start and end and start >= end:
             raise serializers.ValidationError("시작 시각은 종료 시각 이전이어야 합니다.")
         return data
 
@@ -313,7 +320,7 @@ class WorkroomDetailSerializer(serializers.ModelSerializer):  # 전체 워크룸
 
     def get_events(self, obj):
         try:
-            events = obj.events.all()  # ← 수정됨
+            events = obj.events.all()
             return CalendarEventSerializer(events, many=True).data
         except Exception as e:
             print(f"[get_events 오류] {e}")

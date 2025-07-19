@@ -250,15 +250,12 @@ class WorkroomReviewListCreateAPIView(ListCreateAPIView):
         workroom_id = self.kwargs.get("workroom_id")
         return WorkroomReview.objects.filter(workroom_id=workroom_id)
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
         workroom = get_object_or_404(Workroom, pk=self.kwargs.get("workroom_id"))
-        # 워크룸 종료일 검증
-        if workroom.end_date > timezone.now().date():
-            return Response(
-                {"detail": "워크룸 종료 이후에만 리뷰 작성이 가능합니다."}, status=status.HTTP_400_BAD_REQUEST
-            )
-        serializer.save(workroom=workroom, reviewer=self.request.user)
-
+        serializer = self.get_serializer(data=request.data, context={"workroom": workroom})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(workroom=workroom, reviewer=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # 이슈 API ------------------------------------
 @extend_schema(
@@ -284,9 +281,12 @@ class IssueListCreateAPIView(ListCreateAPIView):
         workroom_id = self.kwargs.get("workroom_id")
         return Issue.objects.filter(workroom_id=workroom_id)
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
         workroom = get_object_or_404(Workroom, pk=self.kwargs.get("workroom_id"))
-        serializer.save(workroom=workroom, user=self.request.user)
+        serializer = self.get_serializer(data=request.data, context={"workroom": workroom})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(workroom=workroom, user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(

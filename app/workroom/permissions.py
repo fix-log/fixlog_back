@@ -25,11 +25,12 @@ class WorkroomPermission(permissions.BasePermission):
         # 멤버십 조회
         membership = WorkroomMember.objects.filter(workroom=workroom, user=user, status="accepted").first()
 
-        # 권한 레벨 저장
-        permission_level = membership.permission
-
+        # 멤버십이 없으면 접근 불가
         if not membership:
             return False
+
+        # 권한 레벨 저장
+        permission_level = membership.permission
 
         # 총 관리자(owner)는 모든 작업 가능
         if membership.role == Role.OWNER:

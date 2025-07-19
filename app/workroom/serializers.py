@@ -204,7 +204,7 @@ class WorkroomReviewSerializer(serializers.ModelSerializer):  # 워크룸 리뷰
     class Meta:
         model = WorkroomReview  # 직렬화할 모델 지정
         fields = ["id", "workroom", "reviewer", "reviewee", "rating", "comment", "created_at"]  # 포함할 필드 지정
-        read_only_fields = ["workroom","created_at"]  # 작성 시각은 읽기 전용으로 설정
+        read_only_fields = ["workroom", "created_at"]  # 작성 시각은 읽기 전용으로 설정
 
     def validate(self, data):
         workroom = self.context.get("workroom")  # context에서 workroom 가져오기

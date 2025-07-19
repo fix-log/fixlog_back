@@ -1,26 +1,25 @@
 from datetime import timedelta
-from django.utils import timezone
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
+
 from django.contrib.auth import get_user_model
-from app.workroom.models import (
-    Workroom, WorkroomMember, Role, PermissionLevel
-)
+from django.urls import reverse
+from django.utils import timezone
+from rest_framework import status
+from rest_framework.test import APIClient, APITestCase
+
+from app.workroom.models import PermissionLevel, Role, Workroom, WorkroomMember
 
 # 사용자 모델 할당
 User = get_user_model()
 
+
 # Workroom 관련 API 전반을 테스트하는 클래스
 class WorkroomViewTests(APITestCase):
-    #워크룸 CRUD, 멤버, 이슈, 일정, 리뷰 뷰 테스트
+    # 워크룸 CRUD, 멤버, 이슈, 일정, 리뷰 뷰 테스트
 
     @classmethod
     def setUpTestData(cls):
         # 공통 사용자, 클라이언트, 워크룸, 멤버 생성
-        cls.user = User.objects.create_user(
-            email="test@example.com", password="testpass", nickname="테스트유저"
-        )
+        cls.user = User.objects.create_user(email="test@example.com", password="testpass", nickname="테스트유저")
         cls.client = APIClient()
         cls.client.force_authenticate(user=cls.user)
         cls.workroom = Workroom.objects.create(
@@ -32,8 +31,7 @@ class WorkroomViewTests(APITestCase):
             created_by=cls.user,
         )
         WorkroomMember.objects.create(
-            workroom=cls.workroom, user=cls.user,
-            role=Role.OWNER, permission=PermissionLevel.ADMIN, status="accepted"
+            workroom=cls.workroom, user=cls.user, role=Role.OWNER, permission=PermissionLevel.ADMIN, status="accepted"
         )
 
     def setUp(self):
@@ -52,7 +50,7 @@ class WorkroomViewTests(APITestCase):
             "introduction": "intro2",
             "start_date": timezone.now().date().isoformat(),
             "end_date": (timezone.now().date() + timedelta(days=5)).isoformat(),
-            "description": "desc2"
+            "description": "desc2",
         }
         resp = self.client.post(url, payload, format="json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
@@ -60,7 +58,7 @@ class WorkroomViewTests(APITestCase):
         self.assertIn("id", resp.data)
 
     def test_workroom_retrieve_update_delete(self):
-        #워크룸 상세 조회, 수정, 삭제
+        # 워크룸 상세 조회, 수정, 삭제
         url = reverse("workroom-detail", kwargs={"pk": self.workroom.id})
         # 상세 조회
         resp = self.client.get(url)
@@ -72,14 +70,13 @@ class WorkroomViewTests(APITestCase):
         resp = self.client.delete(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+
 class IssueTests(APITestCase):
-    #이슈 뷰 테스트
+    # 이슈 뷰 테스트
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(
-            email="test@example.com", password="testpass", nickname="테스트유저"
-        )
+        cls.user = User.objects.create_user(email="test@example.com", password="testpass", nickname="테스트유저")
         cls.client = APIClient()
         cls.client.force_authenticate(user=cls.user)
         cls.workroom = Workroom.objects.create(
@@ -91,8 +88,7 @@ class IssueTests(APITestCase):
             created_by=cls.user,
         )
         WorkroomMember.objects.create(
-            workroom=cls.workroom, user=cls.user,
-            role=Role.OWNER, permission=PermissionLevel.ADMIN, status="accepted"
+            workroom=cls.workroom, user=cls.user, role=Role.OWNER, permission=PermissionLevel.ADMIN, status="accepted"
         )
 
     def setUp(self):
@@ -112,7 +108,7 @@ class IssueTests(APITestCase):
             "content": "내용",
             "status": "pending",
             "due_date": (timezone.now() + timedelta(days=1)).date().isoformat(),
-            "user": self.user.id  # 여기에 user 필드를 추가
+            "user": self.user.id,  # 여기에 user 필드를 추가
         }
         resp = self.client.post(self._issue_url(), payload, format="json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
@@ -120,14 +116,13 @@ class IssueTests(APITestCase):
         resp = self.client.patch(self._issue_detail_url(pk), {"title": "수정된 이슈"}, format="json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+
 class EventTests(APITestCase):
     # 일정 뷰 테스트
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(
-            email="test@example.com", password="testpass", nickname="테스트유저"
-        )
+        cls.user = User.objects.create_user(email="test@example.com", password="testpass", nickname="테스트유저")
         cls.client = APIClient()
         cls.client.force_authenticate(user=cls.user)
         cls.workroom = Workroom.objects.create(
@@ -139,8 +134,7 @@ class EventTests(APITestCase):
             created_by=cls.user,
         )
         WorkroomMember.objects.create(
-            workroom=cls.workroom, user=cls.user,
-            role=Role.OWNER, permission=PermissionLevel.ADMIN, status="accepted"
+            workroom=cls.workroom, user=cls.user, role=Role.OWNER, permission=PermissionLevel.ADMIN, status="accepted"
         )
 
     def setUp(self):
@@ -154,7 +148,7 @@ class EventTests(APITestCase):
         return reverse("event-detail", kwargs={"workroom_id": self.workroom.id, "pk": pk})
 
     def test_event_create_and_delete(self):
-        # 일정 생성 및 삭제 
+        # 일정 생성 및 삭제
         payload = {
             "title": "미팅",
             "start": timezone.now().isoformat(),
@@ -165,7 +159,7 @@ class EventTests(APITestCase):
             "alert": False,
             "location": "",
             "url": "",
-            "memo": ""
+            "memo": "",
         }
         resp = self.client.post(self._event_url(), payload, format="json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
@@ -173,9 +167,10 @@ class EventTests(APITestCase):
         resp = self.client.delete(self._event_detail_url(pk))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+
 # class ReviewTests(APITestCase):
 #     리뷰 뷰 테스트
-# 
+#
 #     @classmethod
 #     def setUpTestData(cls):
 #         cls.user = User.objects.create_user(
@@ -195,16 +190,16 @@ class EventTests(APITestCase):
 #             workroom=cls.workroom, user=cls.user,
 #             role=Role.OWNER, permission=PermissionLevel.ADMIN, status="accepted"
 #         )
-# 
+#
 #     def setUp(self):
 #         # 매 테스트마다 클라이언트에 인증 정보 설정
 #         self.client.force_authenticate(user=self.user)
-# 
+#
 #     def _review_url(self):
 #         return reverse("review-list", kwargs={"workroom_id": self.workroom.id})
-# 
+#
 #     def test_review_create_and_list(self):
-#         리뷰 생성 및 목록 조회 
+#         리뷰 생성 및 목록 조회
 #         # 리뷰는 워크룸 종료 후 생성 가능하므로 종료일을 과거로 설정
 #         self.workroom.end_date = timezone.now().date() - timedelta(days=1)
 #         self.workroom.save()

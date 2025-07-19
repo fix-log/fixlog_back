@@ -1,12 +1,13 @@
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APIRequestFactory
 
-from app.workroom.models import Workroom, WorkroomMember, Role, PermissionLevel
+from app.workroom.models import PermissionLevel, Role, Workroom, WorkroomMember
 from app.workroom.permissions import WorkroomPermission
 
 User = get_user_model()
+
 
 class WorkroomPermissionTests(TestCase):
     @classmethod
@@ -18,21 +19,26 @@ class WorkroomPermissionTests(TestCase):
         cls.other = User.objects.create_user(email="other@a.com", password="pw")
         # Workroom 생성
         cls.wr = Workroom.objects.create(
-            name="WR", introduction="intro", start_date=timezone.now().date(),
-            end_date=timezone.now().date(), description="desc", created_by=cls.owner
+            name="WR",
+            introduction="intro",
+            start_date=timezone.now().date(),
+            end_date=timezone.now().date(),
+            description="desc",
+            created_by=cls.owner,
         )
         # Membership 생성
         WorkroomMember.objects.create(
-            workroom=cls.wr, user=cls.owner,
-            role=Role.OWNER, permission=PermissionLevel.ADMIN, status="accepted"
+            workroom=cls.wr, user=cls.owner, role=Role.OWNER, permission=PermissionLevel.ADMIN, status="accepted"
         )
         WorkroomMember.objects.create(
-            workroom=cls.wr, user=cls.manager,
-            role=Role.MANAGER, permission=PermissionLevel.MODIFY_EVENT, status="accepted"
+            workroom=cls.wr,
+            user=cls.manager,
+            role=Role.MANAGER,
+            permission=PermissionLevel.MODIFY_EVENT,
+            status="accepted",
         )
         WorkroomMember.objects.create(
-            workroom=cls.wr, user=cls.member,
-            role=Role.MEMBER, permission=PermissionLevel.VIEW, status="accepted"
+            workroom=cls.wr, user=cls.member, role=Role.MEMBER, permission=PermissionLevel.VIEW, status="accepted"
         )
         cls.factory = APIRequestFactory()
         cls.permission = WorkroomPermission()
@@ -84,9 +90,9 @@ class WorkroomPermissionTests(TestCase):
         # 예: created_by = member
         # create fake issue object with created_by = member
         from app.workroom.models import Issue
+
         issue = Issue.objects.create(
-            workroom=self.wr, user=self.member,
-            title="T", status="pending", content="C", due_date=self.wr.start_date
+            workroom=self.wr, user=self.member, title="T", status="pending", content="C", due_date=self.wr.start_date
         )
         patch_req = self.factory.patch("/fake-path/", {"title": "X"})
         patch_req.user = self.member
@@ -94,8 +100,7 @@ class WorkroomPermissionTests(TestCase):
         # 다른 사람의 객체는 차단
         patch_req.user = self.member
         other_issue = Issue.objects.create(
-            workroom=self.wr, user=self.manager,
-            title="T2", status="pending", content="C2", due_date=self.wr.start_date
+            workroom=self.wr, user=self.manager, title="T2", status="pending", content="C2", due_date=self.wr.start_date
         )
         self.assertFalse(self.permission.has_object_permission(patch_req, None, other_issue))
 

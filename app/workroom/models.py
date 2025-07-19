@@ -179,7 +179,7 @@ class CalendarEvent(CreatedOnlyModel):
     start = models.DateTimeField()  # 시작 시각
     end = models.DateTimeField()  # 종료 시각
     all_day = models.BooleanField(default=False)  # 종일 여부
-    recurrence = models.JSONField(default=dict, blank=True)  # 반복 설정 (frequency, interval 등)
+    recurrence = models.JSONField(default=dict, blank=True, null=True)  # 반복 설정 (frequency, interval 등)
     color = models.CharField(max_length=7, default="#F74627")  # 색상 코드 (#F74627)-> 기본 색상
     alert = models.BooleanField(default=False)  # 알림 추가 여부
     location = models.CharField(max_length=255, blank=True)  # 위치 정보

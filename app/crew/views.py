@@ -1,11 +1,12 @@
-from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.response import Response
 from django.db.models import F
 from django.shortcuts import get_object_or_404
-from .models import Project, Application
-from .serializers import ProjectSerializer, ApplicationSerializer
+from rest_framework import generics, status
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from app.crew.models import Project, Application
+from app.crew.serializers import ProjectSerializer, ApplicationSerializer
 
 
 class ProjectListCreateAPIView(generics.ListCreateAPIView):

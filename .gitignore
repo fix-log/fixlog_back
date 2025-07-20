@@ -10,7 +10,7 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media
-
+static
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
 # in your Git repository. Update and uncomment the following line accordingly.
 # <django-project-name>/staticfiles/
@@ -39,6 +39,7 @@ var/
 wheels/
 share/python-wheels/
 *.egg-info/
+static/
 .installed.cfg
 *.egg
 MANIFEST
@@ -111,7 +112,7 @@ ipython_config.py
 #   This is especially recommended for binary packages to ensure reproducibility, and is more
 #   commonly ignored for libraries.
 #   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
+poetry.lock
 
 # pdm
 #   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
@@ -132,14 +133,15 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+.env.local.local
+.env.prod
 .venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
-
+.env.local
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -414,6 +416,10 @@ fabric.properties
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 
+# Django migrations: ignore all migration scripts but keep __init__.py
+**/migrations/*.py
+!**/migrations/__init__.py
+
 ### Python Patch ###
 # Poetry local configuration file - https://python-poetry.org/docs/configuration/#local-configuration
 poetry.toml
@@ -456,5 +462,3 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/python,django,redis,git,macos,windows,pycharm
-
-설명

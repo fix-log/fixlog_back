@@ -72,13 +72,11 @@ INSTALLED_APPS += [
     "rest_framework",  # drf
     "rest_framework_simplejwt",  # JWT
     "drf_spectacular",  # 스웨거
-    # "app.fixed",  # Fixed 관리
     "app.accounts",  # 회원,인증
     "app.fixred",  # fixred 관리
     "app.crew",  # 크루(팀) 관리
     "app.workroom",  # 워크룸 기능
     "app.fixletter",  # 픽레터 관리
-    "app.fixletter",
     "app.util",  # 유틸 기능
     "channels",
     "corsheaders",  # CORS 처리를 위한 앱
@@ -147,7 +145,7 @@ else:
 #         'ENGINE': 'django.db.backends.sqlite3',
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
-# }
+# }ㅣㄹ실
 
 DATABASES = {
     "default": {
@@ -206,6 +204,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Custom User Model
+AUTH_USER_MODEL = "accounts.User"
+
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "app.util.exceptions.custom_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -249,6 +250,3 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
-
-# User 모델 변경 (이메일)
-AUTH_USER_MODEL = "accounts.User"

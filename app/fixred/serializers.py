@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Fixred, FixredImage
+from .models import Fixred, FixredComment, FixredImage
 
 
 class FixredImageSerializer(serializers.ModelSerializer):
@@ -11,7 +11,7 @@ class FixredImageSerializer(serializers.ModelSerializer):
         fields = ["image_url"]
 
 
-class FixredSerializer(serializers.ModelSerializer):
+class FixredListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     images = FixredImageSerializer(source="fixredimage_set", many=True, read_only=True)
 
@@ -31,3 +31,22 @@ class FixredSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return {"id": obj.user.id, "nickname": obj.user.nickname, "profile_image": obj.user.profile_image or None}
+
+
+class FixredCommentSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FixredComment
+        fields = ["id", "user", "comment", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+    def get_user(self, obj):
+        return {"id": obj.user.id, "nickname": obj.user.nickname, "profile_image": obj.user.profile_image or None}
+
+
+class FixredDetailSerializer(FixredListSerializer):
+    comments = FixredCommentSerializer(many=True, read_only=True)
+
+    class Meta(FixredListSerializer.Meta):
+        fields = FixredListSerializer.Meta.fields + ["comments"]

@@ -37,9 +37,9 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      sh -c "./scripts/run_daphne.sh"
-    env_file:
-      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
+      sh -c "cd /app && python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
     volumes:
       - .:/app
     environment:

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -20,7 +21,25 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-load_dotenv(BASE_DIR / ".env")
+DJANGO_ENV = os.getenv("DJANGO_ENV", "prod")  # 기본값은 prod
+
+if DJANGO_ENV == "dev":
+    load_dotenv(BASE_DIR / ".env.local")
+else:
+    load_dotenv(BASE_DIR / ".env.prod")
+
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+AWS_LOCATION = os.getenv("AWS_LOCATION", "static")
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_ADDRESSING_STYLE = "path"
+
+
+# 테스트 환경 설정
+IS_TEST = "test" in sys.argv
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -32,10 +51,12 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DJANGO_DEBUG") == "True"
 
 # Application definition
-ALLOWED_HOSTS = ['*']  # 모든 호스트 허용 (개발용)
+ALLOWED_HOSTS = ["*"]  # 모든 호스트 허용 (개발용)
 
 # CORS 설정
-CORS_ALLOWED_ORIGINS = os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("DJANGO_CORS_ALLOWED_ORIGINS") else []
+CORS_ALLOWED_ORIGINS = (
+    os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("DJANGO_CORS_ALLOWED_ORIGINS") else []
+)
 
 # 모든 origin 허용 시 (임시 개발용)
 CORS_ALLOW_ALL_ORIGINS = True
@@ -66,14 +87,15 @@ INSTALLED_APPS += [
     "rest_framework",  # drf
     "rest_framework_simplejwt",  # JWT
     "drf_spectacular",  # 스웨거
-    # "app.fixed",  # Fixed 관리
-    "app.accounts",  # 회원,인증
-    # "app.fixred",  # fixred 관리
+    "app.accounts",
+    "app.fixred",  # fixred 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
-    "app.util",     # 유틸 기능
+    "app.fixletter",
+    "app.util",  # 유틸 기능
     "channels",
     "corsheaders",  # CORS 처리를 위한 앱
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -105,7 +127,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "app.config.wsgi.application"
-ASGI_APPLICATION = "config.asgi.application"  # Channels ASGI 설정
+ASGI_APPLICATION = "app.config.asgi.application"  # Channels ASGI 설정
 
 CHANNEL_LAYERS = {
     "default": {
@@ -115,6 +137,20 @@ CHANNEL_LAYERS = {
         },
     },
 }
+# 레디스 설정
+if IS_TEST:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "LOCATION": "test-cache"}}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.getenv("REDIS_URL"),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            },
+        }
+    }
+
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -128,14 +164,18 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",  # PostgreSQL 백엔드를 사용한다.
-        "NAME": os.getenv("POSTGRES_DB"),  # 환경변수에서 DB 이름을 가져온다.
-        "USER": os.getenv("POSTGRES_USER"),  # 환경변수에서 사용자 이름을 가져온다.
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),  # 환경변수에서 비밀번호를 가져온다.
-        "HOST": os.getenv("POSTGRES_HOST", "localhost"),  # 환경변수에서 호스트를 가져온다.
-        "PORT": os.getenv("POSTGRES_PORT", "5432"), # 환경변수에서 포트를 가져온다.
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB_TEST") if IS_TEST else os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT"),
+        "OPTIONS": {
+            "sslmode": "disable",
+        },
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -171,8 +211,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+# Django 5.2 기준 S3 static 저장 설정 (5.2에서 공식화됨)
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": os.getenv("STATICFILES_STORAGE", "django.contrib.staticfiles.storage.StaticFilesStorage"),
+    },
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

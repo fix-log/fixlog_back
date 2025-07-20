@@ -77,7 +77,6 @@ INSTALLED_APPS += [
     "app.fixletter",  # 픽레터 관리
     # "app.crew",  # 크루(팀) 관리
     # "app.workroom",  # 워크룸 기능
-    "app.fixletter",
     "app.util",  # 유틸 기능
     "channels",
     "corsheaders",  # CORS 처리를 위한 앱

@@ -77,6 +77,7 @@ INSTALLED_APPS += [
     "app.fixred",  # fixred 관리
     "app.crew",  # 크루(팀) 관리
     "app.workroom",  # 워크룸 기능
+    "app.fixletter",  # 픽레터 관리
     "app.fixletter",
     "app.util",  # 유틸 기능
     "channels",

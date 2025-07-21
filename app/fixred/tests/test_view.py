@@ -1,15 +1,13 @@
 import json
+import shutil
 import tempfile
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
-
-import shutil
-from django.test import override_settings
-import tempfile
 
 TEST_MEDIA_ROOT = tempfile.mkdtemp()
 

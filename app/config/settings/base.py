@@ -118,7 +118,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",  # Redis 백엔드 설정
         "CONFIG": {
-            "hosts": [("redis", 6379)],  # docker-compose의 redis 서비스 이름 사용
+            "hosts": [(os.getenv("REDIS_HOST", "localhost"), int(os.getenv("REDIS_PORT", "6379")))],
         },
     },
 }

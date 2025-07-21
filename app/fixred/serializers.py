@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-
 from .models import Fixred, FixredComment, FixredImage
 
 
@@ -10,7 +9,6 @@ class FixredImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = FixredImage
         fields = ["image_url"]
-
 
 
 class FixredListSerializer(serializers.ModelSerializer):

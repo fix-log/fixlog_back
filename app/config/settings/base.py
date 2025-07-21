@@ -58,8 +58,6 @@ CACHES = {
 }
 
 
-# Application definition
-
 INSTALLED_APPS = [
     "app.util",  # 유틸 기능
     "app.accounts",  # 회원,인증

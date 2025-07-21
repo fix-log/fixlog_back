@@ -87,7 +87,10 @@ jobs:
         run: poetry run python manage.py makemigrations
 
       - name: Run Django Migration
-        run: poetry run python manage.py migrate
+        run: |
+          poetry run python manage.py migrate util
+          poetry run python manage.py migrate accounts
+          poetry run python manage.py migrate
 
       - name: Run Tests
         run: poetry run python manage.py test

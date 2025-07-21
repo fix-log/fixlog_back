@@ -1,13 +1,15 @@
+from django.db.models import Prefetch
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import generics, permissions
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Fixred
-from .serializers import FixredSerializer
+from .models import Fixred, FixredComment, FixredImage
+from .serializers import FixredDetailSerializer, FixredListSerializer
 
 
-# Fixred 게시글 목록 (픽레드 홈)
+# Fixred 게시글 목록 (픽레드 피드)
 @extend_schema(
-    summary="픽레드 게시글 목록 조회",
+    summary="픽레드 게시글 목록(피드) 조회",
     description="Fixred 게시글을 최신순으로 조회합니다.",
     # "following 쿼리파라미터를 주면 팔로잉한 사용자의 글만 조회됩니다.",
     # parameters=[
@@ -19,23 +21,53 @@ from .serializers import FixredSerializer
     #     ),
     # ],
     responses={
-        200: FixredSerializer(many=True),
-        400: OpenApiResponse(
-            description="잘못된 요청 : 필드 누락 또는 유효성 검사 실패",
-        ),
+        200: FixredDetailSerializer(many=True),
         401: OpenApiResponse(
-            description="인증 실패 : 로그인하지 않은 사용자",
+            description="인증 실패 : 로그인 필요",
         ),
     },
-    tags=["픽레드 게시글"],
+    tags=["픽레드 피드"],
 )
 class FixredListView(generics.ListAPIView):
-    queryset = Fixred.objects.all()
-    permission_classes = [permissions.IsAuthenticated]  # 로그인 사용자만
-    serializer_class = FixredSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FixredListSerializer
 
     def get_queryset(self):
-        return super().get_queryset()
+        user = self.request.user
+
+        # 기본 쿼리셋은 모든 Fixred 게시글
+        queryset = Fixred.objects.select_related("user").prefetch_related("fixredimage_set").order_by("-created_at")
+
+        # 쿼리 파라미터 'filter'가 'following'이면 팔로잉한 사용자의 글만 조회
+        mode = self.request.query_params.get("filter", "all").strip().lower()
+        if mode == "following":
+            following_users = user.following.values_list("id", flat=True)
+            queryset = queryset.filter(user_id__in=following_users)
+
+        return queryset
 
 
 # Fixred 게시글 상세
+@extend_schema(
+    summary="픽레드 게시글 상세 조회",
+    description="Fixred 게시글의 상세 정보를 조회합니다.",
+    responses={
+        200: FixredDetailSerializer,
+        401: OpenApiResponse(description="인증 실패 : 로그인 필요"),
+        404: OpenApiResponse(description="게시글을 찾을 수 없음"),
+    },
+    tags=["픽레드 게시글"],
+)
+class FixredDetailView(generics.RetrieveAPIView):
+    authentication_classes = [JWTAuthentication]
+    queryset = Fixred.objects.select_related("user").prefetch_related("fixredimage_set", "comments")
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FixredDetailSerializer
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        return Fixred.objects.select_related("user").prefetch_related(
+            Prefetch("fixredimage_set", queryset=FixredImage.objects.all()),
+            Prefetch("comments", queryset=FixredComment.objects.select_related("user").order_by("-created_at")),
+        )

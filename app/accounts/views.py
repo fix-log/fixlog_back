@@ -35,7 +35,7 @@ def request_verification_code_view(request):
     send_mail(
         subject="[Fixlog] 이메일 인증번호",
         message=f"아래 인증번호를 입력해주세요:\n인증번호: {code}",
-        from_email="noreply@fixlog.com",
+        from_email="noreply@fixlog.co.kr",
         recipient_list=[email],
     )
     return Response({"message": "인증번호가 이메일로 전송되었습니다."}, status=status.HTTP_200_OK)

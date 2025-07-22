@@ -1,11 +1,12 @@
 from django.db.models import Prefetch
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.response import Response
 
-from .models import Fixred, FixredComment, FixredImage
-from .serializers import FixredCreateSerializer, FixredDetailSerializer, FixredListSerializer
-
+from .models import Fixred, FixredComment, FixredImage 
+from .serializers import FixredCreateSerializer, FixredDeleteSerializer, FixredDetailSerializer, FixredListSerializer, FixredUpdateSerializer
+from app.accounts.models import User
 
 # Fixred 게시글 목록 (픽레드 피드)
 @extend_schema(
@@ -46,8 +47,7 @@ class FixredListView(generics.ListAPIView):
             queryset = queryset.filter(user_id__in=following_users)
 
         return queryset
-
-
+    
 # Fixred 게시글 상세
 @extend_schema(
     summary="픽레드 게시글 상세 조회",
@@ -85,10 +85,79 @@ class FixredDetailView(generics.RetrieveAPIView):
     },
     tags=["픽레드 게시글"],
 )
+
 class FixredCreateView(generics.CreateAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.AllowAny] # 임시로 인증 없이 사용
     serializer_class = FixredCreateSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # serializer.save(user=self.request.user)
+        test_user = User.objects.all()[1]  # 테스트 유저에게 소속시킴 (임시)
+        serializer.save(user=test_user)
+
+
+# Fixred 게시글 수정
+@extend_schema(
+    summary="픽레드 게시글 수정",
+    description="Fixred 게시글을 수정합니다.",
+    request=FixredUpdateSerializer,
+    responses={
+        200: OpenApiResponse(description="수정 성공"),
+        400: OpenApiResponse(description="유효성 오류"),
+        401: OpenApiResponse(description="인증 실패"),
+        404: OpenApiResponse(description="게시글을 찾을 수 없음"),
+    },
+    tags=["픽레드 게시글"],
+)
+class FixredUpdateView(generics.UpdateAPIView):
+    authentication_classes = [JWTAuthentication]
+    # permission_classes = [permissions.IsAuthenticated]  # 인증 필수
+    permission_classes = [permissions.AllowAny] # 임시로 인증 없이 사용
+    serializer_class = FixredUpdateSerializer 
+
+    queryset = Fixred.objects.all()
+    lookup_field = "pk"  # URL에서 게시글 ID로 조회
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+# Fixred 게시글 삭제
+@extend_schema(
+    summary="픽레드 게시글 삭제",
+    description="Fixred 게시글을 삭제합니다.",
+    responses={
+        204: OpenApiResponse(description="삭제 성공"),
+        401: OpenApiResponse(description="인증 실패"),
+        403: OpenApiResponse(description="삭제 권한 없음"),
+        404: OpenApiResponse(description="게시글을 찾을 수 없음"),
+    },
+    tags=["픽레드 게시글"],
+)
+class FixredDeleteView(generics.DestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    # permission_classes = [permissions.IsAuthenticated]  # 인증 필수
+    permission_classes = [permissions.AllowAny] # 임시로 인증 없이 사용
+    serializer_class = FixredDeleteSerializer
+    queryset = Fixred.objects.all()
+    lookup_field = "pk"
+
+    # def perform_destroy(self, instance):
+    #     # 요청한 유저와 작성자가 다르면 삭제 못하게 막기
+    #     if self.request.user != instance.user:
+    #         from rest_framework.exceptions import PermissionDenied
+    #         raise PermissionDenied("게시글 삭제 권한이 없습니다.")
+    #     instance.delete()
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        fixred_id = instance.id
+        self.perform_destroy(instance)
+        return Response(
+            {
+                "fixred_id": fixred_id,
+                "message": "픽레드 삭제 완료"
+            },
+            status=status.HTTP_200_OK
+        )

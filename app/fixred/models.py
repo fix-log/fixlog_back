@@ -31,7 +31,7 @@ class Fixred(TimestampModel):
 
 # 픽레드 이미지 모델
 class FixredImage(models.Model):
-    post = models.ForeignKey(Fixred, on_delete=models.CASCADE)
+    post = models.ForeignKey(Fixred, on_delete=models.CASCADE,related_name="images")
     image = models.ImageField("fixred_image", upload_to="fixred_images/")
 
     def __str__(self):
@@ -39,7 +39,7 @@ class FixredImage(models.Model):
 
 
 # 픽레드 댓글 모델
-class FixredComment(CreatedOnlyModel):
+class FixredComment(TimestampModel):
     fixred = models.ForeignKey(Fixred, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.CharField(max_length=500)

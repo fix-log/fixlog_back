@@ -1,0 +1,2454 @@
+openapi: 3.0.3
+info:
+  title: fixlog API
+  version: 0.1.0
+paths:
+  /designs/:
+    get:
+      operationId: designs_list
+      summary: 디자인 목록 조회 및 생성
+      tags:
+      - designs
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Design'
+          description: 디자인 목록
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Design'
+          description: 디자인 생성 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '500':
+          description: 서버 내부 오류
+    post:
+      operationId: designs_create
+      summary: 디자인 목록 조회 및 생성
+      tags:
+      - designs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Design'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Design'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Design'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Design'
+          description: 디자인 목록
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Design'
+          description: 디자인 생성 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '500':
+          description: 서버 내부 오류
+  /designs/{id}/:
+    get:
+      operationId: designs_retrieve
+      summary: 디자인 상세 조회
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - designs
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Design'
+          description: 디자인 상세
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+    patch:
+      operationId: designs_partial_update
+      summary: 디자인 수정
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - designs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDesign'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDesign'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDesign'
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Design'
+          description: 디자인 수정 완료
+        '400':
+          description: 요청 데이터 오류
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+    delete:
+      operationId: designs_destroy
+      summary: 디자인 삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - designs
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: 디자인 삭제 완료
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+  /languages/:
+    get:
+      operationId: languages_list
+      summary: 언어 목록 조회 및 생성
+      tags:
+      - languages
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Language'
+          description: 언어 목록
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Language'
+          description: 언어 생성 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '500':
+          description: 서버 내부 오류
+    post:
+      operationId: languages_create
+      summary: 언어 목록 조회 및 생성
+      tags:
+      - languages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Language'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Language'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Language'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Language'
+          description: 언어 목록
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Language'
+          description: 언어 생성 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '500':
+          description: 서버 내부 오류
+  /languages/{id}/:
+    get:
+      operationId: languages_retrieve
+      summary: 언어 상세 조회
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - languages
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Language'
+          description: 언어 상세
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+    patch:
+      operationId: languages_partial_update
+      summary: 언어 수정
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - languages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedLanguage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedLanguage'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedLanguage'
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Language'
+          description: 언어 수정 완료
+        '400':
+          description: 요청 데이터 오류
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+    delete:
+      operationId: languages_destroy
+      summary: 언어 삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - languages
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: 언어 삭제 완료
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+  /positions/:
+    get:
+      operationId: positions_list
+      summary: 포지션 목록 조회 및 생성
+      tags:
+      - positions
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Position'
+          description: 포지션 목록
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Position'
+          description: 포지션 생성 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '500':
+          description: 서버 내부 오류
+    post:
+      operationId: positions_create
+      summary: 포지션 목록 조회 및 생성
+      tags:
+      - positions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Position'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Position'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Position'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Position'
+          description: 포지션 목록
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Position'
+          description: 포지션 생성 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '500':
+          description: 서버 내부 오류
+  /positions/{id}/:
+    get:
+      operationId: positions_retrieve
+      summary: 포지션 상세 조회
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - positions
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Position'
+          description: 포지션 상세
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+    patch:
+      operationId: positions_partial_update
+      summary: 포지션 수정
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - positions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPosition'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPosition'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPosition'
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Position'
+          description: 포지션 수정 완료
+        '400':
+          description: 요청 데이터 오류
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+    delete:
+      operationId: positions_destroy
+      summary: 포지션 삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - positions
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: 포지션 삭제 완료
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+  /stacks/:
+    get:
+      operationId: stacks_list
+      summary: 기술스택 목록 조회 및 생성
+      tags:
+      - stacks
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stack'
+          description: 기술스택 목록
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stack'
+          description: 기술스택 생성 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '500':
+          description: 서버 내부 오류
+    post:
+      operationId: stacks_create
+      summary: 기술스택 목록 조회 및 생성
+      tags:
+      - stacks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Stack'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Stack'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Stack'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stack'
+          description: 기술스택 목록
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stack'
+          description: 기술스택 생성 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '500':
+          description: 서버 내부 오류
+  /stacks/{id}/:
+    get:
+      operationId: stacks_retrieve
+      summary: 기술스택 상세 조회
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - stacks
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stack'
+          description: 기술스택 상세
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+    patch:
+      operationId: stacks_partial_update
+      summary: 기술스택 수정
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - stacks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStack'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStack'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStack'
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stack'
+          description: 기술스택 수정 완료
+        '400':
+          description: 요청 데이터 오류
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+    delete:
+      operationId: stacks_destroy
+      summary: 기술스택 삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - stacks
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: 기술스택 삭제 완료
+        '401':
+          description: 인증 정보가 제공되지 않았습니다.
+        '403':
+          description: 권한이 없습니다.
+        '404':
+          description: 해당 ID가 없습니다.
+        '500':
+          description: 서버 내부 오류
+  /token/create/:
+    post:
+      operationId: token_create_create
+      description: 아이디(이메일)와 비밀번호를 받아 JWT 토큰을 생성해주는 API
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Login'
+          description: ''
+  /workrooms/:
+    get:
+      operationId: workrooms_list
+      description: 로그인한 사용자는 워크룸 전체 목록을 조회하거나 새 워크룸을 생성합니다.
+      summary: 워크룸 목록 조회 및 생성
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workroom'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workroom'
+          description: ''
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 접근 권한이 없습니다'
+        '500':
+          description: 서버 내부 오류
+    post:
+      operationId: workrooms_create
+      description: 로그인한 사용자는 워크룸 전체 목록을 조회하거나 새 워크룸을 생성합니다.
+      summary: 워크룸 목록 조회 및 생성
+      tags:
+      - workrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workroom'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Workroom'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Workroom'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workroom'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workroom'
+          description: ''
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 접근 권한이 없습니다'
+        '500':
+          description: 서버 내부 오류
+  /workrooms/{id}/:
+    get:
+      operationId: workrooms_retrieve
+      description: 워크룸 상세 조회는 누구나 가능하며, 수정/삭제는 소유자만 가능합니다.
+      summary: 워크룸 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workroom'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 소유자만 수정/삭제 가능'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    patch:
+      operationId: workrooms_partial_update
+      description: 워크룸 상세 조회는 누구나 가능하며, 수정/삭제는 소유자만 가능합니다.
+      summary: 워크룸 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkroom'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkroom'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkroom'
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workroom'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 소유자만 수정/삭제 가능'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    delete:
+      operationId: workrooms_destroy
+      description: 워크룸 상세 조회는 누구나 가능하며, 수정/삭제는 소유자만 가능합니다.
+      summary: 워크룸 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workroom'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 소유자만 수정/삭제 가능'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+  /workrooms/{workroom_id}/events/:
+    get:
+      operationId: workrooms_events_list
+      description: 승인된 멤버는 일정을 조회 및 생성할 수 있으며, 권한에 따라 수정/삭제가 가능합니다.
+      summary: 일정 목록 조회 및 생성
+      parameters:
+      - in: query
+        name: alert
+        schema:
+          type: boolean
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalendarEvent'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalendarEvent'
+          description: ''
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 권한 레벨 부족'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    post:
+      operationId: workrooms_events_create
+      description: 승인된 멤버는 일정을 조회 및 생성할 수 있으며, 권한에 따라 수정/삭제가 가능합니다.
+      summary: 일정 목록 조회 및 생성
+      parameters:
+      - in: query
+        name: alert
+        schema:
+          type: boolean
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalendarEvent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CalendarEvent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CalendarEvent'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalendarEvent'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEvent'
+          description: ''
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 권한 레벨 부족'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+  /workrooms/{workroom_id}/events/{id}/:
+    get:
+      operationId: workrooms_events_retrieve
+      description: 권한에 따라 일정 수정/삭제가 가능합니다.
+      summary: 일정 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEvent'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 권한 레벨 부족'
+        '404':
+          description: '찾을 수 없음: 해당 일정이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    patch:
+      operationId: workrooms_events_partial_update
+      description: 권한에 따라 일정 수정/삭제가 가능합니다.
+      summary: 일정 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCalendarEvent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCalendarEvent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCalendarEvent'
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEvent'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 권한 레벨 부족'
+        '404':
+          description: '찾을 수 없음: 해당 일정이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    delete:
+      operationId: workrooms_events_destroy
+      description: 권한에 따라 일정 수정/삭제가 가능합니다.
+      summary: 일정 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEvent'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 권한 레벨 부족'
+        '404':
+          description: '찾을 수 없음: 해당 일정이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+  /workrooms/{workroom_id}/issues/:
+    get:
+      operationId: workrooms_issues_list
+      description: 모든 인증된 사용자가 이슈를 조회하거나 작성할 수 있습니다.
+      summary: 이슈 목록 조회 및 생성
+      parameters:
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - completed
+          - in_progress
+          - pending
+        description: |-
+          * `pending` - 시작전
+          * `in_progress` - 진행중
+          * `completed` - 완료
+      - in: query
+        name: user
+        schema:
+          type: integer
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+          description: ''
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 접근 권한이 없습니다'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    post:
+      operationId: workrooms_issues_create
+      description: 모든 인증된 사용자가 이슈를 조회하거나 작성할 수 있습니다.
+      summary: 이슈 목록 조회 및 생성
+      parameters:
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - completed
+          - in_progress
+          - pending
+        description: |-
+          * `pending` - 시작전
+          * `in_progress` - 진행중
+          * `completed` - 완료
+      - in: query
+        name: user
+        schema:
+          type: integer
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Issue'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Issue'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Issue'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+          description: ''
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 접근 권한이 없습니다'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+  /workrooms/{workroom_id}/issues/{id}/:
+    get:
+      operationId: workrooms_issues_retrieve
+      description: 작성자 본인 및 관리자/부관리자는 이슈 수정/삭제가 가능합니다.
+      summary: 이슈 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 작성자 또는 관리자만 가능'
+        '404':
+          description: '찾을 수 없음: 해당 이슈가 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    patch:
+      operationId: workrooms_issues_partial_update
+      description: 작성자 본인 및 관리자/부관리자는 이슈 수정/삭제가 가능합니다.
+      summary: 이슈 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIssue'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIssue'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIssue'
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 작성자 또는 관리자만 가능'
+        '404':
+          description: '찾을 수 없음: 해당 이슈가 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    delete:
+      operationId: workrooms_issues_destroy
+      description: 작성자 본인 및 관리자/부관리자는 이슈 수정/삭제가 가능합니다.
+      summary: 이슈 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 작성자 또는 관리자만 가능'
+        '404':
+          description: '찾을 수 없음: 해당 이슈가 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+  /workrooms/{workroom_id}/members/:
+    get:
+      operationId: workrooms_members_list
+      description: 관리자/부관리자는 이메일로 사용자를 초대할 수 있습니다.
+      summary: 멤버 목록 조회 및 이메일 초대
+      parameters:
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - manager
+          - member
+          - owner
+        description: |-
+          * `owner` - 총 관리자
+          * `manager` - 부관리자
+          * `member` - 일반 멤버
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - accepted
+          - pending
+          - rejected
+        description: |-
+          * `pending` - 대기
+          * `accepted` - 승인
+          * `rejected` - 거절
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkroomMember'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkroomMember'
+          description: ''
+        '400':
+          description: '잘못된 요청: 이메일 유효성 검사 실패 또는 중복 초대'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 관리자/부관리자만 초대 가능'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    post:
+      operationId: workrooms_members_create
+      description: 관리자/부관리자는 이메일로 사용자를 초대할 수 있습니다.
+      summary: 멤버 목록 조회 및 이메일 초대
+      parameters:
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - manager
+          - member
+          - owner
+        description: |-
+          * `owner` - 총 관리자
+          * `manager` - 부관리자
+          * `member` - 일반 멤버
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - accepted
+          - pending
+          - rejected
+        description: |-
+          * `pending` - 대기
+          * `accepted` - 승인
+          * `rejected` - 거절
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkroomMember'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WorkroomMember'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WorkroomMember'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkroomMember'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkroomMember'
+          description: ''
+        '400':
+          description: '잘못된 요청: 이메일 유효성 검사 실패 또는 중복 초대'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 관리자/부관리자만 초대 가능'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+  /workrooms/{workroom_id}/members/{id}/:
+    get:
+      operationId: workrooms_members_retrieve
+      description: 워크룸 멤버 상세 조회/수정/삭제
+      summary: 워크룸 멤버 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkroomMember'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 관리자/부관리자 또는 본인만 가능'
+        '404':
+          description: '찾을 수 없음: 해당 멤버가 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    patch:
+      operationId: workrooms_members_partial_update
+      description: 워크룸 멤버 상세 조회/수정/삭제
+      summary: 워크룸 멤버 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkroomMember'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkroomMember'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkroomMember'
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkroomMember'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 관리자/부관리자 또는 본인만 가능'
+        '404':
+          description: '찾을 수 없음: 해당 멤버가 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    delete:
+      operationId: workrooms_members_destroy
+      description: 워크룸 멤버 상세 조회/수정/삭제
+      summary: 워크룸 멤버 상세 조회/수정/삭제
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkroomMember'
+          description: ''
+        '204':
+          description: 삭제 성공
+        '400':
+          description: '잘못된 요청: 필드 유효성 검사 실패'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 관리자/부관리자 또는 본인만 가능'
+        '404':
+          description: '찾을 수 없음: 해당 멤버가 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+  /workrooms/{workroom_id}/members/{id}/respond/:
+    patch:
+      operationId: workrooms_members_respond_partial_update
+      description: 초대받은 사용자가 자신의 멤버 상태(status)를 승인/거절로 변경합니다.
+      summary: 초대 응답 처리 (PATCH)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkroomMemberRespond'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkroomMemberRespond'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkroomMemberRespond'
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkroomMember'
+          description: ''
+        '400':
+          description: '잘못된 요청: decision 값이 잘못됨'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 초대받은 사용자만 가능'
+        '404':
+          description: '찾을 수 없음: 해당 멤버가 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+  /workrooms/{workroom_id}/reviews/:
+    get:
+      operationId: workrooms_reviews_list
+      description: 워크룸 종료 후 리뷰를 조회하거나 작성합니다.
+      summary: 리뷰 목록 조회 및 작성
+      parameters:
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkroomReview'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkroomReview'
+          description: ''
+        '400':
+          description: '잘못된 요청: 리뷰 작성 조건 불충분'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 관리자/부관리자만 가능'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+    post:
+      operationId: workrooms_reviews_create
+      description: 워크룸 종료 후 리뷰를 조회하거나 작성합니다.
+      summary: 리뷰 목록 조회 및 작성
+      parameters:
+      - in: path
+        name: workroom_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - workrooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkroomReview'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WorkroomReview'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WorkroomReview'
+        required: true
+      security:
+      - cookieAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkroomReview'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkroomReview'
+          description: ''
+        '400':
+          description: '잘못된 요청: 리뷰 작성 조건 불충분'
+        '401':
+          description: '인증되지 않음: 로그인 필요'
+        '403':
+          description: '권한 없음: 관리자/부관리자만 가능'
+        '404':
+          description: '찾을 수 없음: 해당 워크룸이 존재하지 않습니다'
+        '500':
+          description: 서버 내부 오류
+components:
+  schemas:
+    CalendarEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        workroom:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        all_day:
+          type: boolean
+        recurrence: {}
+        color:
+          type: string
+          maxLength: 7
+        alert:
+          type: boolean
+        location:
+          type: string
+          maxLength: 255
+        url:
+          type: string
+          format: uri
+          maxLength: 200
+        memo:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: 작성일자
+      required:
+      - color
+      - created_at
+      - end
+      - id
+      - start
+      - title
+      - workroom
+    Design:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - name
+    Issue:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        workroom:
+          type: integer
+        user:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        status:
+          $ref: '#/components/schemas/IssueStatusEnum'
+        content:
+          type: string
+        due_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: 작성일자
+      required:
+      - content
+      - created_at
+      - due_date
+      - id
+      - title
+      - user
+      - workroom
+    IssueStatusEnum:
+      enum:
+      - pending
+      - in_progress
+      - completed
+      type: string
+      description: |-
+        * `pending` - 시작전
+        * `in_progress` - 진행중
+        * `completed` - 완료
+    Language:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - name
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - password
+    PatchedCalendarEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        workroom:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        all_day:
+          type: boolean
+        recurrence: {}
+        color:
+          type: string
+          maxLength: 7
+        alert:
+          type: boolean
+        location:
+          type: string
+          maxLength: 255
+        url:
+          type: string
+          format: uri
+          maxLength: 200
+        memo:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: 작성일자
+    PatchedDesign:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+    PatchedIssue:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        workroom:
+          type: integer
+        user:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        status:
+          $ref: '#/components/schemas/IssueStatusEnum'
+        content:
+          type: string
+        due_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: 작성일자
+    PatchedLanguage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+    PatchedPosition:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+    PatchedStack:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+    PatchedWorkroom:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        introduction:
+          type: string
+          maxLength: 512
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        description:
+          type: string
+        created_by:
+          type: integer
+          readOnly: true
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionCountInput'
+          writeOnly: true
+        language_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+        stack_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+        design_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+        positions_ro:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkroomPosition'
+          readOnly: true
+        languages_ro:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkroomLanguage'
+          readOnly: true
+        stacks_ro:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkroomStack'
+          readOnly: true
+        designs_ro:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkroomDesign'
+          readOnly: true
+    PatchedWorkroomMember:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        workroom:
+          type: integer
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        permission:
+          $ref: '#/components/schemas/PermissionEnum'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/WorkroomMemberStatusEnum'
+          readOnly: true
+        position_name:
+          type: string
+          nullable: true
+          maxLength: 50
+    PatchedWorkroomMemberRespond:
+      type: object
+      properties:
+        status:
+          allOf:
+          - $ref: '#/components/schemas/WorkroomMemberRespondStatusEnum'
+          description: |-
+            accepted 또는 rejected
+
+            * `accepted` - 승인
+            * `rejected` - 거절
+    PermissionEnum:
+      enum:
+      - view
+      - add_event
+      - modify_event
+      - admin
+      type: string
+      description: |-
+        * `view` - 보기만 가능
+        * `add_event` - 일정 추가만 가능
+        * `modify_event` - 일정 추가·삭제 가능
+        * `admin` - 모든 권한
+    Position:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - name
+    PositionCountInput:
+      type: object
+      description: |-
+        포지션의 고유 ID와 해당 포지션에서 필요한 최대 인원 수를 입력받기 위한 시리얼라이저입니다.
+        주로 워크룸 생성 또는 수정 시 포지션별 인원 제한을 설정할 때 사용됩니다.
+      properties:
+        position_id:
+          type: integer
+        count:
+          type: integer
+          minimum: 1
+      required:
+      - count
+      - position_id
+    RoleEnum:
+      enum:
+      - owner
+      - manager
+      - member
+      type: string
+      description: |-
+        * `owner` - 총 관리자
+        * `manager` - 부관리자
+        * `member` - 일반 멤버
+    Stack:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - name
+    Workroom:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        introduction:
+          type: string
+          maxLength: 512
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        description:
+          type: string
+        created_by:
+          type: integer
+          readOnly: true
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionCountInput'
+          writeOnly: true
+        language_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+        stack_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+        design_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+        positions_ro:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkroomPosition'
+          readOnly: true
+        languages_ro:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkroomLanguage'
+          readOnly: true
+        stacks_ro:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkroomStack'
+          readOnly: true
+        designs_ro:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkroomDesign'
+          readOnly: true
+      required:
+      - created_by
+      - description
+      - designs_ro
+      - id
+      - introduction
+      - languages_ro
+      - name
+      - positions_ro
+      - stacks_ro
+    WorkroomDesign:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        workroom:
+          type: integer
+        design:
+          type: integer
+      required:
+      - design
+      - id
+      - workroom
+    WorkroomLanguage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        workroom:
+          type: integer
+        language:
+          type: integer
+      required:
+      - id
+      - language
+      - workroom
+    WorkroomMember:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        workroom:
+          type: integer
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        permission:
+          $ref: '#/components/schemas/PermissionEnum'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/WorkroomMemberStatusEnum'
+          readOnly: true
+        position_name:
+          type: string
+          nullable: true
+          maxLength: 50
+      required:
+      - id
+      - status
+      - user
+      - workroom
+    WorkroomMemberRespondStatusEnum:
+      enum:
+      - accepted
+      - rejected
+      type: string
+      description: |-
+        * `accepted` - 승인
+        * `rejected` - 거절
+    WorkroomMemberStatusEnum:
+      enum:
+      - pending
+      - accepted
+      - rejected
+      type: string
+      description: |-
+        * `pending` - 대기
+        * `accepted` - 승인
+        * `rejected` - 거절
+    WorkroomPosition:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        workroom:
+          type: integer
+        position:
+          type: integer
+        count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        current_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - id
+      - position
+      - workroom
+    WorkroomReview:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        workroom:
+          type: integer
+        reviewer:
+          type: integer
+        reviewee:
+          type: integer
+        rating:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        comment:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: 작성일자
+      required:
+      - comment
+      - created_at
+      - id
+      - rating
+      - reviewee
+      - reviewer
+      - workroom
+    WorkroomStack:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        workroom:
+          type: integer
+        stack:
+          type: integer
+      required:
+      - id
+      - stack
+      - workroom
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

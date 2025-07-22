@@ -21,22 +21,7 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-DJANGO_ENV = os.getenv("DJANGO_ENV", "prod")  # 기본값은 prod
-
-if DJANGO_ENV == "dev":
-    load_dotenv(BASE_DIR / ".env.local")
-else:
-    load_dotenv(BASE_DIR / ".env.prod")
-
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
-AWS_LOCATION = os.getenv("AWS_LOCATION", "static")
-AWS_DEFAULT_ACL = None
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_ADDRESSING_STYLE = "path"
-
+load_dotenv(BASE_DIR / ".env")
 
 # 테스트 환경 설정
 IS_TEST = "test" in sys.argv
@@ -73,9 +58,13 @@ CACHES = {
 }
 
 
-# Application definition
-
 INSTALLED_APPS = [
+    "app.util",  # 유틸 기능
+    "app.accounts",  # 회원,인증
+    "app.fixred",  # fixred 관리
+    "app.crew",  # 크루(팀) 관리
+    "app.workroom",  # 워크룸 기능
+    "app.fixletter",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -87,16 +76,15 @@ INSTALLED_APPS += [
     "rest_framework",  # drf
     "rest_framework_simplejwt",  # JWT
     "drf_spectacular",  # 스웨거
-    "rest_framework_simplejwt.token_blacklist",  # 토큰 블랙리스트 처리
-    "app.accounts",
+    "app.accounts",  # 회원,인증
     "app.fixred",  # fixred 관리
-    # "app.crew",  # 크루(팀) 관리
-    # "app.workroom",  # 워크룸 기능
-    "app.fixletter",
+    "app.crew",  # 크루(팀) 관리
+    "app.workroom",  # 워크룸 기능
+    "app.fixletter",  # 픽레터 관리
     "app.util",  # 유틸 기능
     "channels",
     "corsheaders",  # CORS 처리를 위한 앱
-    "storages",
+    "django_filters",  # 필터
 ]
 
 MIDDLEWARE = [
@@ -128,7 +116,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "app.config.wsgi.application"
-ASGI_APPLICATION = "app.config.asgi.application"  # Channels ASGI 설정
+ASGI_APPLICATION = "config.asgi.application"  # Channels ASGI 설정
 
 CHANNEL_LAYERS = {
     "default": {
@@ -161,7 +149,7 @@ else:
 #         'ENGINE': 'django.db.backends.sqlite3',
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
-# }
+# }ㅣㄹ실
 
 DATABASES = {
     "default": {
@@ -215,22 +203,16 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-# Django 5.2 기준 S3 static 저장 설정 (5.2에서 공식화됨)
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": os.getenv("STATICFILES_STORAGE", "django.contrib.staticfiles.storage.StaticFilesStorage"),
-    },
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-}
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Custom User Model
+AUTH_USER_MODEL = "accounts.User"
+
 REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "app.util.exceptions.custom_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -239,19 +221,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_PARSER_CLASSES": [
-        "rest_framework.parsers.JSONParser",
-    ],
 }
-
-# SMTP 설정
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # JWT 관련 추가 설정
 SIMPLE_JWT = {
@@ -284,6 +254,3 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
-
-# User 모델 변경 (이메일)
-AUTH_USER_MODEL = "accounts.User"

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import FixredDetailView, FixredListView, FixredCreateView
+from .views import FixredCreateView, FixredDetailView, FixredListView
 
 urlpatterns = [
     path("", FixredListView.as_view(), name="fixred-list"),

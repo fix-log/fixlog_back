@@ -55,7 +55,7 @@ class FixredDetailSerializer(FixredListSerializer):
 class FixredCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Fixred
-        fields = ["content", "content_type","images", "read_permission" ]
+        fields = ["content", "content_type", "images", "read_permission"]
         read_only_fields = ["user", "created_at", "like_count", "comment_count"]
 
     def create(self, validated_data):

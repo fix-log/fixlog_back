@@ -4,7 +4,7 @@ from rest_framework import generics, permissions
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Fixred, FixredComment, FixredImage
-from .serializers import FixredDetailSerializer, FixredListSerializer, FixredCreateSerializer
+from .serializers import FixredCreateSerializer, FixredDetailSerializer, FixredListSerializer
 
 
 # Fixred 게시글 목록 (픽레드 피드)

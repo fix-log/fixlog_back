@@ -3,13 +3,13 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from app.accounts.views import (
     LoginView,
+    confirm_email_code_view,
     delete_account_view,
     get_user_profile_view,
     logout_view,
     profile_view,
-    signup_view,
     request_verification_code_view,
-    confirm_email_code_view,
+    signup_view,
 )
 
 urlpatterns = [

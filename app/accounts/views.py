@@ -107,8 +107,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     summary="JWT 로그인",
     description="이메일과 비밀번호로 로그인하여 토큰을 발급받습니다.",
     request=CustomTokenObtainPairSerializer,
-    responses={200: OpenApiResponse(description="로그인 성공"),
-               401: OpenApiResponse(description="인증 실패")},
+    responses={200: OpenApiResponse(description="로그인 성공"), 401: OpenApiResponse(description="인증 실패")},
     tags=["회원"],
 )
 class LoginView(TokenObtainPairView):

@@ -8,18 +8,18 @@ from app.accounts.views import (
     logout_view,
     profile_view,
     signup_view,
-    verify_code,
+    request_verification_code_view,
+    confirm_email_code_view,
 )
 
-urlpatterns = []
-
-urlpatterns += [
+urlpatterns = [
+    path("request/", request_verification_code_view),
+    path("confirm/", confirm_email_code_view),
     path("register/", signup_view),
-    path("verify-code/", verify_code),
     path("login/", LoginView.as_view()),
     path("profile/", profile_view),
     path("user/<int:user_id>/", get_user_profile_view),
-    path("", delete_account_view),
     path("logout/", logout_view),
     path("token/refresh/", TokenRefreshView.as_view()),
+    path("delete-account/", delete_account_view),
 ]

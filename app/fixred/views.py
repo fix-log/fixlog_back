@@ -4,7 +4,7 @@ from rest_framework import generics, permissions
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import Fixred, FixredComment, FixredImage
-from .serializers import FixredDetailSerializer, FixredListSerializer
+from .serializers import FixredDetailSerializer, FixredListSerializer, FixredCreateSerializer
 
 
 # Fixred 게시글 목록 (픽레드 피드)
@@ -71,3 +71,24 @@ class FixredDetailView(generics.RetrieveAPIView):
             Prefetch("fixredimage_set", queryset=FixredImage.objects.all()),
             Prefetch("comments", queryset=FixredComment.objects.select_related("user").order_by("-created_at")),
         )
+
+
+# Fixred 게시글 추가
+@extend_schema(
+    summary="픽레드 게시글 작성",
+    description="Fixred 게시글을 작성합니다.",
+    request=FixredCreateSerializer,
+    responses={
+        201: OpenApiResponse(description="생성 성공"),
+        400: OpenApiResponse(description="유효성 오류"),
+        401: OpenApiResponse(description="인증 실패"),
+    },
+    tags=["픽레드 게시글"],
+)
+class FixredCreateView(generics.CreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = FixredCreateSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

@@ -50,3 +50,19 @@ class FixredDetailSerializer(FixredListSerializer):
 
     class Meta(FixredListSerializer.Meta):
         fields = FixredListSerializer.Meta.fields + ["comments"]
+
+
+class FixredCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fixred
+        fields = ["content", "content_type","images", "read_permission" ]
+        read_only_fields = ["user", "created_at", "like_count", "comment_count"]
+
+    def create(self, validated_data):
+        images = validated_data.pop("images", [])
+        fixred = Fixred.objects.create(**validated_data)
+
+        for image in images:
+            FixredImage.objects.create(post=fixred, image=image)
+
+        return fixred

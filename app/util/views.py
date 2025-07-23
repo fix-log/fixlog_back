@@ -2,10 +2,25 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+<<<<<<< HEAD
 from rest_framework.permissions import IsAuthenticated
 from app.util.models import Position, Language, Stack, Design
 from app.util.serializers import PositionSerializer, LanguageSerializer, StackSerializer, DesignSerializer
 from app.crew.models import UserBookmark
+=======
+
+from app.util.models import Career, CoopTool, Design, InterestField, InterestTrend, Language, Position, Stack
+from app.util.serializers import (
+    CareerSerializer,
+    CoopToolSerializer,
+    DesignSerializer,
+    InterestFieldSerializer,
+    InterestTrendSerializer,
+    LanguageSerializer,
+    PositionSerializer,
+    StackSerializer,
+)
+>>>>>>> develop
 
 
 # 포지션 전체 목록 조회 및 생성
@@ -316,6 +331,7 @@ class DesignDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Response({"message": "디자인이 삭제되었습니다."}, status=status.HTTP_200_OK)
 
 
+<<<<<<< HEAD
 # 북마크 목록 조회
 @extend_schema(
     summary="내 북마크 목록 조회",
@@ -341,3 +357,306 @@ def user_bookmarks(request):
 
     except Exception as e:
         return Response({"message": "북마크 목록 조회 실패"}, status=status.HTTP_400_BAD_REQUEST)
+=======
+# -------------------- CoopTool --------------------
+@extend_schema(
+    summary="협업 툴 목록 조회 및 생성",
+    responses={
+        200: OpenApiResponse(response=CoopToolSerializer, description="협업 툴 목록"),
+        201: OpenApiResponse(response=CoopToolSerializer, description="협업 툴 생성 성공"),
+        400: OpenApiResponse(description="잘못된 요청"),
+        401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+        403: OpenApiResponse(description="권한이 없습니다."),
+        500: OpenApiResponse(description="서버 내부 오류"),
+    },
+)
+class CoopToolListView(generics.ListCreateAPIView):
+    queryset = CoopTool.objects.all()
+    serializer_class = CoopToolSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+@extend_schema(methods=["put"], exclude=True)
+class CoopToolDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CoopTool.objects.all()
+    serializer_class = CoopToolSerializer
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        methods=["get"],
+        summary="협업 툴 상세 조회",
+        responses={
+            200: OpenApiResponse(response=CoopToolSerializer, description="협업 툴 상세"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema(
+        methods=["patch"],
+        summary="협업 툴 수정",
+        request=CoopToolSerializer,
+        responses={
+            200: OpenApiResponse(response=CoopToolSerializer, description="협업 툴 수정 완료"),
+            400: OpenApiResponse(description="요청 데이터 오류"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return Response({"detail": "PUT 메서드는 지원하지 않습니다."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @extend_schema(
+        methods=["delete"],
+        summary="협업 툴 삭제",
+        responses={
+            200: OpenApiResponse(description="협업 툴 삭제 완료"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        self.perform_destroy(instance)
+        return Response({"message": "협업 툴이 삭제되었습니다."}, status=status.HTTP_200_OK)
+
+
+# -------------------- InterestField --------------------
+@extend_schema(
+    summary="관심 분야 목록 조회 및 생성",
+    responses={
+        200: OpenApiResponse(response=InterestFieldSerializer, description="관심 분야 목록"),
+        201: OpenApiResponse(response=InterestFieldSerializer, description="관심 분야 생성 성공"),
+        400: OpenApiResponse(description="잘못된 요청"),
+        401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+        403: OpenApiResponse(description="권한이 없습니다."),
+        500: OpenApiResponse(description="서버 내부 오류"),
+    },
+)
+class InterestFieldListView(generics.ListCreateAPIView):
+    queryset = InterestField.objects.all()
+    serializer_class = InterestFieldSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+@extend_schema(methods=["put"], exclude=True)
+class InterestFieldDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = InterestField.objects.all()
+    serializer_class = InterestFieldSerializer
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        methods=["get"],
+        summary="관심 분야 상세 조회",
+        responses={
+            200: OpenApiResponse(response=InterestFieldSerializer, description="관심 분야 상세"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema(
+        methods=["patch"],
+        summary="관심 분야 수정",
+        request=InterestFieldSerializer,
+        responses={
+            200: OpenApiResponse(response=InterestFieldSerializer, description="관심 분야 수정 완료"),
+            400: OpenApiResponse(description="요청 데이터 오류"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return Response({"detail": "PUT 메서드는 지원하지 않습니다."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @extend_schema(
+        methods=["delete"],
+        summary="관심 분야 삭제",
+        responses={
+            200: OpenApiResponse(description="관심 분야 삭제 완료"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        self.perform_destroy(instance)
+        return Response({"message": "관심 분야가 삭제되었습니다."}, status=status.HTTP_200_OK)
+
+
+# -------------------- InterestTrend --------------------
+@extend_schema(
+    summary="관심 트렌드 목록 조회 및 생성",
+    responses={
+        200: OpenApiResponse(response=InterestTrendSerializer, description="관심 트렌드 목록"),
+        201: OpenApiResponse(response=InterestTrendSerializer, description="관심 트렌드 생성 성공"),
+        400: OpenApiResponse(description="잘못된 요청"),
+        401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+        403: OpenApiResponse(description="권한이 없습니다."),
+        500: OpenApiResponse(description="서버 내부 오류"),
+    },
+)
+class InterestTrendListView(generics.ListCreateAPIView):
+    queryset = InterestTrend.objects.all()
+    serializer_class = InterestTrendSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+@extend_schema(methods=["put"], exclude=True)
+class InterestTrendDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = InterestTrend.objects.all()
+    serializer_class = InterestTrendSerializer
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        methods=["get"],
+        summary="관심 트렌드 상세 조회",
+        responses={
+            200: OpenApiResponse(response=InterestTrendSerializer, description="관심 트렌드 상세"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema(
+        methods=["patch"],
+        summary="관심 트렌드 수정",
+        request=InterestTrendSerializer,
+        responses={
+            200: OpenApiResponse(response=InterestTrendSerializer, description="관심 트렌드 수정 완료"),
+            400: OpenApiResponse(description="요청 데이터 오류"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return Response({"detail": "PUT 메서드는 지원하지 않습니다."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @extend_schema(
+        methods=["delete"],
+        summary="관심 트렌드 삭제",
+        responses={
+            200: OpenApiResponse(description="관심 트렌드 삭제 완료"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        self.perform_destroy(instance)
+        return Response({"message": "관심 트렌드가 삭제되었습니다."}, status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    summary="커리어 목록 조회 및 생성",
+    responses={
+        200: OpenApiResponse(response=CareerSerializer, description="커리어 목록"),
+        201: OpenApiResponse(response=CareerSerializer, description="커리어 생성 성공"),
+        400: OpenApiResponse(description="잘못된 요청"),
+        401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+        403: OpenApiResponse(description="권한이 없습니다."),
+        500: OpenApiResponse(description="서버 내부 오류"),
+    },
+)
+class CareerListView(generics.ListCreateAPIView):
+    queryset = Career.objects.all()
+    serializer_class = CareerSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+@extend_schema(methods=["put"], exclude=True)
+class CareerDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Career.objects.all()
+    serializer_class = CareerSerializer
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        methods=["get"],
+        summary="커리어 상세 조회",
+        responses={
+            200: OpenApiResponse(response=CareerSerializer, description="커리어 상세"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    @extend_schema(
+        methods=["patch"],
+        summary="커리어 수정",
+        request=CareerSerializer,
+        responses={
+            200: OpenApiResponse(response=CareerSerializer, description="커리어 수정 완료"),
+            400: OpenApiResponse(description="요청 데이터 오류"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return Response({"detail": "PUT 메서드는 지원하지 않습니다."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @extend_schema(
+        methods=["delete"],
+        summary="커리어 삭제",
+        responses={
+            200: OpenApiResponse(description="커리어 삭제 완료"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        self.perform_destroy(instance)
+        return Response({"message": "커리어가 삭제되었습니다."}, status=status.HTTP_200_OK)
+>>>>>>> develop

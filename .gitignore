@@ -50,6 +50,8 @@ MANIFEST
 *.manifest
 *.spec
 
+.env.*
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -132,7 +134,9 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
-# Environments
+
+.env
+
 .env.local.local
 .env.prod
 .venv
@@ -416,9 +420,7 @@ fabric.properties
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 
-# Django migrations: ignore all migration scripts but keep __init__.py
-**/migrations/*.py
-!**/migrations/__init__.py
+
 
 ### Python Patch ###
 # Poetry local configuration file - https://python-poetry.org/docs/configuration/#local-configuration
@@ -462,3 +464,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/python,django,redis,git,macos,windows,pycharm
+설명
+*.idea/
+*.iml

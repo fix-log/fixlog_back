@@ -39,9 +39,7 @@ DEBUG = os.getenv("DJANGO_DEBUG") == "True"
 ALLOWED_HOSTS = ["*"]  # 모든 호스트 허용 (개발용)
 
 # CORS 설정
-CORS_ALLOWED_ORIGINS = (
-    os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("DJANGO_CORS_ALLOWED_ORIGINS") else []
-)
+CORS_ALLOWED_ORIGINS = os.getenv("DJANGO_CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("DJANGO_CORS_ALLOWED_ORIGINS") else []
 
 # 모든 origin 허용 시 (임시 개발용)
 CORS_ALLOW_ALL_ORIGINS = True
@@ -146,7 +144,7 @@ else:
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB_TEST") if IS_TEST else os.getenv("POSTGRES_DB"),
+        "NAME": os.getenv("POSTGRES_DB"),
         "USER": os.getenv("POSTGRES_USER"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
         "HOST": os.getenv("POSTGRES_HOST"),

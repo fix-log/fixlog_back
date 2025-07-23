@@ -2,13 +2,6 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-<<<<<<< HEAD
-from rest_framework.permissions import IsAuthenticated
-from app.util.models import Position, Language, Stack, Design
-from app.util.serializers import PositionSerializer, LanguageSerializer, StackSerializer, DesignSerializer
-from app.crew.models import UserBookmark
-=======
-
 from app.util.models import Career, CoopTool, Design, InterestField, InterestTrend, Language, Position, Stack
 from app.util.serializers import (
     CareerSerializer,
@@ -20,7 +13,6 @@ from app.util.serializers import (
     PositionSerializer,
     StackSerializer,
 )
->>>>>>> develop
 
 
 # 포지션 전체 목록 조회 및 생성
@@ -331,33 +323,6 @@ class DesignDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Response({"message": "디자인이 삭제되었습니다."}, status=status.HTTP_200_OK)
 
 
-<<<<<<< HEAD
-# 북마크 목록 조회
-@extend_schema(
-    summary="내 북마크 목록 조회",
-    responses={
-        200: OpenApiResponse(description="북마크 목록", examples=[{"application/json": [{"id": 1, "project_id": 3}]}]),
-        400: OpenApiResponse(description="잘못된 요청"),
-        401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
-        403: OpenApiResponse(description="권한이 없습니다."),
-    },
-)
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def user_bookmarks(request):
-    """사용자의 북마크 목록 조회"""
-    try:
-        bookmarks = UserBookmark.objects.filter(user=request.user).select_related("project")
-
-        bookmark_list = []
-        for bookmark in bookmarks:
-            bookmark_list.append({"id": bookmark.id, "project_id": bookmark.project.id})
-
-        return Response(bookmark_list, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        return Response({"message": "북마크 목록 조회 실패"}, status=status.HTTP_400_BAD_REQUEST)
-=======
 # -------------------- CoopTool --------------------
 @extend_schema(
     summary="협업 툴 목록 조회 및 생성",
@@ -659,4 +624,3 @@ class CareerDetailView(generics.RetrieveUpdateDestroyAPIView):
             return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
         return Response({"message": "커리어가 삭제되었습니다."}, status=status.HTTP_200_OK)
->>>>>>> develop

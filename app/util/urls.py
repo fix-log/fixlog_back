@@ -13,12 +13,6 @@ urlpatterns = [
     path("stacks/", views.StackListView.as_view(), name="stack-list"),
     path("stacks/<int:pk>/", views.StackDetailView.as_view(), name="stack-detail"),
     # Design 관련 URL
-<<<<<<< HEAD
-    path("designs/", views.DesignListView.as_view(), name="design-list"),  # 목록 및 생성
-    path("designs/<int:pk>/", views.DesignDetailView.as_view(), name="design-detail"),  # 조회, 수정(PATCH), 삭제
-    # 북마크 관련 URL
-    path("users/bookmarks", views.user_bookmarks, name="user-bookmarks"),  # 내 북마크 목록 조회
-=======
     path("designs/", views.DesignListView.as_view(), name="design-list"),
     path("designs/<int:pk>/", views.DesignDetailView.as_view(), name="design-detail"),
     # CoopTool 관련 URL
@@ -33,5 +27,4 @@ urlpatterns = [
     # Career 관련 URL
     path("career/", views.CareerListView.as_view(), name="career-list"),
     path("career/<int:pk>/", views.CareerDetailView.as_view(), name="career-detail"),
->>>>>>> develop
 ]

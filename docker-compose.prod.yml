@@ -5,6 +5,8 @@ services:
   # 1) PostgreSQL DB
   # --------------------------------------------
   db:
+    env_file:
+      - .env.prod
     image: postgres:15-alpine
     ports:
       - "5431:5432"
@@ -39,7 +41,7 @@ services:
     command: >
       sh -c "./scripts/run_daphne.sh"
     env_file:
-      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
+      - .env.prod   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
     volumes:
       - .:/app
     environment:
@@ -61,13 +63,13 @@ services:
     command: >
       sh -c "./scripts/run_api.sh"
     env_file:
-      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
+      - .env.prod   # DB 연결용 POSTGRES_* 를 .env.prod 로 읽도록
     volumes:
       - .:/app
     environment:
       PYTHONPATH: /app/app
     ports:
-      - "8001:8001"
+      - "8000:8000"
     container_name: api
     depends_on:
       - db

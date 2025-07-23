@@ -13,12 +13,15 @@ RUN pip install --upgrade pip && pip install poetry && poetry config virtualenvs
 # poetry 가 설치한 바이너리를 실행 가능하도록 PATH 설정
 ENV PATH="/root/.local/bin:$PATH"
 
+
 # .env 파일 복사 (환경 변수 설정용)
-COPY .env /app/.env
+# COPY .env /app/.env
 
 # 소스 코드 복사
 COPY . /app
 
+# 실행 권한 부여
+RUN chmod +x /app/scripts/run_daphne.sh
+
 # 기본 실행 명령
-CMD ["gunicorn", "fixlog.wsgi:application", "--bind", "0.0.0.0:8000"]
-# Gunicorn으로 애플리케이션을 배포용으로 실행한다.
+CMD ["gunicorn", "fixlog.wsgi:application", "--bind", "0.0.0.0:8000", "--reload", "--reload-engine=poll"]

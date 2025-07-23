@@ -2,35 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 
-from app.util.models import Language, Position, Stack
-
-
-class CoopTool(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-
-class InterestField(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-
-class InterestTrend(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-
-class Career(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
+from app.util.models import Career, CoopTool, InterestField, InterestTrend, Language, Position, Stack
 
 
 class UserManager(BaseUserManager):
@@ -61,7 +33,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     position = models.ManyToManyField(Position, blank=True)
     experience = models.CharField(max_length=255, blank=True, null=True)
     language = models.ManyToManyField(Language, blank=True)
-    tech = models.ManyToManyField(Stack, blank=True)
+    stack = models.ManyToManyField(Stack, blank=True)
     coop_tool = models.ManyToManyField(CoopTool, blank=True)
     interest_field = models.ManyToManyField(InterestField, blank=True)
     interest_trend = models.ManyToManyField(InterestTrend, blank=True)

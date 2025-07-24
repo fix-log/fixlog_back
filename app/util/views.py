@@ -2,6 +2,7 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+
 from app.util.models import Career, CoopTool, Design, InterestField, InterestTrend, Language, Position, Stack
 from app.util.serializers import (
     CareerSerializer,

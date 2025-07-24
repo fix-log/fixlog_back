@@ -1,12 +1,14 @@
+from datetime import datetime, timezone
+
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth import get_user_model
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from app.crew.models import Project, UserBookmark
-from app.util.models import Position, Language, Stack
-from datetime import datetime, timezone
+from app.util.models import Language, Position, Stack
 
 User = get_user_model()
 
@@ -15,7 +17,9 @@ class BookmarkAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(email="test@example.com", password="testpass123", nickname="테스트유저")
 
-        self.other_user = User.objects.create_user(email="other@example.com", password="testpass123", nickname="다른유저")
+        self.other_user = User.objects.create_user(
+            email="other@example.com", password="testpass123", nickname="다른유저"
+        )
 
         self.project = Project.objects.create(
             user=self.other_user,

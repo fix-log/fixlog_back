@@ -17,34 +17,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="Career",
-            fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("name", models.CharField(max_length=100)),
-            ],
-        ),
-        migrations.CreateModel(
-            name="CoopTool",
-            fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("name", models.CharField(max_length=100)),
-            ],
-        ),
-        migrations.CreateModel(
-            name="InterestField",
-            fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("name", models.CharField(max_length=100)),
-            ],
-        ),
-        migrations.CreateModel(
-            name="InterestTrend",
-            fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("name", models.CharField(max_length=100)),
-            ],
-        ),
-        migrations.CreateModel(
             name="User",
             fields=[
                 ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
@@ -102,10 +74,6 @@ class Migration(migrations.Migration):
                         verbose_name="user permissions",
                     ),
                 ),
-                ("career", models.ManyToManyField(blank=True, to="accounts.career")),
-                ("coop_tool", models.ManyToManyField(blank=True, to="accounts.cooptool")),
-                ("interest_field", models.ManyToManyField(blank=True, to="accounts.interestfield")),
-                ("interest_trend", models.ManyToManyField(blank=True, to="accounts.interesttrend")),
             ],
             options={
                 "abstract": False,

@@ -36,10 +36,18 @@ class FixredListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "read_permission", "created_at", "like_count", "comment_count"]
 
+
     def get_user(self, obj):
-        return {"id": obj.user.id, "nickname": obj.user.nickname, "profile_image": obj.user.profile_image or None}
-
-
+        try:
+            return {
+                "id": obj.user.id,
+                "nickname": obj.user.nickname,
+                "profile_image": obj.user.profile_image if obj.user.profile_image else None
+            }
+        except Exception as e:
+            print("get_user()에서 오류:", e)
+            return {"id": None, "nickname": "에러", "profile_image": None}
+        
 class FixredCommentSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
 

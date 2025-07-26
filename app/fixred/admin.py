@@ -56,6 +56,7 @@ class FixredBlockAdmin(admin.ModelAdmin):
     list_display = ("id", "blocker", "blocked", "created_at")
     search_fields = ("blocker__nickname", "blocked__nickname")
 
+
 from app.accounts.models import User
 
 

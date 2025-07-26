@@ -2,13 +2,22 @@ from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import generics, permissions, status
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Fixred, FixredComment, FixredImage 
-from .serializers import FixredCommentSerializer, FixredCreateSerializer, FixredDeleteSerializer, FixredDetailSerializer, FixredListSerializer, FixredUpdateSerializer
 from app.accounts.models import User
+
+from .models import Fixred, FixredComment, FixredImage
+from .serializers import (
+    FixredCommentSerializer,
+    FixredCreateSerializer,
+    FixredDeleteSerializer,
+    FixredDetailSerializer,
+    FixredListSerializer,
+    FixredUpdateSerializer,
+)
+
 
 # Fixred 게시글 목록 (픽레드 피드)
 @extend_schema(
@@ -39,8 +48,12 @@ class FixredListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         # 기본 쿼리셋은 모든 Fixred 게시글
-        queryset = Fixred.objects.select_related("user").prefetch_related("fixredimage_set").filter(
-            read_permission="all").order_by("-created_at")
+        queryset = (
+            Fixred.objects.select_related("user")
+            .prefetch_related("fixredimage_set")
+            .filter(read_permission="all")
+            .order_by("-created_at")
+        )
 
         # 쿼리 파라미터 'filter'가 'following'이면 팔로잉한 사용자의 글만 조회
         mode = self.request.query_params.get("filter", "all").strip().lower()
@@ -48,7 +61,8 @@ class FixredListView(generics.ListAPIView):
             following_users = user.following.values_list("id", flat=True)
             queryset = queryset.filter(user_id__in=following_users)
         return queryset
-    
+
+
 # Fixred 게시글 상세
 @extend_schema(
     summary="픽레드 게시글 상세 조회",
@@ -86,11 +100,10 @@ class FixredDetailView(generics.RetrieveAPIView):
     },
     tags=["픽레드 게시글"],
 )
-
 class FixredCreateView(generics.CreateAPIView):
     authentication_classes = [JWTAuthentication]
-    # permission_classes = [permissions.IsAuthenticated] 
-    permission_classes = [permissions.AllowAny] # 임시로 인증 없이 사용
+    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]  # 임시로 인증 없이 사용
     serializer_class = FixredCreateSerializer
 
     def perform_create(self, serializer):
@@ -117,13 +130,14 @@ class FixredUpdateView(generics.UpdateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]  # 인증 필수
     # permission_classes = [permissions.AllowAny] # 임시로 인증 없이 사용
-    serializer_class = FixredUpdateSerializer 
+    serializer_class = FixredUpdateSerializer
 
     queryset = Fixred.objects.all()
     lookup_field = "pk"  # URL에서 게시글 ID로 조회
 
     def perform_update(self, serializer):
         serializer.save()
+
 
 # Fixred 게시글 삭제
 @extend_schema(
@@ -149,6 +163,7 @@ class FixredDeleteView(generics.DestroyAPIView):
         # 요청한 유저와 작성자가 다르면 삭제 못하게 막기
         if self.request.user != instance.user:
             from rest_framework.exceptions import PermissionDenied
+
             raise PermissionDenied("게시글 삭제 권한이 없습니다.")
         instance.delete()
 
@@ -156,17 +171,12 @@ class FixredDeleteView(generics.DestroyAPIView):
         instance = self.get_object()
         fixred_id = instance.id
         self.perform_destroy(instance)
-        return Response(
-            {
-                "fixred_id": fixred_id,
-                "message": "픽레드 삭제 완료"
-            },
-            status=status.HTTP_200_OK
-        )
-    
+        return Response({"fixred_id": fixred_id, "message": "픽레드 삭제 완료"}, status=status.HTTP_200_OK)
+
 
 # Fixred 댓글
-    
+
+
 @extend_schema(
     summary="픽레드 댓글 목록 및 작성",
     description="해당 픽레드 게시글에 달린 댓글들을 조회하거나 새 댓글을 작성합니다.",
@@ -183,7 +193,6 @@ class FixredCommentView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FixredCommentSerializer
 
-    
     def get_queryset(self):
         fixred_id = self.kwargs["fixred_id"]
         return FixredComment.objects.filter(fixred_id=fixred_id).select_related("user").order_by("-created_at")
@@ -192,6 +201,7 @@ class FixredCommentView(generics.ListCreateAPIView):
         fixred_id = self.kwargs["fixred_id"]
         fixred = get_object_or_404(Fixred, id=fixred_id)
         serializer.save(user=self.request.user, fixred=fixred)
+
 
 # Fixred 댓글 삭제
 @extend_schema(
@@ -212,7 +222,6 @@ class FixredCommentDeleteView(generics.DestroyAPIView):
     lookup_field = "id"
     lookup_url_kwarg = "comment_id"
 
-
     def perform_destroy(self, instance):
         if self.request.user != instance.user:
             raise PermissionDenied("댓글 삭제 권한이 없습니다.")
@@ -224,10 +233,5 @@ class FixredCommentDeleteView(generics.DestroyAPIView):
         comment_id = instance.id
         self.perform_destroy(instance)
         return Response(
-            {
-                "fixred_id": fixred_id,
-                "comment_id": comment_id,
-                "message": "댓글 삭제 완료"
-            },
-            status=status.HTTP_200_OK
-    )
+            {"fixred_id": fixred_id, "comment_id": comment_id, "message": "댓글 삭제 완료"}, status=status.HTTP_200_OK
+        )

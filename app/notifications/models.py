@@ -35,13 +35,13 @@ class Notification(CreatedOnlyModel):
 
     def __str__(self):
         return f"{self.user.nickname}: [{self.notification_type} 알림] {self.content[:20]}..."
-    
+
     def get_target_object(notification):
-        if notification.notification_type == 'fixred':
+        if notification.notification_type == "fixred":
             return Fixred.objects.get(pk=notification.target_id)
-        elif notification.notification_type == 'workroom':
+        elif notification.notification_type == "workroom":
             return Workroom.objects.get(pk=notification.target_id)
-        elif notification.notification_type == 'crew':
+        elif notification.notification_type == "crew":
             return Project.objects.get(pk=notification.target_id)
         # elif notification.notification_type == 'fixletter':
         #     return None  # 픽레터는 현재 구현되지 않음

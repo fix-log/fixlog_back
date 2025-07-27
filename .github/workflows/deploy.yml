@@ -56,4 +56,4 @@ jobs:
             # 문제가 없다면 blue 컨테이너 종료
             docker compose rm -sf api-blue
 
-            echo "✅배포 완료"
+            echo "✅배포 완료"name: Deploy to EC2 via Docker

@@ -56,10 +56,3 @@ class FixredBlockAdmin(admin.ModelAdmin):
     list_display = ("id", "blocker", "blocked", "created_at")
     search_fields = ("blocker__nickname", "blocked__nickname")
 
-
-from app.accounts.models import User
-
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ("id", "email", "is_staff", "is_superuser")

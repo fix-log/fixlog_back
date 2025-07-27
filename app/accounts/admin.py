@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import User, RefreshToken, SocialAccount
+
+from .models import RefreshToken, SocialAccount, User
 
 
 @admin.register(User)
@@ -10,22 +11,41 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ("is_staff", "is_active", "created_at")
     search_fields = ("email", "nickname", "phone_number")
     ordering = ("-date_joined",)
-    filter_horizontal = ("groups", "user_permissions", "position", "language", "stack", "coop_tool", "interest_field", "interest_trend", "career")
+    filter_horizontal = (
+        "groups",
+        "user_permissions",
+        "position",
+        "language",
+        "stack",
+        "coop_tool",
+        "interest_field",
+        "interest_trend",
+        "career",
+    )
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (_("Personal info"), {"fields": ("nickname", "profile_image", "phone_number", "birth", "experience", "portfolio", "ref_link")}),
-        (_("Relationships"), {"fields": ("position", "language", "stack", "coop_tool", "interest_field", "interest_trend", "career")}),
+        (
+            _("Personal info"),
+            {"fields": ("nickname", "profile_image", "phone_number", "birth", "experience", "portfolio", "ref_link")},
+        ),
+        (
+            _("Relationships"),
+            {"fields": ("position", "language", "stack", "coop_tool", "interest_field", "interest_trend", "career")},
+        ),
         (_("Permissions"), {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
         (_("OAuth info"), {"fields": ("oauth_provider", "oauth_id")}),
     )
 
     add_fieldsets = (
-        (None, {
-            "classes": ("wide",),
-            "fields": ("email", "password1", "password2", "nickname", "is_staff", "is_active"),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "password1", "password2", "nickname", "is_staff", "is_active"),
+            },
+        ),
     )
 
     readonly_fields = ("date_joined", "last_login")

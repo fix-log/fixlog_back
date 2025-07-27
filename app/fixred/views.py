@@ -102,14 +102,14 @@ class FixredDetailView(generics.RetrieveAPIView):
 )
 class FixredCreateView(generics.CreateAPIView):
     authentication_classes = [JWTAuthentication]
-    # permission_classes = [permissions.IsAuthenticated]
-    permission_classes = [permissions.AllowAny]  # 임시로 인증 없이 사용
+    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.AllowAny]  # 임시로 인증 없이 사용
     serializer_class = FixredCreateSerializer
 
     def perform_create(self, serializer):
-        # serializer.save(user=self.request.user)
-        test_user = User.objects.all()[1]  # 테스트 유저에게 소속시킴 (임시)
-        serializer.save(user=test_user)
+        serializer.save(user=self.request.user)
+        # test_user = User.objects.all()[1]  # 테스트 유저에게 소속시킴 (임시)
+        # serializer.save(user=test_user)
 
 
 # Fixred 게시글 수정

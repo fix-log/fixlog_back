@@ -136,6 +136,9 @@ class FixredUpdateView(generics.UpdateAPIView):
     lookup_field = "pk"  # URL에서 게시글 ID로 조회
 
     def perform_update(self, serializer):
+        instance = self.get_object()
+        if self.request.user != instance.user:
+            raise PermissionDenied("게시글 수정 권한이 없습니다.")
         serializer.save()
 
 

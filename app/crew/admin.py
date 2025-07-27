@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from app.crew.models import Project, ProjectLanguage, ProjectPosition, ProjectSkillTool
+from app.crew.models import Project, ProjectLanguage, ProjectPosition, ProjectSkillTool, UserBookmark
 
 
 class ProjectPositionInline(admin.TabularInline):
@@ -43,3 +43,14 @@ class ProjectLanguageAdmin(admin.ModelAdmin):
 class ProjectSkillToolAdmin(admin.ModelAdmin):
     list_display = ["project", "skill_tool"]
     list_filter = ["skill_tool"]
+
+
+@admin.register(UserBookmark)
+class UserBookmarkAdmin(admin.ModelAdmin):
+    list_display = ["user", "project", "created_at"]
+    list_filter = ["created_at", "project__status"]
+    search_fields = ["user__nickname", "project__title"]
+    readonly_fields = ["created_at"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("user", "project")

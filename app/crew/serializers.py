@@ -31,6 +31,8 @@ class ProjectSkillToolSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     # 유저 닉네임 추가
     user_nickname = serializers.CharField(source="user.nickname", read_only=True)
+    # 유저 프로필 이미지 추가
+    user_profile_image = serializers.CharField(source="user.profile_image", read_only=True)
 
     # 중간 테이블 정보를 포함한 필드들
     project_positions = ProjectPositionSerializer(source="projectposition_set", many=True, read_only=True)
@@ -48,6 +50,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "user_nickname",
+            "user_profile_image",
             "title",
             "deadline",
             "start_date",

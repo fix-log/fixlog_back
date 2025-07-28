@@ -1,7 +1,15 @@
 from rest_framework import serializers
 
-from app.crew.models import Project, ProjectLanguage, ProjectPosition, ProjectSkillTool, ProjectDesign, ProjectCoopTool, Application
-from app.util.models import Language, Position, Stack, Design, CoopTool
+from app.crew.models import (
+    Application,
+    Project,
+    ProjectCoopTool,
+    ProjectDesign,
+    ProjectLanguage,
+    ProjectPosition,
+    ProjectSkillTool,
+)
+from app.util.models import CoopTool, Design, Language, Position, Stack
 
 
 class ProjectPositionSerializer(serializers.ModelSerializer):
@@ -125,7 +133,15 @@ class ProjectSerializer(serializers.ModelSerializer):
         instance.save()
 
         # 중간 테이블 데이터 업데이트
-        if any([position_ids is not None, language_ids is not None, skill_tool_ids is not None, design_ids is not None, coop_tool_ids is not None]):
+        if any(
+            [
+                position_ids is not None,
+                language_ids is not None,
+                skill_tool_ids is not None,
+                design_ids is not None,
+                coop_tool_ids is not None,
+            ]
+        ):
             self._update_relations(instance, position_ids, language_ids, skill_tool_ids, design_ids, coop_tool_ids)
 
         return instance

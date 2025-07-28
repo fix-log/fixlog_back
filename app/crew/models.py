@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from app.util.models import Language, Position, Stack, Design, CoopTool
+from app.util.models import CoopTool, Design, Language, Position, Stack
 
 
 class Project(models.Model):

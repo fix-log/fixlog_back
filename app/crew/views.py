@@ -6,10 +6,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from app.crew.models import Project, Application
-from app.crew.serializers import ProjectSerializer, ApplicationSerializer
-from app.crew.models import Project, UserBookmark
-from app.crew.serializers import ProjectSerializer
+from app.crew.models import Application, Project, UserBookmark
+from app.crew.serializers import ApplicationSerializer, ProjectSerializer
 
 
 class ProjectListCreateAPIView(generics.ListCreateAPIView):
@@ -18,8 +16,11 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = Project.objects.all().prefetch_related(
-            "projectposition_set__position", "projectlanguage_set__language", "projectskilltool_set__skill_tool",
-            "projectdesign_set__design", "projectcooptool_set__coop_tool"
+            "projectposition_set__position",
+            "projectlanguage_set__language",
+            "projectskilltool_set__skill_tool",
+            "projectdesign_set__design",
+            "projectcooptool_set__coop_tool",
         )
 
         # 제목 검색 기능
@@ -77,8 +78,11 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
 
 class ProjectDetailAPIView(generics.RetrieveAPIView):
     queryset = Project.objects.all().prefetch_related(
-        "projectposition_set__position", "projectlanguage_set__language", "projectskilltool_set__skill_tool",
-        "projectdesign_set__design", "projectcooptool_set__coop_tool"
+        "projectposition_set__position",
+        "projectlanguage_set__language",
+        "projectskilltool_set__skill_tool",
+        "projectdesign_set__design",
+        "projectcooptool_set__coop_tool",
     )
     serializer_class = ProjectSerializer
     lookup_field = "pk"

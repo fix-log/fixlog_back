@@ -64,7 +64,9 @@ INSTALLED_APPS = [
     "app.fixred",  # fixred 관리
     "app.crew",  # 크루(팀) 관리
     "app.workroom",  # 워크룸 기능
-    "app.fixletter",
+    "app.fixletter",  # 픽레터 기능 (현재 구현되지 않음)
+    "app.notifications",  # 알림 기능
+    "app.search",  # 검색 기능 (검색 기록)
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

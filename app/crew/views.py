@@ -1,12 +1,18 @@
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+<<<<<<< HEAD
 from app.crew.models import Project, Application
 from app.crew.serializers import ProjectSerializer, ApplicationSerializer
+=======
+from app.crew.models import Project, UserBookmark
+from app.crew.serializers import ProjectSerializer
+>>>>>>> develop
 
 
 class ProjectListCreateAPIView(generics.ListCreateAPIView):
@@ -105,6 +111,7 @@ class ProjectDeleteAPIView(generics.DestroyAPIView):
         return obj
 
 
+<<<<<<< HEAD
 class ProjectApplyAPIView(generics.CreateAPIView, generics.DestroyAPIView):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
@@ -179,3 +186,35 @@ class ProjectApplicantsAPIView(generics.ListAPIView):
             raise PermissionDenied("프로젝트 소유자만 지원자 목록을 볼 수 있습니다.")
 
         return Application.objects.filter(project=project)
+=======
+# 북마크 관련 뷰
+@api_view(["POST", "DELETE"])
+@permission_classes([IsAuthenticated])
+def bookmark_manage(request, project_id):
+    """프로젝트 북마크 추가/삭제"""
+    try:
+        project = get_object_or_404(Project, id=project_id)
+
+        if request.method == "POST":
+            # 북마크 추가
+            if UserBookmark.objects.filter(user=request.user, project=project).exists():
+                return Response({"message": "북마크 등록 실패"}, status=status.HTTP_400_BAD_REQUEST)
+
+            UserBookmark.objects.create(user=request.user, project=project)
+            return Response({"message": "북마크 등록"}, status=status.HTTP_200_OK)
+
+        elif request.method == "DELETE":
+            # 북마크 삭제
+            try:
+                bookmark = UserBookmark.objects.get(user=request.user, project=project)
+                bookmark.delete()
+                return Response({"message": "북마크 등록 취소"}, status=status.HTTP_200_OK)
+            except UserBookmark.DoesNotExist:
+                return Response({"message": "북마크 등록 취소 실패"}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        if request.method == "POST":
+            return Response({"message": "북마크 등록 실패"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"message": "북마크 등록 취소 실패"}, status=status.HTTP_400_BAD_REQUEST)
+>>>>>>> develop

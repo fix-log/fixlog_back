@@ -31,7 +31,7 @@ class Fixred(TimestampModel):
 
 # 픽레드 이미지 모델
 class FixredImage(models.Model):
-    post = models.ForeignKey(Fixred, on_delete=models.CASCADE)
+    post = models.ForeignKey(Fixred, on_delete=models.CASCADE, related_name="fixredimage_set")
     image = models.ImageField("fixred_image", upload_to="fixred_images/")
 
     def __str__(self):
@@ -39,13 +39,25 @@ class FixredImage(models.Model):
 
 
 # 픽레드 댓글 모델
-class FixredComment(CreatedOnlyModel):
+class FixredComment(TimestampModel):
     fixred = models.ForeignKey(Fixred, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.CharField(max_length=500)
 
     def __str__(self):
         return f"[{self.id}] {self.user.nickname}: {self.comment[:10]}..."
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # 댓글 저장 후 카운트 갱신
+        self.fixred.comment_count = self.fixred.comments.count()
+        self.fixred.save(update_fields=["comment_count"])
+
+    def delete(self, *args, **kwargs):
+        fixred = self.fixred
+        super().delete(*args, **kwargs)
+        fixred.comment_count = fixred.comments.count()
+        fixred.save(update_fields=["comment_count"])
 
 
 # 픽레드 신고 모델

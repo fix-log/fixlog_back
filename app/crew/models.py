@@ -61,6 +61,7 @@ class ProjectSkillTool(models.Model):
         db_table = "project_skill_tool"
 
 
+<<<<<<< HEAD
 class Application(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="applications")
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="applications")
@@ -73,3 +74,18 @@ class Application(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.project.title}"
+=======
+# 북마크 모델
+class UserBookmark(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="bookmarks")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="bookmarks")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "project")
+        db_table = "user_bookmark"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.nickname} → {self.project.title}"
+>>>>>>> develop

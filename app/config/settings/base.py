@@ -58,29 +58,25 @@ CACHES = {
 }
 
 
-# Application definition
-
 INSTALLED_APPS = [
+    "app.util",  # 유틸 기능
+    "app.accounts",  # 회원,인증
+    "app.fixred",  # fixred 관리
+    "app.crew",  # 크루(팀) 관리
+    "app.workroom",  # 워크룸 기능
+    "app.fixletter",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-]
-INSTALLED_APPS += [
     "rest_framework",  # drf
     "rest_framework_simplejwt",  # JWT
     "drf_spectacular",  # 스웨거
-    # "app.fixed",  # Fixed 관리
-    "app.accounts",  # 회원,인증
-    "app.fixred",  # fixred 관리
-    "app.crew",  # 크루(팀) 관리
-    "app.workroom",  # 워크룸 기능
-    "app.fixletter",
-    "app.util",  # 유틸 기능
     "channels",
     "corsheaders",  # CORS 처리를 위한 앱
+    "django_filters",  # 필터
 ]
 
 MIDDLEWARE = [
@@ -161,6 +157,14 @@ DATABASES = {
     }
 }
 
+# 이메일 SMTP 설정
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "noreply@fixlog.co.kr"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -208,6 +212,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
 
 REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "app.util.exceptions.custom_exception_handler",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",

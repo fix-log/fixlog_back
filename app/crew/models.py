@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from app.util.models import Language, Position, Stack
+from app.util.models import Language, Position, Stack, Design, CoopTool
 
 
 class Project(models.Model):
@@ -24,6 +24,8 @@ class Project(models.Model):
     positions = models.ManyToManyField(Position, through="ProjectPosition", blank=True)
     languages = models.ManyToManyField(Language, through="ProjectLanguage", blank=True)
     skill_tools = models.ManyToManyField(Stack, through="ProjectSkillTool", blank=True)
+    designs = models.ManyToManyField(Design, through="ProjectDesign", blank=True)
+    coop_tools = models.ManyToManyField(CoopTool, through="ProjectCoopTool", blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -61,7 +63,24 @@ class ProjectSkillTool(models.Model):
         db_table = "project_skill_tool"
 
 
-<<<<<<< HEAD
+class ProjectDesign(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    design = models.ForeignKey(Design, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("project", "design")
+        db_table = "project_design"
+
+
+class ProjectCoopTool(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    coop_tool = models.ForeignKey(CoopTool, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("project", "coop_tool")
+        db_table = "project_coop_tool"
+
+
 class Application(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="applications")
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="applications")
@@ -74,8 +93,8 @@ class Application(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.project.title}"
-=======
-# 북마크 모델
+
+
 class UserBookmark(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="bookmarks")
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="bookmarks")
@@ -88,4 +107,3 @@ class UserBookmark(models.Model):
 
     def __str__(self):
         return f"{self.user.nickname} → {self.project.title}"
->>>>>>> develop

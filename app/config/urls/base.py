@@ -31,6 +31,7 @@ urlpatterns = [
     path("", include("app.workroom.urls")),
     path("fixred/", include("app.fixred.urls")),
     path("user/", include("app.accounts.urls")),
+    path("notifications/", include("app.notifications.urls")),
 ]
 
 if settings.DEBUG:

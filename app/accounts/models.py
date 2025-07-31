@@ -52,6 +52,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     oauth_provider = models.CharField(max_length=50, blank=True, null=True)
     oauth_id = models.CharField(max_length=100, blank=True, null=True)
 
+    search_history = models.BooleanField(default=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = "email"

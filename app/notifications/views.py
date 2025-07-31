@@ -1,5 +1,5 @@
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
-from rest_framework import response, generics, status
+from rest_framework import generics, response, status
 from rest_framework.permissions import IsAuthenticated
 
 from app.notifications.models import Notification
@@ -38,6 +38,7 @@ class NotificationListView(generics.ListAPIView):
     },
 )
 class NotificationReadView(generics.UpdateAPIView):
+    http_method_names = ["patch"]
     permission_classes = [IsAuthenticated]
     queryset = Notification.objects.all()
     lookup_field = "pk"
@@ -61,6 +62,7 @@ class NotificationReadView(generics.UpdateAPIView):
     },
 )
 class NotificationReadAllView(generics.UpdateAPIView):
+    http_method_names = ["patch"]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):

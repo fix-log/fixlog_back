@@ -1,5 +1,5 @@
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
-from rest_framework import Response, generics, status
+from rest_framework import response, generics, status
 from rest_framework.permissions import IsAuthenticated
 
 from app.notifications.models import Notification
@@ -45,11 +45,11 @@ class NotificationReadView(generics.UpdateAPIView):
     def patch(self, request, *args, **kwargs):
         notification = self.get_object()
         if notification.user != request.user:
-            return Response({"error": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+            return response({"error": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         if not notification.is_read:
             notification.is_read = True
             notification.save()
-        return Response({"message": "알림 읽음 처리 완료"}, status=status.HTTP_200_OK)
+        return response({"message": "알림 읽음 처리 완료"}, status=status.HTTP_200_OK)
 
 
 # 알림 전체 읽음 처리
@@ -66,4 +66,4 @@ class NotificationReadAllView(generics.UpdateAPIView):
     def post(self, request):
         updated = Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
 
-        return Response({"message": f"{updated}개의 알림을 읽음 처리했습니다."}, status=status.HTTP_200_OK)
+        return response({"message": f"{updated}개의 알림을 읽음 처리했습니다."}, status=status.HTTP_200_OK)

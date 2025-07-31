@@ -62,8 +62,10 @@ class SearchView(APIView):
 
         if category in ("fixred", "all"):
             fixred_results = Fixred.objects.filter(content__icontains=query)
+            # 인기순
             if sort == "popular":
                 fixred_results = fixred_results.order_by("-like_count")
+            # 최신순
             elif sort == "latest":
                 fixred_results = fixred_results.order_by("-created_at")
             results["픽레드"] = [{"id": f.id, "content": f.content} for f in fixred_results]

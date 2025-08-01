@@ -45,7 +45,7 @@ class SearchView(APIView):
             return Response({"error": "검색어를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
 
         # 검색어 저장 on일때만
-        if user.search_history :
+        if user.search_history:
             SearchHistory.objects.get_or_create(user=user, keyword=query)
 
         results = {}
@@ -57,32 +57,33 @@ class SearchView(APIView):
         except Exception as e:
             results["크루"] = f"크루 검색 실패: {str(e)}"
         try:
-            if category in ("fixred_popular","all"):
+            if category in ("fixred_popular", "all"):
                 fixred_pop_results = Fixred.objects.filter(content__icontains=query).order_by("-like_count")
                 results["픽레드_인기글"] = [{"id": f.id, "content": f.content} for f in fixred_pop_results]
         except Exception as e:
-                results["픽레드_인기글"] = f"픽레드 인기글 검색 실패: {str(e)}"
+            results["픽레드_인기글"] = f"픽레드 인기글 검색 실패: {str(e)}"
 
         try:
             if category in ("fixred_latest", "all"):
                 fixred_last_results = Fixred.objects.filter(content__icontains=query).order_by("-created_at")
                 results["픽레드_최신글"] = [{"id": f.id, "content": f.content} for f in fixred_last_results]
         except Exception as e:
-                results["픽레드_최신글"] = f"픽레드 최신글 검색 실패: {str(e)}"
+            results["픽레드_최신글"] = f"픽레드 최신글 검색 실패: {str(e)}"
 
         try:
             if category in ("user", "all"):
                 user_results = User.objects.filter(
-                    Q(nickname__icontains=query) |
-                    Q(position__name__icontains=query) |
-                    Q(language__name__icontains=query) |
-                    Q(stack__name__icontains=query)
+                    Q(nickname__icontains=query)
+                    | Q(position__name__icontains=query)
+                    | Q(language__name__icontains=query)
+                    | Q(stack__name__icontains=query)
                 ).distinct()
                 results["프로필"] = [{"id": u.id, "nickname": u.nickname} for u in user_results]
         except Exception as e:
             results["프로필"] = f"유저 검색 실패: {str(e)}"
 
         return Response({"검색어": query, "검색 결과": results}, status=status.HTTP_200_OK)
+
 
 @extend_schema(
     summary="검색 기록 조회 및 생성",
@@ -123,6 +124,7 @@ class SearchHistoryDeleteView(generics.DestroyAPIView):
         SearchHistory.objects.filter(user=user).delete()
         return Response({"message": "검색 기록이 삭제되었습니다."}, status=status.HTTP_200_OK)
 
+
 @extend_schema(
     summary="검색어 개별 삭제",
     description="로그인 유저의 검색 기록 중 하나를 삭제합니다.",
@@ -130,7 +132,7 @@ class SearchHistoryDeleteView(generics.DestroyAPIView):
         200: OpenApiResponse(description="삭제 성공"),
         404: OpenApiResponse(description="해당 검색어 찾을 수 없음"),
     },
-        tags=["검색 기록"],
+    tags=["검색 기록"],
 )
 # 검색 기록 하나만 삭제
 class SearchHistoryDeleteOneView(generics.DestroyAPIView):

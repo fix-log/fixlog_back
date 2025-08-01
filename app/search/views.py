@@ -16,13 +16,12 @@ from .serializers import SearchHistorySerializer
 
 @extend_schema(
     summary="검색 기능",
-    description="크루, 워크룸, 픽레드, 유저를 통합 검색합니다.",
+    description="크루, 픽레드, 유저를 통합 검색합니다.",
     parameters=[
         OpenApiParameter(name="q", description="검색어", required=True, type=str),
-        OpenApiParameter(name="sort", description="픽레드 정렬 기준: latest | popular", required=False, type=str),
         OpenApiParameter(
             name="category",
-            description="검색 카테고리: all | crew | workroom | fixred | user",
+            description="검색 카테고리: all | crew | fixred-lasteat | fixred-popular | user",
             required=False,
             type=str,
         ),
@@ -31,6 +30,7 @@ from .serializers import SearchHistorySerializer
         200: OpenApiResponse(description="검색 결과 반환"),
         400: OpenApiResponse(description="검색어 누락"),
     },
+    tags=["검색"],
 )
 # 검색 기능
 class SearchView(APIView):
@@ -38,55 +38,58 @@ class SearchView(APIView):
 
     def get(self, request):
         query = request.query_params.get("q", "").strip()
-        category = request.query_params.get("category", "all")  # 검색 카테고리 (all, crew, workroom, fixred, user)
-        sort = request.query_params.get("sort")  # 픽레드 정렬 기준
-
+        category = request.query_params.get("category", "all")  # (all, crew, fixred-popular, fixred-lastet, user)
         user = request.user
 
         if not query:
             return Response({"error": "검색어를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
 
         # 검색어 저장 on일때만
-        if user.search_history:
+        if user.search_history :
             SearchHistory.objects.get_or_create(user=user, keyword=query)
 
         results = {}
 
-        if category in ("crew", "all"):
-            crew_results = Project.objects.filter(title__icontains=query)
-            results["크루"] = [{"id": c.id, "title": c.title} for c in crew_results]
+        try:
+            if category in ("crew", "all"):
+                crew_results = Project.objects.filter(title__icontains=query)
+                results["크루"] = [{"id": c.id, "title": c.title} for c in crew_results]
+        except Exception as e:
+            results["크루"] = f"크루 검색 실패: {str(e)}"
+        try:
+            if category in ("fixred_popular","all"):
+                fixred_pop_results = Fixred.objects.filter(content__icontains=query).order_by("-like_count")
+                results["픽레드_인기글"] = [{"id": f.id, "content": f.content} for f in fixred_pop_results]
+        except Exception as e:
+                results["픽레드_인기글"] = f"픽레드 인기글 검색 실패: {str(e)}"
 
-        if category in ("workroom", "all"):
-            workroom_results = Workroom.objects.filter(title__icontains=query)
-            results["워크룸"] = [{"id": w.id, "title": w.title} for w in workroom_results]
+        try:
+            if category in ("fixred_latest", "all"):
+                fixred_last_results = Fixred.objects.filter(content__icontains=query).order_by("-created_at")
+                results["픽레드_최신글"] = [{"id": f.id, "content": f.content} for f in fixred_last_results]
+        except Exception as e:
+                results["픽레드_최신글"] = f"픽레드 최신글 검색 실패: {str(e)}"
 
-        if category in ("fixred", "all"):
-            fixred_results = Fixred.objects.filter(content__icontains=query)
-            # 인기순
-            if sort == "popular":
-                fixred_results = fixred_results.order_by("-like_count")
-            # 최신순
-            elif sort == "latest":
-                fixred_results = fixred_results.order_by("-created_at")
-            results["픽레드"] = [{"id": f.id, "content": f.content} for f in fixred_results]
-
-        if category in ("user", "all"):
-            user_results = User.objects.filter(
-                Q(nickname__icontains=query)
-                | Q(position__name__icontains=query)
-                | Q(language__name__icontains=query)
-                | Q(stack__name__icontains=query)
-            ).distinct()
-            results["프로필"] = [{"id": u.id, "nickname": u.nickname} for u in user_results]
+        try:
+            if category in ("user", "all"):
+                user_results = User.objects.filter(
+                    Q(nickname__icontains=query) |
+                    Q(position__name__icontains=query) |
+                    Q(language__name__icontains=query) |
+                    Q(stack__name__icontains=query)
+                ).distinct()
+                results["프로필"] = [{"id": u.id, "nickname": u.nickname} for u in user_results]
+        except Exception as e:
+            results["프로필"] = f"유저 검색 실패: {str(e)}"
 
         return Response({"검색어": query, "검색 결과": results}, status=status.HTTP_200_OK)
-
 
 @extend_schema(
     summary="검색 기록 조회 및 생성",
     description="현재 로그인 유저의 검색 기록을 조회하거나 새 키워드를 등록합니다.",
     request=SearchHistorySerializer,
     responses={200: SearchHistorySerializer(many=True)},
+    tags=["검색 기록"],
 )
 # 검색 리스트 생성, 조회
 class SearchHistoryView(generics.ListCreateAPIView):
@@ -109,6 +112,7 @@ class SearchHistoryView(generics.ListCreateAPIView):
     summary="검색 기록 전체 삭제",
     description="현재 로그인 유저의 모든 검색 기록을 삭제합니다.",
     responses={200: OpenApiResponse(description="삭제 성공 메시지 반환")},
+    tags=["검색 기록"],
 )
 # 검색 기록 삭제
 class SearchHistoryDeleteView(generics.DestroyAPIView):
@@ -118,3 +122,25 @@ class SearchHistoryDeleteView(generics.DestroyAPIView):
         user = request.user
         SearchHistory.objects.filter(user=user).delete()
         return Response({"message": "검색 기록이 삭제되었습니다."}, status=status.HTTP_200_OK)
+
+@extend_schema(
+    summary="검색어 개별 삭제",
+    description="로그인 유저의 검색 기록 중 하나를 삭제합니다.",
+    responses={
+        200: OpenApiResponse(description="삭제 성공"),
+        404: OpenApiResponse(description="해당 검색어 찾을 수 없음"),
+    },
+        tags=["검색 기록"],
+)
+# 검색 기록 하나만 삭제
+class SearchHistoryDeleteOneView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, keyword_id, *args, **kwargs):
+        user = request.user
+        try:
+            history = SearchHistory.objects.get(id=keyword_id, user=user)
+            history.delete()
+            return Response({"message": "해당 검색어가 삭제되었습니다."}, status=status.HTTP_200_OK)
+        except SearchHistory.DoesNotExist:
+            return Response({"error": "해당 검색어를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)

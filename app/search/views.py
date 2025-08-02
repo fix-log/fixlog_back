@@ -58,14 +58,18 @@ class SearchView(APIView):
         try:
             if category in ("fixred_popular", "all"):
                 fixred_pop_results = Fixred.objects.filter(content__icontains=query).order_by("-like_count")
-                results["픽레드_인기글"] = [{"id": f.id, "content": f.content,"like_count": f.like_count} for f in fixred_pop_results]
+                results["픽레드_인기글"] = [
+                    {"id": f.id, "content": f.content, "like_count": f.like_count} for f in fixred_pop_results
+                ]
         except Exception as e:
             results["픽레드_인기글"] = f"픽레드 인기글 검색 실패: {str(e)}"
 
         try:
             if category in ("fixred_latest", "all"):
                 fixred_last_results = Fixred.objects.filter(content__icontains=query).order_by("-created_at")
-                results["픽레드_최신글"] = [{"id": f.id, "content": f.content,"create_at":f.created_at} for f in fixred_last_results]
+                results["픽레드_최신글"] = [
+                    {"id": f.id, "content": f.content, "create_at": f.created_at} for f in fixred_last_results
+                ]
         except Exception as e:
             results["픽레드_최신글"] = f"픽레드 최신글 검색 실패: {str(e)}"
 

@@ -22,7 +22,8 @@ class FixredImageSerializer(serializers.ModelSerializer):
 
 class FixredListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
-    images = FixredImageSerializer(source="fixredimage_set", many=True, read_only=True)
+    images = FixredImageSerializer(source="fixred_images", many=True, read_only=True)
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Fixred
@@ -32,6 +33,7 @@ class FixredListSerializer(serializers.ModelSerializer):
             "content",
             "images",
             "like_count",
+            "is_liked",
             "comment_count",
             "read_permission",
             "created_at",
@@ -48,6 +50,14 @@ class FixredListSerializer(serializers.ModelSerializer):
         except Exception as e:
             print("get_user()에서 오류:", e)
             return {"id": None, "nickname": "에러", "profile_image": None}
+
+    def get_is_liked(self, obj):
+        request = self.context.get("request")
+        user = request.user if request else None
+
+        if user and user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        return False
 
 
 class FixredCommentSerializer(serializers.ModelSerializer):

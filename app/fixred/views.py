@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from app.accounts.models import User
+from app.fixred.utils.like import toggle_fixred_like
 
 from .models import Fixred, FixredComment, FixredImage
 from .serializers import (
@@ -45,12 +46,17 @@ class FixredListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FixredListSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
     def get_queryset(self):
         user = self.request.user
         # 기본 쿼리셋은 모든 Fixred 게시글
         queryset = (
             Fixred.objects.select_related("user")
-            .prefetch_related("fixredimage_set")
+            .prefetch_related("fixred_images", "comments", "likes")
             .filter(read_permission="all")
             .order_by("-created_at")
         )
@@ -76,14 +82,14 @@ class FixredListView(generics.ListAPIView):
 )
 class FixredDetailView(generics.RetrieveAPIView):
     authentication_classes = [JWTAuthentication]
-    queryset = Fixred.objects.select_related("user").prefetch_related("fixredimage_set", "comments")
+    queryset = Fixred.objects.select_related("user").prefetch_related("fixred_images", "comments")
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = FixredDetailSerializer
     lookup_field = "pk"
 
     def get_queryset(self):
         return Fixred.objects.select_related("user").prefetch_related(
-            Prefetch("fixredimage_set", queryset=FixredImage.objects.all()),
+            Prefetch("fixred_images", queryset=FixredImage.objects.all()),
             Prefetch("comments", queryset=FixredComment.objects.select_related("user").order_by("-created_at")),
         )
 
@@ -237,4 +243,28 @@ class FixredCommentDeleteView(generics.DestroyAPIView):
         self.perform_destroy(instance)
         return Response(
             {"fixred_id": fixred_id, "comment_id": comment_id, "message": "댓글 삭제 완료"}, status=status.HTTP_200_OK
+        )
+
+
+@extend_schema(
+    summary="픽레드 좋아요 토글",
+    description="픽레드 게시글에 좋아요를 추가하거나 제거합니다.",
+    responses={
+        200: OpenApiResponse(description="좋아요 토글 성공"),
+        401: OpenApiResponse(description="인증 실패"),
+        404: OpenApiResponse(description="픽레드를 찾을 수 없음"),
+    },
+    tags=["픽레드 게시글"],
+)
+# Fixred 좋아요
+class FixredLikeView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, fixred_id):
+        result = toggle_fixred_like(request.user, fixred_id)
+        fixred = result["fixred"]
+        message = "좋아요 완료" if result["liked"] else "좋아요 취소"
+        return Response(
+            {"fixred_id": fixred.id, "liked": result["liked"], "message": message, "like_count": fixred.like_count},
+            status=status.HTTP_200_OK,
         )

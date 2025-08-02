@@ -25,3 +25,9 @@ class NotificationSerializer(serializers.ModelSerializer):
             "is_read",
             "created_at",
         ]
+
+
+class NotificationReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ["id", "is_read"]

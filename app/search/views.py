@@ -44,7 +44,8 @@ class SearchView(APIView):
             return Response({"error": "검색어를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
 
         # 로그인 사용자만 검색어 저장
-        if request.user.is_authenticated and request.uesr.searchhistory:
+        if request.user.is_authenticated and request.user.search_history:
+            user = request.user
             SearchHistory.objects.get_or_create(user=user, keyword=query)
 
         results = {}
@@ -95,7 +96,7 @@ class SearchView(APIView):
     responses={200: SearchHistorySerializer(many=True)},
     tags=["검색 기록"],
 )
-# 검색 리스트 생성, 조회
+# 검색 리스트 조회
 class SearchHistoryView(generics.ListCreateAPIView):
     http_method_names = ["get"]
     permission_classes = [IsAuthenticated]

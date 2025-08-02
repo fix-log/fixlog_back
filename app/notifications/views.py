@@ -1,6 +1,7 @@
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
-from rest_framework import generics, response, status
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from app.notifications.models import Notification
 from app.notifications.serializers import NotificationSerializer
@@ -13,7 +14,12 @@ from app.notifications.serializers import NotificationSerializer
     parameters=[
         OpenApiParameter(name="type", description="알림 타입 필터링", required=False, type=str),
     ],
-    responses=NotificationSerializer,
+    responses={
+        200: OpenApiResponse(description="알림 목록 조회 성공"),
+        403: OpenApiResponse(description="권한 없음"),
+        500: OpenApiResponse(description="서버 오류"),
+    },
+    tags=["알림"],
 )
 class NotificationListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -36,6 +42,7 @@ class NotificationListView(generics.ListAPIView):
         200: OpenApiResponse(description="알림 읽음 처리 완료"),
         403: OpenApiResponse(description="권한 없음"),
     },
+    tags=["알림"],
 )
 class NotificationReadView(generics.UpdateAPIView):
     http_method_names = ["patch"]
@@ -46,11 +53,18 @@ class NotificationReadView(generics.UpdateAPIView):
     def patch(self, request, *args, **kwargs):
         notification = self.get_object()
         if notification.user != request.user:
-            return response({"error": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         if not notification.is_read:
             notification.is_read = True
             notification.save()
-        return response({"message": "알림 읽음 처리 완료"}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "notification_id": notification.id,
+                "is_read": notification.is_read,
+                "message": "알림 읽음 처리 완료",
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 # 알림 전체 읽음 처리
@@ -58,14 +72,15 @@ class NotificationReadView(generics.UpdateAPIView):
     summary="모든 알림 읽음 처리",
     description="사용자의 읽지 않은 모든 알림을 읽음 처리합니다.",
     responses={
-        200: OpenApiResponse(description="읽음 처리된 알림 수 리턴"),
+        200: OpenApiResponse(description="전체 읽음 처리"),
     },
+    tags=["알림"],
 )
 class NotificationReadAllView(generics.UpdateAPIView):
     http_method_names = ["patch"]
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def patch(self, request):
         updated = Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
 
-        return response({"message": f"{updated}개의 알림을 읽음 처리했습니다."}, status=status.HTTP_200_OK)
+        return Response({"message": f"{updated}개의 알림 전체 읽음 처리 완료"}, status=status.HTTP_200_OK)

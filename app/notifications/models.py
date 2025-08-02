@@ -33,7 +33,7 @@ class Notification(CreatedOnlyModel):
     is_read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.user.nickname}: [{self.notification_type} 알림] {self.content[:20]}..."
+        return f"{self.user.nickname}: [{self.notification_type}_id : {self.target_id}] - {self.event}"
 
     def get_target_object(self):
         if self.notification_type == "fixred":

@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from app.accounts.models import User
 from app.crew.models import Project
 from app.fixred.models import Fixred
-from app.workroom.models import Workroom
 
 from .models import SearchHistory
 from .serializers import SearchHistorySerializer
@@ -16,7 +15,7 @@ from .serializers import SearchHistorySerializer
 
 @extend_schema(
     summary="검색 기능",
-    description="크루, 픽레드, 유저를 통합 검색합니다.",
+    description="크루, 픽레드, 유저를 통합 검색합니다.\n 로그인 사용자만 검색어 저장 가능하며, 검색어는 중복 저장되지 않습니다.",
     parameters=[
         OpenApiParameter(name="q", description="검색어", required=True, type=str),
         OpenApiParameter(
@@ -34,7 +33,7 @@ from .serializers import SearchHistorySerializer
 )
 # 검색 기능
 class SearchView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
 
     def get(self, request):
         query = request.query_params.get("q", "").strip()
@@ -44,8 +43,8 @@ class SearchView(APIView):
         if not query:
             return Response({"error": "검색어를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 검색어 저장 on일때만
-        if user.search_history:
+        # 로그인 사용자만 검색어 저장
+        if request.user.is_authenticated and request.uesr.searchhistory:
             SearchHistory.objects.get_or_create(user=user, keyword=query)
 
         results = {}
@@ -59,14 +58,14 @@ class SearchView(APIView):
         try:
             if category in ("fixred_popular", "all"):
                 fixred_pop_results = Fixred.objects.filter(content__icontains=query).order_by("-like_count")
-                results["픽레드_인기글"] = [{"id": f.id, "content": f.content} for f in fixred_pop_results]
+                results["픽레드_인기글"] = [{"id": f.id, "content": f.content,"like_count": f.like_count} for f in fixred_pop_results]
         except Exception as e:
             results["픽레드_인기글"] = f"픽레드 인기글 검색 실패: {str(e)}"
 
         try:
             if category in ("fixred_latest", "all"):
                 fixred_last_results = Fixred.objects.filter(content__icontains=query).order_by("-created_at")
-                results["픽레드_최신글"] = [{"id": f.id, "content": f.content} for f in fixred_last_results]
+                results["픽레드_최신글"] = [{"id": f.id, "content": f.content,"create_at":f.created_at} for f in fixred_last_results]
         except Exception as e:
             results["픽레드_최신글"] = f"픽레드 최신글 검색 실패: {str(e)}"
 
@@ -94,6 +93,7 @@ class SearchView(APIView):
 )
 # 검색 리스트 생성, 조회
 class SearchHistoryView(generics.ListCreateAPIView):
+    http_method_names = ["get"]
     permission_classes = [IsAuthenticated]
     serializer_class = SearchHistorySerializer
 
@@ -137,12 +137,13 @@ class SearchHistoryDeleteView(generics.DestroyAPIView):
 # 검색 기록 하나만 삭제
 class SearchHistoryDeleteOneView(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated]
+    lookup_field = "pk"
 
-    def delete(self, request, keyword_id, *args, **kwargs):
+    def delete(self, request, pk, *args, **kwargs):
         user = request.user
         try:
-            history = SearchHistory.objects.get(id=keyword_id, user=user)
+            history = SearchHistory.objects.get(id=pk, user=user)
             history.delete()
-            return Response({"message": "해당 검색어가 삭제되었습니다."}, status=status.HTTP_200_OK)
+            return Response({"message": "검색어 삭제 완료"}, status=status.HTTP_200_OK)
         except SearchHistory.DoesNotExist:
             return Response({"error": "해당 검색어를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)

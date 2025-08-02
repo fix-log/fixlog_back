@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from app.accounts.models import User
+from app.fixred.utils.mention import extract_mentioned_users
 
 from .models import Fixred, FixredComment, FixredImage
 
@@ -90,7 +91,17 @@ class FixredCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         images = validated_data.pop("images", [])
-        fixred = Fixred.objects.create(**validated_data)
+        content = validated_data.get("content", "")
+        read_permission = validated_data.get("read_permission", "public")
+        fixred = Fixred.objects.create(
+            user=self.context["request"].user,
+            content=content,
+            read_permission=read_permission,
+        )
+        # 언급한 유저 연결
+        if read_permission == "mention":
+            mentioned = extract_mentioned_users(content)
+            fixred.mentioned_users.set(mentioned)
 
         for image in images:
             FixredImage.objects.create(post=fixred, image=image)

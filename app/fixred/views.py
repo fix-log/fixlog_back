@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
@@ -6,8 +7,10 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from app.accounts import models
 from app.accounts.models import User
 from app.fixred.utils.like import toggle_fixred_like
+from app.notifications.utils import send_notification
 
 from .models import Fixred, FixredComment, FixredImage
 from .serializers import (
@@ -23,16 +26,15 @@ from .serializers import (
 # Fixred 게시글 목록 (픽레드 피드)
 @extend_schema(
     summary="픽레드 게시글 목록(피드) 조회",
-    description="Fixred 게시글을 최신순으로 조회합니다.",
-    # "following 쿼리파라미터를 주면 팔로잉한 사용자의 글만 조회됩니다.",
-    # parameters=[
-    #     OpenApiParameter(
-    #         name="filter",
-    #         #description="'all' 또는 'following' 선택",
-    #         required=False,
-    #         location=OpenApiParameter.QUERY,
-    #     ),
-    # ],
+    description="Fixred 게시글을 최신순으로 조회합니다. following 쿼리파라미터를 주면 팔로잉한 사용자의 글만 조회됩니다.",
+    parameters=[
+        OpenApiParameter(
+            name="filter",
+            description="following: 사용자가 팔로잉 한 사용자의 게시물만 조회",
+            required=False,
+            location=OpenApiParameter.QUERY,
+        ),
+    ],
     responses={
         200: FixredDetailSerializer(many=True),
         401: OpenApiResponse(
@@ -53,21 +55,28 @@ class FixredListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        # 기본 쿼리셋은 모든 Fixred 게시글
-        queryset = (
-            Fixred.objects.select_related("user")
-            .prefetch_related("fixred_images", "comments", "likes")
-            .filter(read_permission="all")
-            .order_by("-created_at")
-        )
-
-        # 쿼리 파라미터 'filter'가 'following'이면 팔로잉한 사용자의 글만 조회
-        mode = self.request.query_params.get("filter", "all").strip().lower()
+        mode = self.request.query_params.get("filter", "all")
+        queryset = Fixred.objects.select_related("user").prefetch_related("fixred_images")
+    
+        PUBLIC = "public"
+        FOLLOWER = "follower"
+        MENTION = "mention"
+    
         if mode == "following":
-            following_users = user.following.values_list("id", flat=True)
-            queryset = queryset.filter(user_id__in=following_users)
-        return queryset
-
+            following_user_ids = user.following.values_list("following_id", flat=True)
+            queryset = queryset.filter(
+                Q(user__id__in=following_user_ids) &
+                Q(read_permission__in=[PUBLIC, FOLLOWER])
+            )
+        else:
+            queryset = queryset.filter(
+                Q(read_permission=PUBLIC)
+                | Q(read_permission=FOLLOWER, user__followers__follower=user)
+                | Q(read_permission=MENTION, mentioned_users=user)
+            ).distinct()
+    
+        return queryset.order_by("-created_at")
+    
 
 # Fixred 게시글 상세
 @extend_schema(
@@ -113,10 +122,20 @@ class FixredCreateView(generics.CreateAPIView):
     serializer_class = FixredCreateSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        fixred = serializer.save(user=self.request.user)
         # test_user = User.objects.all()[1]  # 테스트 유저에게 소속시킴 (임시)
         # serializer.save(user=test_user)
 
+        # 언급 알림 
+        if fixred.read_permission == "mention":
+            # mention한 유저에게 알림 보내기
+            for mention_user in fixred.mentioned_users.exclude(id=fixred.user.id):
+                send_notification(
+                    user=mention_user,
+                    sender=fixred.user,
+                    notification_type="fixred",
+                    event="mention",
+                    target_id=fixred.id,)
 
 # Fixred 게시글 수정
 @extend_schema(
@@ -183,9 +202,6 @@ class FixredDeleteView(generics.DestroyAPIView):
         return Response({"fixred_id": fixred_id, "message": "픽레드 삭제 완료"}, status=status.HTTP_200_OK)
 
 
-# Fixred 댓글
-
-
 @extend_schema(
     summary="픽레드 댓글 목록 및 작성",
     description="해당 픽레드 게시글에 달린 댓글들을 조회하거나 새 댓글을 작성합니다.",
@@ -197,6 +213,7 @@ class FixredDeleteView(generics.DestroyAPIView):
     },
     tags=["픽레드 댓글"],
 )
+# Fixred 댓글
 class FixredCommentView(generics.ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
@@ -211,6 +228,15 @@ class FixredCommentView(generics.ListCreateAPIView):
         fixred = get_object_or_404(Fixred, id=fixred_id)
         serializer.save(user=self.request.user, fixred=fixred)
 
+        # 댓글 알림
+        if fixred.user != self.request.user:
+            send_notification(
+                user=fixred.user,
+                sender=self.request.user,
+                type_="fixred",
+                event="comment",
+                target_id=fixred.id,
+            )
 
 # Fixred 댓글 삭제
 @extend_schema(
@@ -268,3 +294,4 @@ class FixredLikeView(generics.GenericAPIView):
             {"fixred_id": fixred.id, "liked": result["liked"], "message": message, "like_count": fixred.like_count},
             status=status.HTTP_200_OK,
         )
+    

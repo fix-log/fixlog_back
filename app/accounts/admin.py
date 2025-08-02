@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from app.search.models import SearchHistory
 
-from .models import RefreshToken, SocialAccount, User
+from .models import Follow, RefreshToken, SocialAccount, User
 
 
 class SearchHistoryInline(admin.TabularInline):  # or admin.StackedInline
@@ -72,3 +72,10 @@ class SocialAccountAdmin(admin.ModelAdmin):
     list_display = ("user", "provider", "uid", "created_at")
     search_fields = ("user__email", "uid", "provider")
     list_filter = ("provider",)
+
+
+@admin.register(Follow)
+class FollowAdmin(admin.ModelAdmin):
+    list_display = ("follower", "following", "created_at")
+    search_fields = ("follower__email", "following__email")
+    list_filter = ("created_at",)

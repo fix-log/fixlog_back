@@ -14,13 +14,21 @@ class Fixred(TimestampModel):
     read_permission = models.CharField(
         max_length=10,
         choices=[
-            ("all", "모든 사람"),
-            ("follow", "내가 팔로우 하는 사람만"),
+            ("public", "모든 사람"),
+            ("follower", "나를 팔로우 하는 사람만"),
             ("mention", "멘션한 사람만"),
         ],
-        default="all",
+        default="public",
     )
 
+    # 멘션 기능을 위한 필드
+    mentioned_users = models.ManyToManyField(
+        User,
+        related_name="mention_in_fixreds",
+        blank=True,
+        verbose_name="언급된 사용자",
+    )
+        
     class Meta:
         db_table = "fixred"
         ordering = ["-created_at"]  # 최신순 정렬

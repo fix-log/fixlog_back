@@ -1,5 +1,4 @@
-from django.db.models import Q
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import generics, permissions, status
@@ -57,26 +56,23 @@ class FixredListView(generics.ListAPIView):
         user = self.request.user
         mode = self.request.query_params.get("filter", "all")
         queryset = Fixred.objects.select_related("user").prefetch_related("fixred_images")
-    
+
         PUBLIC = "public"
         FOLLOWER = "follower"
         MENTION = "mention"
-    
+
         if mode == "following":
             following_user_ids = user.following.values_list("following_id", flat=True)
-            queryset = queryset.filter(
-                Q(user__id__in=following_user_ids) &
-                Q(read_permission__in=[PUBLIC, FOLLOWER])
-            )
+            queryset = queryset.filter(Q(user__id__in=following_user_ids) & Q(read_permission__in=[PUBLIC, FOLLOWER]))
         else:
             queryset = queryset.filter(
                 Q(read_permission=PUBLIC)
                 | Q(read_permission=FOLLOWER, user__followers__follower=user)
                 | Q(read_permission=MENTION, mentioned_users=user)
             ).distinct()
-    
+
         return queryset.order_by("-created_at")
-    
+
 
 # Fixred 게시글 상세
 @extend_schema(
@@ -126,7 +122,7 @@ class FixredCreateView(generics.CreateAPIView):
         # test_user = User.objects.all()[1]  # 테스트 유저에게 소속시킴 (임시)
         # serializer.save(user=test_user)
 
-        # 언급 알림 
+        # 언급 알림
         if fixred.read_permission == "mention":
             # mention한 유저에게 알림 보내기
             for mention_user in fixred.mentioned_users.exclude(id=fixred.user.id):
@@ -135,7 +131,9 @@ class FixredCreateView(generics.CreateAPIView):
                     sender=fixred.user,
                     notification_type="fixred",
                     event="mention",
-                    target_id=fixred.id,)
+                    target_id=fixred.id,
+                )
+
 
 # Fixred 게시글 수정
 @extend_schema(
@@ -238,6 +236,7 @@ class FixredCommentView(generics.ListCreateAPIView):
                 target_id=fixred.id,
             )
 
+
 # Fixred 댓글 삭제
 @extend_schema(
     summary="픽레드 댓글 삭제",
@@ -294,4 +293,3 @@ class FixredLikeView(generics.GenericAPIView):
             {"fixred_id": fixred.id, "liked": result["liked"], "message": message, "like_count": fixred.like_count},
             status=status.HTTP_200_OK,
         )
-    

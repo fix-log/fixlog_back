@@ -28,7 +28,7 @@ class Fixred(TimestampModel):
         blank=True,
         verbose_name="언급된 사용자",
     )
-        
+
     class Meta:
         db_table = "fixred"
         ordering = ["-created_at"]  # 최신순 정렬

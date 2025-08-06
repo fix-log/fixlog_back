@@ -34,7 +34,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.daphne
+          file: Dockerfile
           push: true
           tags: seonhongmun/fixlog-daphne:prod-latest
 

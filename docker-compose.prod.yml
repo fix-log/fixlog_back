@@ -47,6 +47,7 @@ services:
       PYTHONPATH: /app/app
 #    ports:
 #      - "8000:8000"
+    container_name: fixlog-daphne
     depends_on:
 #      - db
       - redis
@@ -67,7 +68,7 @@ services:
       PYTHONPATH: /app/app
     ports:
       - "8000:8000"
-    container_name: api
+    container_name: fixlog-api
     depends_on:
 #      - db
       - redis
@@ -80,6 +81,7 @@ services:
     image: seonhongmun/fixlog-nginx:prod-latest
     ports:
       - "80:80"
+    container_name: fixlog-nginx
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - static_volume:/app/static

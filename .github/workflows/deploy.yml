@@ -53,18 +53,21 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "📦배포 준비 중..."
+            echo "배포 준비 중..."
             cd /home/ubuntu/fixlog-project
 
-            # 최신 코드 반영
+            echo "최신 코드 pull"
             git pull origin release
-
-            # DockerHub에서 모든 서비스 이미지 pull
+      
+            echo "이전 컨테이너 정리"
+            docker compose -f docker-compose.prod.yml down
+      
+            echo "DockerHub 최신 이미지 pull"
             docker pull seonhongmun/fixlog-api:prod-latest
             docker pull seonhongmun/fixlog-daphne:prod-latest
             docker pull seonhongmun/fixlog-nginx:prod-latest
-
-            # 컨테이너 전체 재시작
+      
+            echo "컨테이너 재시작"
             docker compose -f docker-compose.prod.yml up -d
 
-            echo "✅배포 완료"
+            echo "배포 완료"

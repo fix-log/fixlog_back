@@ -26,7 +26,8 @@ services:
   # 2) Redis
   # --------------------------------------------
   redis:
-    image: seonhongmun/fixlog-redis:prod-latest
+    image: redis:7.2-alpine
+    container_name: fixlog-redis
     ports:
       - "6379:6379"
     restart: always

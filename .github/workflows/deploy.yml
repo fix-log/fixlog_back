@@ -46,14 +46,6 @@ jobs:
           push: true
           tags: seonhongmun/fixlog-nginx:prod-latest
 
-      - name: Build and Push Redis
-        uses: docker/build-push-action@v6
-        with:
-          context: ./redis
-          file: Dockerfile
-          push: true
-          tags: seonhongmun/fixlog-redis:prod-latest
-
       - name: SSH and deploy on EC2
         uses: appleboy/ssh-action@v0.1.10
         with:

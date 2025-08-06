@@ -61,6 +61,9 @@ jobs:
       
             echo "이전 컨테이너 정리"
             docker compose -f docker-compose.prod.yml down
+            
+            echo "이전 이미지 삭제"
+            docker image prune -af
       
             echo "DockerHub 최신 이미지 pull"
             docker pull seonhongmun/fixlog-api:prod-latest

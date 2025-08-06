@@ -60,7 +60,9 @@ jobs:
             git pull origin release
 
             # DockerHub에서 모든 서비스 이미지 pull
-            docker compose -f docker-compose.prod.yml pull
+            docker pull seonhongmun/fixlog-api:prod-latest
+            docker pull seonhongmun/fixlog-daphne:prod-latest
+            docker pull seonhongmun/fixlog-nginx:prod-latest
 
             # 컨테이너 전체 재시작
             docker compose -f docker-compose.prod.yml up -d

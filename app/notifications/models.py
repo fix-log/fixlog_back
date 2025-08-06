@@ -29,20 +29,19 @@ class Notification(CreatedOnlyModel):
 
     notification_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     event = models.CharField(max_length=50, choices=EVENT_CHOICES, null=True, blank=True)
-    content = models.CharField(max_length=255)
     target_id = models.PositiveIntegerField(null=True, blank=True)
     is_read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.user.nickname}: [{self.notification_type} 알림] {self.content[:20]}..."
+        return f"{self.user.nickname}: [{self.notification_type}_id : {self.target_id}] - {self.event}"
 
-    def get_target_object(notification):
-        if notification.notification_type == "fixred":
-            return Fixred.objects.get(pk=notification.target_id)
-        elif notification.notification_type == "workroom":
-            return Workroom.objects.get(pk=notification.target_id)
-        elif notification.notification_type == "crew":
-            return Project.objects.get(pk=notification.target_id)
+    def get_target_object(self):
+        if self.notification_type == "fixred":
+            return Fixred.objects.filter(pk=self.target_id).first()
+        elif self.notification_type == "workroom":
+            return Workroom.objects.filter(pk=self.target_id).first()
+        elif self.notification_type == "crew":
+            return Project.objects.filter(pk=self.target_id).first()
         # elif notification.notification_type == 'fixletter':
         #     return None  # 픽레터는 현재 구현되지 않음
         else:

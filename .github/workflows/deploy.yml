@@ -22,16 +22,37 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Docker Images
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
           push: true
-          tags: |
-            rubyhae/fixlog:prod-latest
-            rubyhae/fixlog:latest
-          no-cache: true
+          tags: seonhongmun/fixlog-api:prod-latest
+
+      - name: Build and Push Daphne
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.daphne
+          push: true
+          tags: seonhongmun/fixlog-daphne:prod-latest
+
+      - name: Build and Push Nginx
+        uses: docker/build-push-action@v6
+        with:
+          context: ./nginx
+          file: Dockerfile
+          push: true
+          tags: seonhongmun/fixlog-nginx:prod-latest
+
+      - name: Build and Push Redis
+        uses: docker/build-push-action@v6
+        with:
+          context: ./redis
+          file: Dockerfile
+          push: true
+          tags: seonhongmun/fixlog-redis:prod-latest
 
       - name: SSH and deploy on EC2
         uses: appleboy/ssh-action@v0.1.10
@@ -46,14 +67,10 @@ jobs:
             # 최신 코드 반영
             git pull origin release
 
-            # 새로운 버전(api-green) 컨테이너 실행
-            docker compose -f docker-compose.prod.yml up -d --build api-green
+            # DockerHub에서 모든 서비스 이미지 pull
+            docker compose -f docker-compose.prod.yml pull
 
-            # Nginx 설정의 upstream을 green으로 전환
-            sed -i 's/api-blue/api-green/g' ./nginx/nginx.conf
-            docker exec nginx nginx -s reload
+            # 컨테이너 전체 재시작
+            docker compose -f docker-compose.prod.yml up -d
 
-            # 문제가 없다면 blue 컨테이너 종료
-            docker compose rm -sf api-blue
-
-            echo "✅배포 완료"name: Deploy to EC2 via Docker
+            echo "✅배포 완료"

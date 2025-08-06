@@ -55,7 +55,8 @@ jobs:
           script: |
             echo "배포 준비 중..."
             cd /home/ec2-user/fixlog_back
-
+            git reset --hard HEAD  # 현재 변경사항 초기화
+            git clean -fd          # 추적되지 않은 파일 삭제
             echo "최신 코드 pull"
             git pull origin release
       

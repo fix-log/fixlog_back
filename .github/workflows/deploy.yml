@@ -54,7 +54,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             echo "배포 준비 중..."
-            cd /home/ubuntu/fixlog-project
+            cd /home/ec2-user/fixlog_back
 
             echo "최신 코드 pull"
             git pull origin release

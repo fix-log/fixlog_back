@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from app.accounts.models import User
+from app.fixred.utils.mention import extract_mentioned_users
 
 from .models import Fixred, FixredComment, FixredImage
 
@@ -22,7 +23,8 @@ class FixredImageSerializer(serializers.ModelSerializer):
 
 class FixredListSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
-    images = FixredImageSerializer(source="fixredimage_set", many=True, read_only=True)
+    images = FixredImageSerializer(source="fixred_images", many=True, read_only=True)
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Fixred
@@ -32,6 +34,7 @@ class FixredListSerializer(serializers.ModelSerializer):
             "content",
             "images",
             "like_count",
+            "is_liked",
             "comment_count",
             "read_permission",
             "created_at",
@@ -48,6 +51,14 @@ class FixredListSerializer(serializers.ModelSerializer):
         except Exception as e:
             print("get_user()에서 오류:", e)
             return {"id": None, "nickname": "에러", "profile_image": None}
+
+    def get_is_liked(self, obj):
+        request = self.context.get("request")
+        user = request.user if request else None
+
+        if user and user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        return False
 
 
 class FixredCommentSerializer(serializers.ModelSerializer):
@@ -80,7 +91,17 @@ class FixredCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         images = validated_data.pop("images", [])
-        fixred = Fixred.objects.create(**validated_data)
+        content = validated_data.get("content", "")
+        read_permission = validated_data.get("read_permission", "public")
+        fixred = Fixred.objects.create(
+            user=self.context["request"].user,
+            content=content,
+            read_permission=read_permission,
+        )
+        # 언급한 유저 연결
+        if read_permission == "mention":
+            mentioned = extract_mentioned_users(content)
+            fixred.mentioned_users.set(mentioned)
 
         for image in images:
             FixredImage.objects.create(post=fixred, image=image)

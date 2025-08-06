@@ -6,6 +6,7 @@ from .views import (
     FixredCreateView,
     FixredDeleteView,
     FixredDetailView,
+    FixredLikeView,
     FixredListView,
     FixredUpdateView,
 )
@@ -22,4 +23,6 @@ urlpatterns = [
         FixredCommentDeleteView.as_view(),
         name="fixred-comment-delete",
     ),
+    # Fixred 좋아요
+    path("<int:fixred_id>/like/", FixredLikeView.as_view(), name="fixred-like"),
 ]

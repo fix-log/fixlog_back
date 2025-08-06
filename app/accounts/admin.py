@@ -2,7 +2,16 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from .models import RefreshToken, SocialAccount, User
+from app.search.models import SearchHistory
+
+from .models import Follow, RefreshToken, SocialAccount, User
+
+
+class SearchHistoryInline(admin.TabularInline):  # or admin.StackedInline
+    model = SearchHistory
+    extra = 0
+    readonly_fields = ("keyword", "created_at")
+    can_delete = True
 
 
 @admin.register(User)
@@ -22,7 +31,7 @@ class UserAdmin(BaseUserAdmin):
         "interest_trend",
         "career",
     )
-
+    inlines = [SearchHistoryInline]
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         (
@@ -63,3 +72,10 @@ class SocialAccountAdmin(admin.ModelAdmin):
     list_display = ("user", "provider", "uid", "created_at")
     search_fields = ("user__email", "uid", "provider")
     list_filter = ("provider",)
+
+
+@admin.register(Follow)
+class FollowAdmin(admin.ModelAdmin):
+    list_display = ("follower", "following", "created_at")
+    search_fields = ("follower__email", "following__email")
+    list_filter = ("created_at",)

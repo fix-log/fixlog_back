@@ -14,11 +14,19 @@ class Fixred(TimestampModel):
     read_permission = models.CharField(
         max_length=10,
         choices=[
-            ("all", "모든 사람"),
-            ("follow", "내가 팔로우 하는 사람만"),
+            ("public", "모든 사람"),
+            ("follower", "나를 팔로우 하는 사람만"),
             ("mention", "멘션한 사람만"),
         ],
-        default="all",
+        default="public",
+    )
+
+    # 멘션 기능을 위한 필드
+    mentioned_users = models.ManyToManyField(
+        User,
+        related_name="mention_in_fixreds",
+        blank=True,
+        verbose_name="언급된 사용자",
     )
 
     class Meta:
@@ -26,26 +34,63 @@ class Fixred(TimestampModel):
         ordering = ["-created_at"]  # 최신순 정렬
 
     def __str__(self):
-        return f"[{self.id}] {self.user.nickname}: {self.content[:20]}..."
+        return f"픽레드 | {self.user.nickname} - {self.content[:10]}..."
 
 
 # 픽레드 이미지 모델
 class FixredImage(models.Model):
-    post = models.ForeignKey(Fixred, on_delete=models.CASCADE)
+    post = models.ForeignKey(Fixred, on_delete=models.CASCADE, related_name="fixred_images")
     image = models.ImageField("fixred_image", upload_to="fixred_images/")
 
     def __str__(self):
-        return f"{self.post.content[:10]} image"
+        return f"픽레드 {self.post.id} 이미지"
 
 
 # 픽레드 댓글 모델
-class FixredComment(CreatedOnlyModel):
+class FixredComment(TimestampModel):
     fixred = models.ForeignKey(Fixred, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.CharField(max_length=500)
 
     def __str__(self):
-        return f"[{self.id}] {self.user.nickname}: {self.comment[:10]}..."
+        return f"댓글 | [Fixred {self.fixred.id}] {self.user.nickname}: {self.comment[:5]}..."
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # 댓글 저장 후 카운트 갱신
+        self.fixred.comment_count = self.fixred.comments.count()
+        self.fixred.save(update_fields=["comment_count"])
+
+    def delete(self, *args, **kwargs):
+        fixred = self.fixred
+        super().delete(*args, **kwargs)
+        fixred.comment_count = fixred.comments.count()
+        fixred.save(update_fields=["comment_count"])
+
+
+# 픽레드 좋아요 모델
+class FixredLike(CreatedOnlyModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="fixred_likes")
+    fixred = models.ForeignKey(Fixred, on_delete=models.CASCADE, related_name="likes")
+
+    class Meta:
+        unique_together = ("user", "fixred")  # 중복 좋아요 방지
+        db_table = "fixred_like"
+
+    def __str__(self):
+        return f"좋아요 | {self.user.nickname} -> Fixred(id:{self.fixred.id})"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.fixred.like_count = self.fixred.likes.count()
+        # 좋아요 저장 후 카운트 갱신
+        self.fixred.save(update_fields=["like_count"])
+
+    def delete(self, *args, **kwargs):
+        fixred = self.fixred
+        super().delete(*args, **kwargs)
+        fixred.like_count = fixred.likes.count()
+        fixred.save(update_fields=["like_count"])
 
 
 # 픽레드 신고 모델
@@ -103,4 +148,4 @@ class FixredBlock(CreatedOnlyModel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.blocker.nickname} → {self.blocked.nickname} | 차단"
+        return f"차단 | {self.blocker.nickname} -> {self.blocked.nickname}"

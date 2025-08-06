@@ -45,8 +45,8 @@ class FixredListSerializerTest(TestCase):
         fixred = Fixred.objects.create(user=user, content="hello world", like_count=5, comment_count=2)
         dummy = SimpleUploadedFile("test.png", b"file-bytes")
         img = FixredImage.objects.create(post=fixred, image=dummy)
-        fixred.fixredimage_set.add(img)
-        fixred.fixredimage_set.set([img])
+        fixred.fixred_images.add(img)
+        fixred.fixred_images.set([img])
 
         data = FixredListSerializer(fixred).data
         print(f"{self.__class__.__name__}.{self._testMethodName}: 성공")

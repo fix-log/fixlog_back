@@ -64,7 +64,9 @@ INSTALLED_APPS = [
     "app.fixred",  # fixred 관리
     "app.crew",  # 크루(팀) 관리
     "app.workroom",  # 워크룸 기능
-    "app.fixletter",
+    "app.fixletter",  # 픽레터 기능 (현재 구현되지 않음)
+    "app.notifications",  # 알림 기능
+    "app.search",  # 검색 기능 (검색 기록)
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -141,8 +143,9 @@ else:
 #         'ENGINE': 'django.db.backends.sqlite3',
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
-# }ㅣㄹ실
+# }
 
+POSTGRES_SSLMODE = os.getenv("POSTGRES_SSLMODE", "disable")
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -152,7 +155,7 @@ DATABASES = {
         "HOST": os.getenv("POSTGRES_HOST"),
         "PORT": os.getenv("POSTGRES_PORT"),
         "OPTIONS": {
-            "sslmode": "disable",
+            "sslmode": POSTGRES_SSLMODE,
         },
     }
 }

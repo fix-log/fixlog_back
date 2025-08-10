@@ -1,11 +1,13 @@
 from django.db.models import F
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from app.crew.models import Project
-from app.crew.serializers import ProjectSerializer
+from app.crew.models import Application, Project, UserBookmark
+from app.crew.serializers import ApplicationSerializer, ProjectSerializer
 
 
 class ProjectListCreateAPIView(generics.ListCreateAPIView):
@@ -14,7 +16,11 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = Project.objects.all().prefetch_related(
-            "projectposition_set__position", "projectlanguage_set__language", "projectskilltool_set__skill_tool"
+            "projectposition_set__position",
+            "projectlanguage_set__language",
+            "projectskilltool_set__skill_tool",
+            "projectdesign_set__design",
+            "projectcooptool_set__coop_tool",
         )
 
         # 제목 검색 기능
@@ -45,6 +51,18 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
             for language in languages:
                 queryset = queryset.filter(projectlanguage__language__id=language)
 
+        # 디자인 필터링 (designs) - AND 조건
+        designs = self.request.query_params.getlist("designs")
+        if designs:
+            for design in designs:
+                queryset = queryset.filter(projectdesign__design__id=design)
+
+        # 협업도구 필터링 (coop_tools) - AND 조건
+        coop_tools = self.request.query_params.getlist("coop_tools")
+        if coop_tools:
+            for coop_tool in coop_tools:
+                queryset = queryset.filter(projectcooptool__coop_tool__id=coop_tool)
+
         # 정렬 (인기많은것부터 역순, 기본은 최신순)
         ordering = self.request.query_params.get("ordering", "-created_at")
         if ordering == "popular":
@@ -60,7 +78,11 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
 
 class ProjectDetailAPIView(generics.RetrieveAPIView):
     queryset = Project.objects.all().prefetch_related(
-        "projectposition_set__position", "projectlanguage_set__language", "projectskilltool_set__skill_tool"
+        "projectposition_set__position",
+        "projectlanguage_set__language",
+        "projectskilltool_set__skill_tool",
+        "projectdesign_set__design",
+        "projectcooptool_set__coop_tool",
     )
     serializer_class = ProjectSerializer
     lookup_field = "pk"
@@ -102,3 +124,96 @@ class ProjectDeleteAPIView(generics.DestroyAPIView):
         if obj.user != self.request.user:
             raise PermissionDenied("본인이 생성한 프로젝트만 삭제할 수 있습니다.")
         return obj
+
+
+class ProjectApplyAPIView(generics.CreateAPIView, generics.DestroyAPIView):
+    queryset = Application.objects.all()
+    serializer_class = ApplicationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        project_id = self.kwargs.get("project_id")
+        project = get_object_or_404(Project, id=project_id)
+        user = self.request.user
+
+        try:
+            return Application.objects.get(user=user, project=project)
+        except Application.DoesNotExist:
+            return None
+
+    def create(self, request, *args, **kwargs):
+        project_id = self.kwargs.get("project_id")
+        project = get_object_or_404(Project, id=project_id)
+        user = request.user
+
+        # 자신의 프로젝트에는 지원할 수 없음
+        if project.user == user:
+            return Response({"message": "지원 실패"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 이미 지원한 프로젝트인지 확인
+        if Application.objects.filter(user=user, project=project).exists():
+            return Response({"message": "지원 실패"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 지원 생성
+        Application.objects.create(user=user, project=project)
+        return Response({"message": "지원 성공"}, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        project_id = self.kwargs.get("project_id")
+        project = get_object_or_404(Project, id=project_id)
+        user = request.user
+
+        # 지원 내역 확인
+        try:
+            application = Application.objects.get(user=user, project=project)
+            application.delete()
+            return Response({"message": "지원 취소"}, status=status.HTTP_200_OK)
+        except Application.DoesNotExist:
+            return Response({"message": "지원 취소 성공"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProjectApplicantsAPIView(generics.ListAPIView):
+    serializer_class = ApplicationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        project_id = self.kwargs.get("project_id")
+        project = get_object_or_404(Project, id=project_id)
+
+        # 프로젝트 소유자만 지원자 목록을 볼 수 있음
+        if project.user != self.request.user:
+            raise PermissionDenied("프로젝트 소유자만 지원자 목록을 볼 수 있습니다.")
+
+        return Application.objects.filter(project=project)
+
+
+# 북마크 관련 뷰
+@api_view(["POST", "DELETE"])
+@permission_classes([IsAuthenticated])
+def bookmark_manage(request, project_id):
+    """프로젝트 북마크 추가/삭제"""
+    try:
+        project = get_object_or_404(Project, id=project_id)
+
+        if request.method == "POST":
+            # 북마크 추가
+            if UserBookmark.objects.filter(user=request.user, project=project).exists():
+                return Response({"message": "북마크 등록 실패"}, status=status.HTTP_400_BAD_REQUEST)
+
+            UserBookmark.objects.create(user=request.user, project=project)
+            return Response({"message": "북마크 등록"}, status=status.HTTP_200_OK)
+
+        elif request.method == "DELETE":
+            # 북마크 삭제
+            try:
+                bookmark = UserBookmark.objects.get(user=request.user, project=project)
+                bookmark.delete()
+                return Response({"message": "북마크 등록 취소"}, status=status.HTTP_200_OK)
+            except UserBookmark.DoesNotExist:
+                return Response({"message": "북마크 등록 취소 실패"}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        if request.method == "POST":
+            return Response({"message": "북마크 등록 실패"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"message": "북마크 등록 취소 실패"}, status=status.HTTP_400_BAD_REQUEST)

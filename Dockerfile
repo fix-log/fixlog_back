@@ -24,4 +24,4 @@ COPY . /app
 RUN chmod +x /app/scripts/run_daphne.sh
 
 # 기본 실행 명령
-CMD ["gunicorn", "fixlog.wsgi:application", "--bind", "0.0.0.0:8000", "--reload", "--reload-engine=poll"]
+CMD ["sh", "/app/scripts/run_api.sh"]

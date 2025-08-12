@@ -1,32 +1,35 @@
 version: '3.8'  # 생략 가능하지만 명시 권장
 
+name: fixlog
+
 services:
-  # --------------------------------------------
-  # 1) PostgreSQL DB
-  # --------------------------------------------
-  db:
-    env_file:
-      - .env.prod
-    image: postgres:15-alpine
-    ports:
-      - "5431:5432"
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+#  # --------------------------------------------
+#  # 1) PostgreSQL DB
+#  # --------------------------------------------
+#  db:
+#    image: seonhongmun/fixlog-db:prod-latest
+#    env_file:
+#      - .env.prod
+#    ports:
+#      - "5431:5432"
+#    environment:
+#      POSTGRES_DB: ${POSTGRES_DB}
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#    volumes:
+#      - db_data:/var/lib/postgresql/data
+#    restart: always
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
   # --------------------------------------------
   # 2) Redis
   # --------------------------------------------
   redis:
-    image: redis:7-alpine
+    image: redis:7.2-alpine
+    container_name: fixlog-redis
     ports:
       - "6379:6379"
     restart: always
@@ -35,9 +38,7 @@ services:
   # 3) Daphne (ASGI: WebSocket 처리)
   # --------------------------------------------
   daphne:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: seonhongmun/fixlog-daphne:prod-latest
     command: >
       sh -c "./scripts/run_daphne.sh"
     env_file:
@@ -48,8 +49,9 @@ services:
       PYTHONPATH: /app/app
 #    ports:
 #      - "8000:8000"
+    container_name: fixlog-daphne
     depends_on:
-      - db
+#      - db
       - redis
     restart: always
 
@@ -57,9 +59,7 @@ services:
   # 4) API (Gunicorn WSGI: HTTP 요청 처리)
   # --------------------------------------------
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: seonhongmun/fixlog-api:prod-latest
     command: >
       sh -c "./scripts/run_api.sh"
     env_file:
@@ -70,9 +70,9 @@ services:
       PYTHONPATH: /app/app
     ports:
       - "8000:8000"
-    container_name: api
+    container_name: fixlog-api
     depends_on:
-      - db
+#      - db
       - redis
     restart: always
 
@@ -80,12 +80,15 @@ services:
   # 5) Nginx (리버스 프록시 & 정적파일 서빙)
   # --------------------------------------------
   nginx:
-    image: nginx:1.25-alpine
+    image: seonhongmun/fixlog-nginx:prod-latest
     ports:
       - "80:80"
+      - "443:443"
+    container_name: fixlog-nginx
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - static_volume:/app/static
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - daphne
       - api

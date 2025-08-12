@@ -6,8 +6,6 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from app.accounts import models
-from app.accounts.models import User
 from app.fixred.utils.like import toggle_fixred_like
 from app.notifications.utils import send_notification
 
@@ -20,6 +18,8 @@ from .serializers import (
     FixredListSerializer,
     FixredUpdateSerializer,
 )
+from .utils.permission import FOLLOWER, MENTION, PUBLIC, can_view_fixred
+from .utils.response import fail, ok
 
 
 # Fixred 게시글 목록 (픽레드 피드)
@@ -57,10 +57,6 @@ class FixredListView(generics.ListAPIView):
         mode = self.request.query_params.get("filter", "all")
         queryset = Fixred.objects.select_related("user").prefetch_related("fixred_images")
 
-        PUBLIC = "public"
-        FOLLOWER = "follower"
-        MENTION = "mention"
-
         if mode == "following":
             following_user_ids = user.following.values_list("following_id", flat=True)
             queryset = queryset.filter(Q(user__id__in=following_user_ids) & Q(read_permission__in=[PUBLIC, FOLLOWER]))
@@ -69,6 +65,7 @@ class FixredListView(generics.ListAPIView):
                 Q(read_permission=PUBLIC)
                 | Q(read_permission=FOLLOWER, user__followers__follower=user)
                 | Q(read_permission=MENTION, mentioned_users=user)
+                | Q(user=user)
             ).distinct()
 
         return queryset.order_by("-created_at")
@@ -81,6 +78,7 @@ class FixredListView(generics.ListAPIView):
     responses={
         200: FixredDetailSerializer,
         401: OpenApiResponse(description="인증 실패 : 로그인 필요"),
+        403: OpenApiResponse(description="권한 없음"),
         404: OpenApiResponse(description="게시글을 찾을 수 없음"),
     },
     tags=["픽레드 게시글"],
@@ -98,6 +96,16 @@ class FixredDetailView(generics.RetrieveAPIView):
             Prefetch("comments", queryset=FixredComment.objects.select_related("user").order_by("-created_at")),
         )
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # 권한 체크
+        if not can_view_fixred(request.user, instance):
+            return fail("게시물에 대한 권한이 없습니다.", code=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(instance)
+        data = dict(serializer.data)
+        return Response(data, status=status.HTTP_200_OK)
+
 
 # Fixred 게시글 추가
 @extend_schema(
@@ -114,25 +122,26 @@ class FixredDetailView(generics.RetrieveAPIView):
 class FixredCreateView(generics.CreateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-    # permission_classes = [permissions.AllowAny]  # 임시로 인증 없이 사용
     serializer_class = FixredCreateSerializer
 
-    def perform_create(self, serializer):
-        fixred = serializer.save(user=self.request.user)
-        # test_user = User.objects.all()[1]  # 테스트 유저에게 소속시킴 (임시)
-        # serializer.save(user=test_user)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        fixred = serializer.save(user=request.user)
 
-        # 언급 알림
-        if fixred.read_permission == "mention":
-            # mention한 유저에게 알림 보내기
+        # 멘션 알림
+        if fixred.read_permission == MENTION:
             for mention_user in fixred.mentioned_users.exclude(id=fixred.user.id):
                 send_notification(
                     user=mention_user,
                     sender=fixred.user,
-                    notification_type="fixred",
+                    type_="fixred",
                     event="mention",
                     target_id=fixred.id,
                 )
+
+        data = dict(serializer.data)
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 # Fixred 게시글 수정
@@ -144,6 +153,7 @@ class FixredCreateView(generics.CreateAPIView):
         200: OpenApiResponse(description="수정 성공"),
         400: OpenApiResponse(description="유효성 오류"),
         401: OpenApiResponse(description="인증 실패"),
+        403: OpenApiResponse(description="수정 권한 없음"),
         404: OpenApiResponse(description="게시글을 찾을 수 없음"),
     },
     tags=["픽레드 게시글"],
@@ -151,8 +161,7 @@ class FixredCreateView(generics.CreateAPIView):
 class FixredUpdateView(generics.UpdateAPIView):
     http_method_names = ["patch"]
     authentication_classes = [JWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]  # 인증 필수
-    # permission_classes = [permissions.AllowAny] # 임시로 인증 없이 사용
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = FixredUpdateSerializer
 
     queryset = Fixred.objects.all()
@@ -179,8 +188,7 @@ class FixredUpdateView(generics.UpdateAPIView):
 )
 class FixredDeleteView(generics.DestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]  # 인증 필수
-    # permission_classes = [permissions.AllowAny] # 임시로 인증 없이 사용
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = FixredDeleteSerializer
     queryset = Fixred.objects.all()
     lookup_field = "pk"
@@ -197,7 +205,7 @@ class FixredDeleteView(generics.DestroyAPIView):
         instance = self.get_object()
         fixred_id = instance.id
         self.perform_destroy(instance)
-        return Response({"fixred_id": fixred_id, "message": "픽레드 삭제 완료"}, status=status.HTTP_200_OK)
+        return ok("픽레드 삭제 완료", fixred_id=fixred_id)
 
 
 @extend_schema(
@@ -208,6 +216,7 @@ class FixredDeleteView(generics.DestroyAPIView):
         201: OpenApiResponse(description="댓글 작성 성공"),
         400: OpenApiResponse(description="요청 오류"),
         401: OpenApiResponse(description="인증 실패"),
+        403: OpenApiResponse(description="게시물 권한 없음"),
     },
     tags=["픽레드 댓글"],
 )
@@ -219,13 +228,20 @@ class FixredCommentView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         fixred_id = self.kwargs["fixred_id"]
+        fixred = get_object_or_404(Fixred, id=fixred_id)
+        # 권한체크
+        if not can_view_fixred(self.request.user, fixred):
+            raise PermissionDenied("게시물에 대한 권한이 없습니다.")
         return FixredComment.objects.filter(fixred_id=fixred_id).select_related("user").order_by("-created_at")
 
     def perform_create(self, serializer):
         fixred_id = self.kwargs["fixred_id"]
         fixred = get_object_or_404(Fixred, id=fixred_id)
-        serializer.save(user=self.request.user, fixred=fixred)
+        # 권한체크
+        if not can_view_fixred(self.request.user, fixred):
+            raise PermissionDenied("게시물에 대한 권한이 없습니다.")
 
+        serializer.save(user=self.request.user, fixred=fixred)
         # 댓글 알림
         if fixred.user != self.request.user:
             send_notification(
@@ -244,7 +260,7 @@ class FixredCommentView(generics.ListCreateAPIView):
     responses={
         200: OpenApiResponse(description="댓글 삭제 성공"),
         401: OpenApiResponse(description="인증 실패"),
-        403: OpenApiResponse(description="삭제 권한 없음"),
+        403: OpenApiResponse(description="댓글 삭제 권한 없음"),
         404: OpenApiResponse(description="댓글을 찾을 수 없음"),
     },
     tags=["픽레드 댓글"],
@@ -277,6 +293,7 @@ class FixredCommentDeleteView(generics.DestroyAPIView):
     responses={
         200: OpenApiResponse(description="좋아요 토글 성공"),
         401: OpenApiResponse(description="인증 실패"),
+        403: OpenApiResponse(description="게시물 권한 없음"),
         404: OpenApiResponse(description="픽레드를 찾을 수 없음"),
     },
     tags=["픽레드 게시글"],
@@ -286,6 +303,13 @@ class FixredLikeView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, fixred_id):
+        # 권한 체크
+        fixred = get_object_or_404(Fixred, id=fixred_id)
+        if not can_view_fixred(request.user, fixred):
+            from .utils.response import fail
+
+            return fail("게시물에 대한 권한이 없습니다.", code=status.HTTP_403_FORBIDDEN)
+
         result = toggle_fixred_like(request.user, fixred_id)
         fixred = result["fixred"]
         message = "좋아요 완료" if result["liked"] else "좋아요 취소"

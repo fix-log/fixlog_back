@@ -1,10 +1,11 @@
+from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.conf import settings
 
 from app.fixred.models import FixredLike
 from app.notifications.models import Notification
 from app.notifications.utils import send_notification
+
 
 @receiver(post_save, sender=FixredLike)
 def handle_like_created(sender, instance, created, **kwargs):

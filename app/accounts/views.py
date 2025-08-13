@@ -32,58 +32,54 @@ def set_refresh_cookie(response, refresh_token):
     return response
 
 
-# ✉️ 이메일 인증번호 요청
-@extend_schema(
-    summary="이메일 인증번호 요청",
-    description="회원가입 전 이메일로 인증번호를 전송합니다.",
-    request={"type": "object", "properties": {"email": {"type": "string"}}, "required": ["email"]},
-    responses={200: OpenApiResponse(description="인증번호 발송 완료"), 400: OpenApiResponse(description="요청 오류")},
-    tags=["회원"],
-)
+# ✉️ 인증번호 요청 (회원가입 & 비밀번호 재설정 공용)
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def request_verification_code_view(request):
+def request_verification_code_view(request, purpose):
     email = request.data.get("email")
+    name = request.data.get("name") if purpose == "password_reset" else None
+
     if not email:
         return Response({"error": "이메일이 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
+    # 비번 재설정이면 추가로 이름 검증
+    if purpose == "password_reset":
+        if not name:
+            return Response({"error": "이름이 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            User.objects.get(email=email, name=name, is_active=True)
+        except User.DoesNotExist:
+            return Response({"error": "일치하는 사용자 정보를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
     code = str(random.randint(100000, 999999))
-    cache.set(f"email_verification:{email}", code, timeout=300)
+    cache.set(f"verification:{purpose}:{email}", code, timeout=300)
+
+    subject_map = {"signup": "[Fixlog] 이메일 인증번호", "password_reset": "[Fixlog] 비밀번호 재설정 인증번호"}
     send_mail(
-        subject="[Fixlog] 이메일 인증번호",
+        subject=subject_map.get(purpose, "[Fixlog] 인증번호"),
         message=f"아래 인증번호를 입력해주세요:\n인증번호: {code}",
         from_email="noreply@fixlog.co.kr",
         recipient_list=[email],
     )
-    return Response({"message": "인증번호가 이메일로 전송되었습니다."}, status=status.HTTP_200_OK)
+    return Response({"message": f"{purpose} 인증번호가 이메일로 전송되었습니다."})
 
 
-# ✅ 이메일 인증 확인
-@extend_schema(
-    summary="이메일 인증 확인",
-    description="이메일과 인증번호를 입력하여 인증 상태를 등록합니다.",
-    request={
-        "type": "object",
-        "properties": {"email": {"type": "string"}, "code": {"type": "string"}},
-        "required": ["email", "code"],
-    },
-    responses={200: OpenApiResponse(description="인증 성공"), 400: OpenApiResponse(description="인증 실패")},
-    tags=["회원"],
-)
+# ✅ 인증 확인 (공용)
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def confirm_email_code_view(request):
+def confirm_verification_code_view(request, purpose):
     email = request.data.get("email")
     code = request.data.get("code")
     if not email or not code:
         return Response({"error": "이메일과 인증번호가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
-    cached_code = cache.get(f"email_verification:{email}")
+
+    cached_code = cache.get(f"verification:{purpose}:{email}")
     if cached_code != code:
         return Response({"error": "인증번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
-    cache.set(f"email_verified:{email}", True, timeout=600)
-    cache.delete(f"email_verification:{email}")
-    return Response({"message": "이메일 인증 완료!"}, status=status.HTTP_200_OK)
+    cache.set(f"verified:{purpose}:{email}", True, timeout=600)
+    cache.delete(f"verification:{purpose}:{email}")
+    return Response({"message": f"{purpose} 인증 완료!"})
 
 
 # 🧾 회원가입
@@ -289,3 +285,41 @@ def find_email_view(request):
         return Response({"email": user.email})
     except User.DoesNotExist:
         return Response({"error": "일치하는 사용자 정보를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+
+# 🔑 비밀번호 재설정
+@extend_schema(
+    summary="비밀번호 재설정",
+    description="이메일 인증이 완료된 사용자의 비밀번호를 새 비밀번호로 변경합니다.",
+    request={
+        "type": "object",
+        "properties": {"email": {"type": "string"}, "new_password": {"type": "string"}},
+        "required": ["email", "new_password"],
+    },
+    responses={
+        200: OpenApiResponse(description="비밀번호 변경 완료"),
+        400: OpenApiResponse(description="요청 오류"),
+        403: OpenApiResponse(description="인증 안 됨"),
+    },
+    tags=["회원"],
+)
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def reset_password_view(request):
+    email = request.data.get("email")
+    new_password = request.data.get("new_password")
+    if not email or not new_password:
+        return Response({"error": "이메일과 새 비밀번호가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+    verified = cache.get(f"password_reset_verified:{email}")
+    if not verified:
+        return Response({"error": "이메일 인증을 먼저 완료해주세요."}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        user = User.objects.get(email=email, is_active=True)
+        user.set_password(new_password)
+        user.save()
+        cache.delete(f"password_reset_verified:{email}")
+        return Response({"message": "비밀번호가 변경되었습니다."}, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({"error": "존재하지 않는 사용자입니다."}, status=status.HTTP_404_NOT_FOUND)

@@ -32,36 +32,66 @@ def set_refresh_cookie(response, refresh_token):
     return response
 
 
-# ✉️ 인증번호 요청 (회원가입 & 비밀번호 재설정 공용)
+# 상수
+VERIFICATION_TTL = 300  # 5분 (초)
+VERIFIED_FLAG_TTL = 300  # 5분 (초)
+REQUEST_COOLDOWN = 60  # 60초 재요청 제한
+MAX_ATTEMPTS = 5  # 인증번호 최대 시도 횟수
+
+
+def _verification_key(purpose, email):
+    return f"verification:{purpose}:{email}"
+
+
+def _verified_flag_key(purpose, email):
+    return f"verified:{purpose}:{email}"
+
+
+def _attempts_key(purpose, email):
+    return f"attempts:{purpose}:{email}"
+
+
+def _cooldown_key(purpose, email):
+    return f"cooldown:{purpose}:{email}"
+
+
+# ✉️ 인증번호 요청 (회원가입 & 비밀번호 재설정 공용, 이름 검증 제거)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def request_verification_code_view(request, purpose):
     email = request.data.get("email")
-    name = request.data.get("name") if purpose == "password_reset" else None
-
     if not email:
         return Response({"error": "이메일이 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # 비번 재설정이면 추가로 이름 검증
+    # password_reset이면 가입 여부 확인
     if purpose == "password_reset":
-        if not name:
-            return Response({"error": "이름이 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            User.objects.get(email=email, name=name, is_active=True)
-        except User.DoesNotExist:
-            return Response({"error": "일치하는 사용자 정보를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+        if not User.objects.filter(email=email, is_active=True).exists():
+            return Response({"error": "해당 이메일로 가입된 사용자가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
-    code = str(random.randint(100000, 999999))
-    cache.set(f"verification:{purpose}:{email}", code, timeout=300)
+    # 재요청 쿨다운 체크 (선택)
+    cooldown_k = _cooldown_key(purpose, email)
+    if cache.get(cooldown_k):
+        return Response(
+            {"error": "인증번호를 너무 자주 요청했습니다. 잠시 후 다시 시도해주세요."},
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
 
-    subject_map = {"signup": "[Fixlog] 이메일 인증번호", "password_reset": "[Fixlog] 비밀번호 재설정 인증번호"}
+    code = f"{random.randint(100000, 999999)}"
+    cache.set(_verification_key(purpose, email), code, timeout=VERIFICATION_TTL)
+    cache.delete(_attempts_key(purpose, email))  # 코드 재발급 시 시도 횟수 초기화
+    cache.set(cooldown_k, True, timeout=REQUEST_COOLDOWN)  # 쿨다운 설정
+
+    subject = "[Fixlog] 이메일 인증번호" if purpose == "signup" else "[Fixlog] 비밀번호 재설정 인증번호"
     send_mail(
-        subject=subject_map.get(purpose, "[Fixlog] 인증번호"),
-        message=f"아래 인증번호를 입력해주세요:\n인증번호: {code}",
+        subject=subject,
+        message=f"아래 인증번호를 입력해주세요 (유효기간 5분):\n인증번호: {code}",
         from_email="noreply@fixlog.co.kr",
         recipient_list=[email],
     )
-    return Response({"message": f"{purpose} 인증번호가 이메일로 전송되었습니다."})
+    return Response(
+        {"message": f"{purpose} 인증번호가 이메일로 전송되었습니다.", "ttl_seconds": VERIFICATION_TTL},
+        status=status.HTTP_200_OK,
+    )
 
 
 # ✅ 인증 확인 (공용)
@@ -73,13 +103,51 @@ def confirm_verification_code_view(request, purpose):
     if not email or not code:
         return Response({"error": "이메일과 인증번호가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
-    cached_code = cache.get(f"verification:{purpose}:{email}")
-    if cached_code != code:
-        return Response({"error": "인증번호가 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
+    # 시도 횟수 체크 (선택)
+    attempts_k = _attempts_key(purpose, email)
+    attempts = cache.get(attempts_k) or 0
+    if attempts >= MAX_ATTEMPTS:
+        return Response(
+            {"error": "인증번호 최대 시도 횟수를 초과했습니다. 다시 요청해주세요."},
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
 
-    cache.set(f"verified:{purpose}:{email}", True, timeout=600)
-    cache.delete(f"verification:{purpose}:{email}")
-    return Response({"message": f"{purpose} 인증 완료!"})
+    cached_code = cache.get(_verification_key(purpose, email))
+    if cached_code != code:
+        cache.set(attempts_k, attempts + 1, timeout=VERIFICATION_TTL)  # 남은 유효시간 동안만 카운트
+        remaining = max(0, MAX_ATTEMPTS - (attempts + 1))
+        return Response(
+            {"error": "인증번호가 일치하지 않습니다.", "remaining_attempts": remaining},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # 성공
+    cache.set(_verified_flag_key(purpose, email), True, timeout=VERIFIED_FLAG_TTL)
+    cache.delete(_verification_key(purpose, email))
+    cache.delete(attempts_k)
+    return Response(
+        {"message": f"{purpose} 인증이 완료되었습니다.", "verified_ttl_seconds": VERIFIED_FLAG_TTL},
+        status=status.HTTP_200_OK,
+    )
+
+
+# 🧾 회원가입 (가입 전용: verified:signup:{email} 플래그 확인)
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def signup_view(request):
+    serializer = SignupSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    email = serializer.validated_data["email"]
+    if not cache.get(_verified_flag_key("signup", email)):
+        return Response({"error": "이메일 인증을 먼저 완료해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = serializer.save()
+    user.is_active = True
+    user.save()
+    cache.delete(_verified_flag_key("signup", email))
+    return Response({"message": "회원가입이 완료되었습니다!"}, status=status.HTTP_201_CREATED)
 
 
 # 🧾 회원가입
@@ -266,7 +334,7 @@ def get_user_profile_view(request, user_id):
             "name": {"type": "string"},
             "phone_number": {"type": "string"},  # 예: "010-1234-5678"
         },
-        "required": ["name", "phone_number"],
+        "required": ["birth", "phone_number"],
     },
     responses={
         200: OpenApiResponse(description="이메일 반환 성공"),
@@ -277,32 +345,17 @@ def get_user_profile_view(request, user_id):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def find_email_view(request):
-    name = request.data.get("name")
+    birth = request.data.get("birth")
     phone_number = request.data.get("phone_number")
 
     try:
-        user = User.objects.get(name=name, phone_number=phone_number, is_active=True)
+        user = User.objects.get(birth=birth, phone_number=phone_number, is_active=True)
         return Response({"email": user.email})
     except User.DoesNotExist:
         return Response({"error": "일치하는 사용자 정보를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
 
-# 🔑 비밀번호 재설정
-@extend_schema(
-    summary="비밀번호 재설정",
-    description="이메일 인증이 완료된 사용자의 비밀번호를 새 비밀번호로 변경합니다.",
-    request={
-        "type": "object",
-        "properties": {"email": {"type": "string"}, "new_password": {"type": "string"}},
-        "required": ["email", "new_password"],
-    },
-    responses={
-        200: OpenApiResponse(description="비밀번호 변경 완료"),
-        400: OpenApiResponse(description="요청 오류"),
-        403: OpenApiResponse(description="인증 안 됨"),
-    },
-    tags=["회원"],
-)
+# 🔑 비밀번호 재설정 (password_reset 전용: verified:password_reset:{email} 확인)
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def reset_password_view(request):
@@ -311,15 +364,15 @@ def reset_password_view(request):
     if not email or not new_password:
         return Response({"error": "이메일과 새 비밀번호가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
-    verified = cache.get(f"password_reset_verified:{email}")
-    if not verified:
+    if not cache.get(_verified_flag_key("password_reset", email)):
         return Response({"error": "이메일 인증을 먼저 완료해주세요."}, status=status.HTTP_403_FORBIDDEN)
 
     try:
         user = User.objects.get(email=email, is_active=True)
-        user.set_password(new_password)
-        user.save()
-        cache.delete(f"password_reset_verified:{email}")
-        return Response({"message": "비밀번호가 변경되었습니다."}, status=status.HTTP_200_OK)
     except User.DoesNotExist:
         return Response({"error": "존재하지 않는 사용자입니다."}, status=status.HTTP_404_NOT_FOUND)
+
+    user.set_password(new_password)
+    user.save()
+    cache.delete(_verified_flag_key("password_reset", email))
+    return Response({"message": "비밀번호가 변경되었습니다."}, status=status.HTTP_200_OK)

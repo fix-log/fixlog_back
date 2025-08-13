@@ -1,7 +1,10 @@
+import datetime
 import random
 
+from django.conf import settings
 from django.core.cache import cache
 from django.core.mail import send_mail
+from django.utils import timezone
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -15,7 +18,21 @@ from app.accounts.models import User
 from app.accounts.serializer import SignupSerializer, UserSerializer
 
 
-# ✉️ 이메일 인증번호 요청 (회원가입 이전)
+# Refresh Token을 HttpOnly 쿠키에 저장
+def set_refresh_cookie(response, refresh_token):
+    expires = timezone.now() + datetime.timedelta(days=30)
+    response.set_cookie(
+        key="refresh_token",
+        value=str(refresh_token),
+        httponly=True,
+        secure=not settings.DEBUG,  # DEBUG=False면 운영 → secure=True
+        samesite="Strict",  # CSRF 방지
+        expires=expires,
+    )
+    return response
+
+
+# ✉️ 이메일 인증번호 요청
 @extend_schema(
     summary="이메일 인증번호 요청",
     description="회원가입 전 이메일로 인증번호를 전송합니다.",
@@ -41,7 +58,7 @@ def request_verification_code_view(request):
     return Response({"message": "인증번호가 이메일로 전송되었습니다."}, status=status.HTTP_200_OK)
 
 
-# ✅ 이메일 인증번호 확인 및 인증 플래그 저장
+# ✅ 이메일 인증 확인
 @extend_schema(
     summary="이메일 인증 확인",
     description="이메일과 인증번호를 입력하여 인증 상태를 등록합니다.",
@@ -69,7 +86,7 @@ def confirm_email_code_view(request):
     return Response({"message": "이메일 인증 완료!"}, status=status.HTTP_200_OK)
 
 
-# 🧾 회원가입 (이메일 인증 선행 요구)
+# 🧾 회원가입
 @extend_schema(
     summary="회원가입",
     description="이메일 인증이 완료된 사용자만 회원가입이 가능합니다.",
@@ -95,7 +112,7 @@ def signup_view(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# 🔑 JWT 로그인
+# 🔑 커스텀 토큰 직렬화
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -103,18 +120,57 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 
+# 🔑 로그인 (Access JSON + Refresh 쿠키)
 @extend_schema(
     summary="JWT 로그인",
-    description="이메일과 비밀번호로 로그인하여 토큰을 발급받습니다.",
+    description="이메일/비밀번호로 Access Token(JSON)과 Refresh Token(HttpOnly Cookie)을 발급받습니다.",
     request=CustomTokenObtainPairSerializer,
     responses={200: OpenApiResponse(description="로그인 성공"), 401: OpenApiResponse(description="인증 실패")},
     tags=["회원"],
 )
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        access = serializer.validated_data["access"]
+        refresh = serializer.validated_data["refresh"]
+
+        res = Response(
+            {
+                "access": str(access),  # localStorage 저장용
+                "nickname": serializer.user.nickname,
+            },
+            status=status.HTTP_200_OK,
+        )
+        set_refresh_cookie(res, refresh, secure=False)  # 개발 시 secure=False
+        return res
 
 
-# 👤 내 프로필 조회 및 수정
+# 🔄 토큰 재발급
+@extend_schema(
+    summary="Access 토큰 재발급",
+    description="쿠키의 Refresh Token을 이용해 새로운 Access Token을 발급받습니다.",
+    responses={200: OpenApiResponse(description="재발급 성공"), 401: OpenApiResponse(description="재발급 실패")},
+    tags=["회원"],
+)
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def refresh_token_view(request):
+    refresh_token = request.COOKIES.get("refresh_token")
+    if not refresh_token:
+        return Response({"error": "Refresh Token이 없습니다."}, status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        refresh = RefreshToken(refresh_token)
+        access_token = refresh.access_token
+        return Response({"access": str(access_token)}, status=status.HTTP_200_OK)
+    except Exception:
+        return Response({"error": "Refresh Token이 유효하지 않습니다."}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+# 👤 내 프로필 조회/수정
 @extend_schema(
     summary="내 프로필 조회 및 수정",
     description="로그인된 사용자의 정보를 조회하거나 수정합니다.",
@@ -158,24 +214,33 @@ def delete_account_view(request):
     return Response({"message": "계정이 비활성화되었습니다."})
 
 
-# 🔓 로그아웃
+# 🚪 로그아웃
 @extend_schema(
     summary="로그아웃",
-    description="리프레시 토큰을 블랙리스트 처리하여 로그아웃합니다.",
-    request={"type": "object", "properties": {"refresh": {"type": "string"}}, "required": ["refresh"]},
-    responses={200: OpenApiResponse(description="로그아웃 완료"), 400: OpenApiResponse(description="토큰 오류")},
+    description="Refresh Token을 블랙리스트 처리하고 쿠키에서 삭제합니다.",
+    responses={200: OpenApiResponse(description="로그아웃 완료")},
     tags=["회원"],
 )
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def logout_view(request):
     try:
-        refresh_token = request.data.get("refresh")
-        token = RefreshToken(refresh_token)
-        token.blacklist()
-        return Response({"message": "로그아웃되었습니다."})
+        refresh_token = request.COOKIES.get("refresh_token")
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except Exception:
+                # 블랙리스트 처리 실패 시에도 쿠키 삭제는 계속 진행
+                pass
+
+        # 응답과 함께 쿠키 삭제
+        res = Response({"message": "로그아웃되었습니다."}, status=status.HTTP_200_OK)
+        res.delete_cookie("refresh_token")
+        return res
+
     except Exception:
-        return Response({"error": "잘못된 토큰입니다."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "잘못된 요청입니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # 🔍 다른 사용자 프로필 조회

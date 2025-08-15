@@ -3,8 +3,8 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from app.notifications.models import Notification
-from app.notifications.serializers import NotificationSerializer
+from app.notifications.models import Notification, NotificationSetting
+from app.notifications.serializers import NotificationSerializer, NotificationSettingSerializer
 
 
 # 알림 목록 조회
@@ -84,3 +84,19 @@ class NotificationReadAllView(generics.UpdateAPIView):
         updated = Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
 
         return Response({"message": f"{updated}개의 알림 전체 읽음 처리 완료"}, status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    summary="내 알림 설정 조회/수정",
+    description="현재 로그인한 사용자의 알림 기능 전체 온/오프를 설정합니다.",
+    responses={200: OpenApiResponse(description="알림 설정 조회/수정 성공")},
+    tags=["알림"],
+)
+class NotificationSettingView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = NotificationSettingSerializer
+
+    def get_object(self):
+        # 로그인한 사용자의 알림 설정 가져오기 (없으면 기본값으로 생성)
+        notification_setting, _ = NotificationSetting.objects.get_or_create(user=self.request.user)
+        return notification_setting

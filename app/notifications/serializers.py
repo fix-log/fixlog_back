@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from app.accounts.models import User
 
-from .models import Notification
+from .models import Notification, NotificationSetting
 
 
 class SenderSerializer(serializers.ModelSerializer):
@@ -31,3 +31,9 @@ class NotificationReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ["id", "is_read"]
+
+
+class NotificationSettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationSetting
+        fields = ["is_enabled"]

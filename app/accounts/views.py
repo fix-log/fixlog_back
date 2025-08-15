@@ -194,3 +194,33 @@ def get_user_profile_view(request, user_id):
         return Response(serializer.data)
     except User.DoesNotExist:
         return Response({"error": "존재하지 않는 사용자입니다."}, status=status.HTTP_404_NOT_FOUND)
+
+
+@extend_schema(
+    summary="이메일 찾기",
+    description="이름과 전화번호를 입력해 가입된 이메일을 반환합니다.",
+    request={
+        "type": "object",
+        "properties": {
+            "name": {"type": "string"},
+            "phone_number": {"type": "string"},  # 예: "010-1234-5678"
+        },
+        "required": ["name", "phone_number"],
+    },
+    responses={
+        200: OpenApiResponse(description="이메일 반환 성공"),
+        404: OpenApiResponse(description="일치하는 정보 없음"),
+    },
+    tags=["회원"],
+)
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def find_email_view(request):
+    name = request.data.get("name")
+    phone_number = request.data.get("phone_number")
+
+    try:
+        user = User.objects.get(name=name, phone_number=phone_number, is_active=True)
+        return Response({"email": user.email})
+    except User.DoesNotExist:
+        return Response({"error": "일치하는 사용자 정보를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)

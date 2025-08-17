@@ -1,12 +1,12 @@
 from django.db.models import F
 from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 from app.crew.models import Application, Project, UserBookmark
 from app.crew.serializers import ApplicationSerializer, ProjectSerializer
@@ -16,6 +16,7 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
     """
     프로젝트 목록 조회 및 생성
     """
+
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
 
@@ -23,15 +24,50 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
         operation_summary="프로젝트 목록 조회",
         operation_description="검색, 필터링, 정렬 옵션을 사용하여 프로젝트 목록을 조회합니다.",
         manual_parameters=[
-            openapi.Parameter('search', openapi.IN_QUERY, description="제목 검색", type=openapi.TYPE_STRING),
-            openapi.Parameter('status', openapi.IN_QUERY, description="모집 상태 필터", type=openapi.TYPE_STRING),
-            openapi.Parameter('skill_tools', openapi.IN_QUERY, description="기술스택 ID 목록", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_INTEGER)),
-            openapi.Parameter('positions', openapi.IN_QUERY, description="포지션 ID 목록", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_INTEGER)),
-            openapi.Parameter('languages', openapi.IN_QUERY, description="언어 ID 목록", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_INTEGER)),
-            openapi.Parameter('designs', openapi.IN_QUERY, description="디자인 ID 목록", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_INTEGER)),
-            openapi.Parameter('coop_tools', openapi.IN_QUERY, description="협업도구 ID 목록", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_INTEGER)),
-            openapi.Parameter('ordering', openapi.IN_QUERY, description="정렬 옵션 (popular: 인기순, 기본: 최신순)", type=openapi.TYPE_STRING),
-        ]
+            openapi.Parameter("search", openapi.IN_QUERY, description="제목 검색", type=openapi.TYPE_STRING),
+            openapi.Parameter("status", openapi.IN_QUERY, description="모집 상태 필터", type=openapi.TYPE_STRING),
+            openapi.Parameter(
+                "skill_tools",
+                openapi.IN_QUERY,
+                description="기술스택 ID 목록",
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+            ),
+            openapi.Parameter(
+                "positions",
+                openapi.IN_QUERY,
+                description="포지션 ID 목록",
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+            ),
+            openapi.Parameter(
+                "languages",
+                openapi.IN_QUERY,
+                description="언어 ID 목록",
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+            ),
+            openapi.Parameter(
+                "designs",
+                openapi.IN_QUERY,
+                description="디자인 ID 목록",
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+            ),
+            openapi.Parameter(
+                "coop_tools",
+                openapi.IN_QUERY,
+                description="협업도구 ID 목록",
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Items(type=openapi.TYPE_INTEGER),
+            ),
+            openapi.Parameter(
+                "ordering",
+                openapi.IN_QUERY,
+                description="정렬 옵션 (popular: 인기순, 기본: 최신순)",
+                type=openapi.TYPE_STRING,
+            ),
+        ],
     )
     def get_queryset(self):
         queryset = Project.objects.all().prefetch_related(
@@ -91,10 +127,7 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
 
         return queryset.distinct()  # 중복 제거
 
-    @swagger_auto_schema(
-        operation_summary="새 프로젝트 생성",
-        operation_description="새로운 프로젝트를 생성합니다."
-    )
+    @swagger_auto_schema(operation_summary="새 프로젝트 생성", operation_description="새로운 프로젝트를 생성합니다.")
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -103,6 +136,7 @@ class ProjectDetailAPIView(generics.RetrieveAPIView):
     """
     프로젝트 상세 조회
     """
+
     queryset = Project.objects.all().prefetch_related(
         "projectposition_set__position",
         "projectlanguage_set__language",
@@ -115,7 +149,7 @@ class ProjectDetailAPIView(generics.RetrieveAPIView):
 
     @swagger_auto_schema(
         operation_summary="프로젝트 상세 조회",
-        operation_description="프로젝트의 상세 정보를 조회하고 조회수를 증가시킵니다."
+        operation_description="프로젝트의 상세 정보를 조회하고 조회수를 증가시킵니다.",
     )
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -134,6 +168,7 @@ class ProjectUpdateAPIView(generics.UpdateAPIView):
     """
     프로젝트 수정
     """
+
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
@@ -141,7 +176,7 @@ class ProjectUpdateAPIView(generics.UpdateAPIView):
 
     @swagger_auto_schema(
         operation_summary="프로젝트 수정",
-        operation_description="프로젝트 정보를 수정합니다. 프로젝트 생성자만 수정 가능합니다."
+        operation_description="프로젝트 정보를 수정합니다. 프로젝트 생성자만 수정 가능합니다.",
     )
     def get_object(self):
         obj = super().get_object()
@@ -154,6 +189,7 @@ class ProjectDeleteAPIView(generics.DestroyAPIView):
     """
     프로젝트 삭제
     """
+
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
@@ -161,7 +197,7 @@ class ProjectDeleteAPIView(generics.DestroyAPIView):
 
     @swagger_auto_schema(
         operation_summary="프로젝트 삭제",
-        operation_description="프로젝트를 삭제합니다. 프로젝트 생성자만 삭제 가능합니다."
+        operation_description="프로젝트를 삭제합니다. 프로젝트 생성자만 삭제 가능합니다.",
     )
     def get_object(self):
         obj = super().get_object()
@@ -174,6 +210,7 @@ class ProjectApplyAPIView(generics.CreateAPIView, generics.DestroyAPIView):
     """
     프로젝트 지원 및 지원 취소
     """
+
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
     permission_classes = [IsAuthenticated]
@@ -190,7 +227,7 @@ class ProjectApplyAPIView(generics.CreateAPIView, generics.DestroyAPIView):
 
     @swagger_auto_schema(
         operation_summary="프로젝트 지원",
-        operation_description="프로젝트에 지원합니다. 자신의 프로젝트에는 지원할 수 없습니다."
+        operation_description="프로젝트에 지원합니다. 자신의 프로젝트에는 지원할 수 없습니다.",
     )
     def create(self, request, *args, **kwargs):
         project_id = self.kwargs.get("project_id")
@@ -209,10 +246,7 @@ class ProjectApplyAPIView(generics.CreateAPIView, generics.DestroyAPIView):
         Application.objects.create(user=user, project=project)
         return Response({"message": "지원 성공"}, status=status.HTTP_201_CREATED)
 
-    @swagger_auto_schema(
-        operation_summary="프로젝트 지원 취소",
-        operation_description="프로젝트 지원을 취소합니다."
-    )
+    @swagger_auto_schema(operation_summary="프로젝트 지원 취소", operation_description="프로젝트 지원을 취소합니다.")
     def destroy(self, request, *args, **kwargs):
         project_id = self.kwargs.get("project_id")
         project = get_object_or_404(Project, id=project_id)
@@ -231,12 +265,13 @@ class ProjectApplicantsAPIView(generics.ListAPIView):
     """
     프로젝트 지원자 목록 조회
     """
+
     serializer_class = ApplicationSerializer
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         operation_summary="프로젝트 지원자 목록 조회",
-        operation_description="프로젝트의 지원자 목록을 조회합니다. 프로젝트 소유자만 조회 가능합니다."
+        operation_description="프로젝트의 지원자 목록을 조회합니다. 프로젝트 소유자만 조회 가능합니다.",
     )
     def get_queryset(self):
         project_id = self.kwargs.get("project_id")
@@ -251,14 +286,10 @@ class ProjectApplicantsAPIView(generics.ListAPIView):
 
 # 북마크 관련 뷰
 @swagger_auto_schema(
-    method='POST',
-    operation_summary="프로젝트 북마크 추가",
-    operation_description="프로젝트를 북마크에 추가합니다."
+    method="POST", operation_summary="프로젝트 북마크 추가", operation_description="프로젝트를 북마크에 추가합니다."
 )
 @swagger_auto_schema(
-    method='DELETE',
-    operation_summary="프로젝트 북마크 삭제",
-    operation_description="프로젝트를 북마크에서 삭제합니다."
+    method="DELETE", operation_summary="프로젝트 북마크 삭제", operation_description="프로젝트를 북마크에서 삭제합니다."
 )
 @api_view(["POST", "DELETE"])
 @permission_classes([IsAuthenticated])

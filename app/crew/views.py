@@ -39,7 +39,11 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
     """
 
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return []
+        return [IsAuthenticated()]
 
     def get_queryset(self):
         queryset = Project.objects.all().prefetch_related(
@@ -126,6 +130,7 @@ class ProjectDetailAPIView(generics.RetrieveAPIView):
     )
     serializer_class = ProjectSerializer
     lookup_field = "pk"
+    permission_classes = []
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

@@ -4,6 +4,50 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def create_tables_if_not_exist(apps, schema_editor):
+    """테이블이 존재하지 않는 경우에만 생성"""
+    db_alias = schema_editor.connection.alias
+    
+    with schema_editor.connection.cursor() as cursor:
+        # project_design 테이블 존재 확인
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'project_design'
+            );
+        """)
+        design_exists = cursor.fetchone()[0]
+        
+        # project_coop_tool 테이블 존재 확인
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'project_coop_tool'
+            );
+        """)
+        coop_tool_exists = cursor.fetchone()[0]
+        
+        if not design_exists:
+            cursor.execute("""
+                CREATE TABLE project_design (
+                    id SERIAL PRIMARY KEY,
+                    project_id INTEGER NOT NULL REFERENCES crew_project(id) ON DELETE CASCADE,
+                    design_id INTEGER NOT NULL REFERENCES util_design(id) ON DELETE CASCADE,
+                    UNIQUE(project_id, design_id)
+                );
+            """)
+            
+        if not coop_tool_exists:
+            cursor.execute("""
+                CREATE TABLE project_coop_tool (
+                    id SERIAL PRIMARY KEY,
+                    project_id INTEGER NOT NULL REFERENCES crew_project(id) ON DELETE CASCADE,
+                    coop_tool_id INTEGER NOT NULL REFERENCES util_cooptool(id) ON DELETE CASCADE,
+                    UNIQUE(project_id, coop_tool_id)
+                );
+            """)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -12,30 +56,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name="ProjectDesign",
-            fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("design", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="util.design")),
-                ("project", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="crew.project")),
-            ],
-            options={
-                "db_table": "project_design",
-                "unique_together": {("project", "design")},
-            },
-        ),
-        migrations.CreateModel(
-            name="ProjectCoopTool",
-            fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("coop_tool", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="util.cooptool")),
-                ("project", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="crew.project")),
-            ],
-            options={
-                "db_table": "project_coop_tool",
-                "unique_together": {("project", "coop_tool")},
-            },
-        ),
+        migrations.RunPython(create_tables_if_not_exist, migrations.RunPython.noop),
         migrations.AddField(
             model_name="project",
             name="designs",

@@ -180,7 +180,7 @@ class ProjectUpdateAPIView(generics.UpdateAPIView):
 @extend_schema(
     summary="프로젝트 삭제",
     responses={
-        200: OpenApiResponse(description="프로젝트 삭제 완료"),
+        204: OpenApiResponse(description="프로젝트 삭제 완료"),
         401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
         403: OpenApiResponse(description="권한이 없습니다."),
         404: OpenApiResponse(description="해당 ID가 없습니다."),
@@ -202,7 +202,7 @@ class ProjectDeleteAPIView(generics.DestroyAPIView):
         if not request.user.is_authenticated or instance.user != request.user:
             return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
         self.perform_destroy(instance)
-        return Response({"message": "프로젝트가 삭제되었습니다."}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_object(self):
         obj = super().get_object()

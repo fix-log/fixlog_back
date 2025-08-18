@@ -1,9 +1,9 @@
 from django.apps import AppConfig
 
 
-class fixredConfig(AppConfig):
+class NotificationsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "app.fixred"
+    name = "app.notifications"
 
     def ready(self):
-        import app.fixred.signals
+        import app.notifications.signals

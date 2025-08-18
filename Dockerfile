@@ -20,8 +20,14 @@ ENV PATH="/root/.local/bin:$PATH"
 # 소스 코드 복사
 COPY . /app
 
+# 스크립트 복사
+COPY ./scripts ./scripts
+
 # 실행 권한 부여
-RUN chmod +x /app/scripts/run_daphne.sh
+RUN chmod +x ./scripts/run_daphne.sh
+RUN chmod +x ./scripts/run_api.sh
+
+COPY . .
 
 # 기본 실행 명령
-CMD ["gunicorn", "fixlog.wsgi:application", "--bind", "0.0.0.0:8000", "--reload", "--reload-engine=poll"]
+CMD ["sh", "/app/scripts/run_api.sh"]

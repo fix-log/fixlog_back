@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from app.accounts import views_follow
 from app.accounts.views import (
     LoginView,
     confirm_email_code_view,
@@ -18,8 +19,12 @@ urlpatterns = [
     path("register/", signup_view),
     path("login/", LoginView.as_view()),
     path("profile/", profile_view),
-    path("user/<int:user_id>/", get_user_profile_view),
+    path("<int:user_id>/", get_user_profile_view),
     path("logout/", logout_view),
     path("token/refresh/", TokenRefreshView.as_view()),
-    path("delete-account/", delete_account_view),
+    path("leave/", delete_account_view),
+    # 팔로우 관련 URL
+    path("<int:user_id>/follow/", views_follow.follow_toggle_view),
+    path("<int:user_id>/followers/", views_follow.followers_list_view),
+    path("<int:user_id>/following/", views_follow.following_list_view),
 ]

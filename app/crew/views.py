@@ -1,5 +1,7 @@
 from django.db.models import F
 from django.shortcuts import get_object_or_404
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import PermissionDenied
@@ -10,9 +12,38 @@ from app.crew.models import Application, Project, UserBookmark
 from app.crew.serializers import ApplicationSerializer, ProjectSerializer
 
 
+@extend_schema(
+    summary="프로젝트 목록 조회 및 생성",
+    parameters=[
+        OpenApiParameter("search", OpenApiTypes.STR, description="제목 검색"),
+        OpenApiParameter("status", OpenApiTypes.STR, description="모집 상태 필터"),
+        OpenApiParameter("skill_tools", OpenApiTypes.INT, many=True, description="기술스택 ID 목록"),
+        OpenApiParameter("positions", OpenApiTypes.INT, many=True, description="포지션 ID 목록"),
+        OpenApiParameter("languages", OpenApiTypes.INT, many=True, description="언어 ID 목록"),
+        OpenApiParameter("designs", OpenApiTypes.INT, many=True, description="디자인 ID 목록"),
+        OpenApiParameter("coop_tools", OpenApiTypes.INT, many=True, description="협업도구 ID 목록"),
+        OpenApiParameter("ordering", OpenApiTypes.STR, description="정렬 옵션 (popular: 인기순, 기본: 최신순)"),
+    ],
+    responses={
+        200: OpenApiResponse(response=ProjectSerializer(many=True), description="프로젝트 목록"),
+        201: OpenApiResponse(response=ProjectSerializer, description="프로젝트 생성 성공"),
+        400: OpenApiResponse(description="잘못된 요청"),
+        401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+        403: OpenApiResponse(description="권한이 없습니다."),
+        500: OpenApiResponse(description="서버 내부 오류"),
+    },
+)
 class ProjectListCreateAPIView(generics.ListCreateAPIView):
+    """
+    프로젝트 목록 조회 및 생성
+    """
+
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return []
+        return [IsAuthenticated()]
 
     def get_queryset(self):
         queryset = Project.objects.all().prefetch_related(
@@ -76,7 +107,20 @@ class ProjectListCreateAPIView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
+@extend_schema(
+    summary="프로젝트 상세 조회",
+    description="프로젝트의 상세 정보를 조회하고 조회수를 증가시킵니다.",
+    responses={
+        200: OpenApiResponse(response=ProjectSerializer, description="프로젝트 상세"),
+        404: OpenApiResponse(description="해당 ID가 없습니다."),
+        500: OpenApiResponse(description="서버 내부 오류"),
+    },
+)
 class ProjectDetailAPIView(generics.RetrieveAPIView):
+    """
+    프로젝트 상세 조회
+    """
+
     queryset = Project.objects.all().prefetch_related(
         "projectposition_set__position",
         "projectlanguage_set__language",
@@ -86,6 +130,7 @@ class ProjectDetailAPIView(generics.RetrieveAPIView):
     )
     serializer_class = ProjectSerializer
     lookup_field = "pk"
+    permission_classes = []
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -100,11 +145,35 @@ class ProjectDetailAPIView(generics.RetrieveAPIView):
         return Response(serializer.data)
 
 
+@extend_schema(methods=["put"], exclude=True)
 class ProjectUpdateAPIView(generics.UpdateAPIView):
+    """
+    프로젝트 수정
+    """
+
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "pk"
+
+    @extend_schema(
+        methods=["patch"],
+        summary="프로젝트 수정",
+        request=ProjectSerializer,
+        responses={
+            200: OpenApiResponse(response=ProjectSerializer, description="프로젝트 수정 완료"),
+            400: OpenApiResponse(description="요청 데이터 오류"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            403: OpenApiResponse(description="권한이 없습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return Response({"detail": "PUT 메서드는 지원하지 않습니다."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def get_object(self):
         obj = super().get_object()
@@ -113,11 +182,32 @@ class ProjectUpdateAPIView(generics.UpdateAPIView):
         return obj
 
 
+@extend_schema(
+    summary="프로젝트 삭제",
+    responses={
+        204: OpenApiResponse(description="프로젝트 삭제 완료"),
+        401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+        403: OpenApiResponse(description="권한이 없습니다."),
+        404: OpenApiResponse(description="해당 ID가 없습니다."),
+        500: OpenApiResponse(description="서버 내부 오류"),
+    },
+)
 class ProjectDeleteAPIView(generics.DestroyAPIView):
+    """
+    프로젝트 삭제
+    """
+
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "pk"
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not request.user.is_authenticated or instance.user != request.user:
+            return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_object(self):
         obj = super().get_object()
@@ -127,6 +217,10 @@ class ProjectDeleteAPIView(generics.DestroyAPIView):
 
 
 class ProjectApplyAPIView(generics.CreateAPIView, generics.DestroyAPIView):
+    """
+    프로젝트 지원 및 지원 취소
+    """
+
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
     permission_classes = [IsAuthenticated]
@@ -141,6 +235,17 @@ class ProjectApplyAPIView(generics.CreateAPIView, generics.DestroyAPIView):
         except Application.DoesNotExist:
             return None
 
+    @extend_schema(
+        methods=["post"],
+        summary="프로젝트 지원",
+        responses={
+            201: OpenApiResponse(description="지원 성공"),
+            400: OpenApiResponse(description="지원 실패"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
     def create(self, request, *args, **kwargs):
         project_id = self.kwargs.get("project_id")
         project = get_object_or_404(Project, id=project_id)
@@ -158,6 +263,17 @@ class ProjectApplyAPIView(generics.CreateAPIView, generics.DestroyAPIView):
         Application.objects.create(user=user, project=project)
         return Response({"message": "지원 성공"}, status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        methods=["delete"],
+        summary="프로젝트 지원 취소",
+        responses={
+            200: OpenApiResponse(description="지원 취소"),
+            400: OpenApiResponse(description="지원 취소 실패"),
+            401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+            404: OpenApiResponse(description="해당 ID가 없습니다."),
+            500: OpenApiResponse(description="서버 내부 오류"),
+        },
+    )
     def destroy(self, request, *args, **kwargs):
         project_id = self.kwargs.get("project_id")
         project = get_object_or_404(Project, id=project_id)
@@ -172,7 +288,21 @@ class ProjectApplyAPIView(generics.CreateAPIView, generics.DestroyAPIView):
             return Response({"message": "지원 취소 성공"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(
+    summary="프로젝트 지원자 목록 조회",
+    responses={
+        200: OpenApiResponse(response=ApplicationSerializer(many=True), description="지원자 목록"),
+        401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+        403: OpenApiResponse(description="권한이 없습니다."),
+        404: OpenApiResponse(description="해당 ID가 없습니다."),
+        500: OpenApiResponse(description="서버 내부 오류"),
+    },
+)
 class ProjectApplicantsAPIView(generics.ListAPIView):
+    """
+    프로젝트 지원자 목록 조회
+    """
+
     serializer_class = ApplicationSerializer
     permission_classes = [IsAuthenticated]
 
@@ -188,6 +318,28 @@ class ProjectApplicantsAPIView(generics.ListAPIView):
 
 
 # 북마크 관련 뷰
+@extend_schema(
+    methods=["POST"],
+    summary="프로젝트 북마크 추가",
+    responses={
+        200: OpenApiResponse(description="북마크 등록"),
+        400: OpenApiResponse(description="북마크 등록 실패"),
+        401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+        404: OpenApiResponse(description="해당 ID가 없습니다."),
+        500: OpenApiResponse(description="서버 내부 오류"),
+    },
+)
+@extend_schema(
+    methods=["DELETE"],
+    summary="프로젝트 북마크 삭제",
+    responses={
+        200: OpenApiResponse(description="북마크 등록 취소"),
+        400: OpenApiResponse(description="북마크 등록 취소 실패"),
+        401: OpenApiResponse(description="인증 정보가 제공되지 않았습니다."),
+        404: OpenApiResponse(description="해당 ID가 없습니다."),
+        500: OpenApiResponse(description="서버 내부 오류"),
+    },
+)
 @api_view(["POST", "DELETE"])
 @permission_classes([IsAuthenticated])
 def bookmark_manage(request, project_id):

@@ -33,6 +33,7 @@ urlpatterns = [
     path("user/", include("app.accounts.urls")),
     path("notifications/", include("app.notifications.urls")),
     path("search/", include("app.search.urls")),
+    path("fixletter/",include("app.fixletter.urls"))
 ]
 
 if settings.DEBUG:

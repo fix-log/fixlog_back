@@ -110,7 +110,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "app.config.wsgi.application"
-ASGI_APPLICATION = "config.asgi.application"  # Channels ASGI 설정
+ASGI_APPLICATION = "app.config.asgi.application"  # Channels ASGI 설정
 
 CHANNEL_LAYERS = {
     "default": {

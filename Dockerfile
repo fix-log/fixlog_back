@@ -19,12 +19,9 @@ COPY . .
 # .env 파일 복사 (환경 변수 설정용)
 # COPY .env /app/.env
 
-# 스크립트 복사
-COPY ./scripts /scripts
-
 # 실행 권한 부여
-RUN chmod +x /scripts/run_daphne.sh
-RUN chmod +x /scripts/run_api.sh
+RUN chmod +x /app/scripts/run_daphne.sh
+RUN chmod +x /app/scripts/run_api.sh
 
-# 기본 실행 명령
+# 기본 실행 명령 (COPY . . 구조 기준)
 CMD ["sh", "/app/scripts/run_api.sh"]

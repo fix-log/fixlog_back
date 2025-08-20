@@ -7,11 +7,11 @@ DJANGO_ENV=${DJANGO_ENV:-prod}
 export DJANGO_SETTINGS_MODULE=config.settings.$DJANGO_ENV
 
 echo "▶️ DB 마이그레이션 시작..."
-poetry run python manage.py makemigrations
-poetry run python manage.py migrate --noinput
+poetry run python app/manage.py makemigrations
+poetry run python app/manage.py migrate --noinput
 
 echo "▶️ 정적 파일 수집 시작..."
-poetry run python manage.py collectstatic --noinput
+poetry run python app/manage.py collectstatic --noinput
 
 echo "▶️ S3 static 파일 확인..."
 poetry run python scripts/verify_static.py
@@ -27,6 +27,7 @@ else
 fi
 
 exec poetry run gunicorn config.wsgi:application \
+     --chdir app \
      --bind 0.0.0.0:8001 \
      --workers 4 \
      --timeout 60 \

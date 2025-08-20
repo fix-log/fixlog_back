@@ -85,16 +85,16 @@ jobs:
 
       - name: Make Migrations
         run: |
-          poetry run python manage.py makemigrations util
-          poetry run python manage.py makemigrations accounts  
-          poetry run python manage.py makemigrations fixred
-          poetry run python manage.py makemigrations crew
-          poetry run python manage.py makemigrations workroom
-          poetry run python manage.py makemigrations fixletter
-          poetry run python manage.py makemigrations
+          poetry run python app/manage.py makemigrations util
+          poetry run python app/manage.py makemigrations accounts  
+          poetry run python app/manage.py makemigrations fixred
+          poetry run python app/manage.py makemigrations crew
+          poetry run python app/manage.py makemigrations workroom
+          poetry run python app/manage.py makemigrations fixletter
+          poetry run python app/manage.py makemigrations
 
       - name: Run Django Migration
-        run: poetry run python manage.py migrate
+        run: poetry run python app/manage.py migrate
 
       - name: Run Tests
-        run: poetry run python manage.py test
+        run: poetry run python app/manage.py test

@@ -37,13 +37,14 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      sh -c "cd /app && python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
-
+      sh -c "cd /app && python app/manage.py migrate &&
+             python app/manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
     volumes:
       - .:/app
     environment:
-      PYTHONPATH: /app/app
+      PYTHONPATH: .
     ports:
       - "8000:8000"
     depends_on:
@@ -59,13 +60,13 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      sh -c "./scripts/run_api.sh"
+      sh -c "/scripts/run_api.sh"
     env_file:
       - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
     volumes:
       - .:/app
     environment:
-      PYTHONPATH: /app/app
+      PYTHONPATH: .
     ports:
       - "8001:8001"
     depends_on:

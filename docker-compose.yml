@@ -60,7 +60,7 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      sh -c "/scripts/run_api.sh"
+      sh -c "/app/scripts/run_api.sh"
     env_file:
       - .env   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
     volumes:

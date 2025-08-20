@@ -5,6 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
+ENV PYTHONPATH="/app/app"
 
 # 의존성 파일 복사 및 Poetry 설치
 COPY ./pyproject.toml ./poetry.lock ./
@@ -21,13 +22,11 @@ ENV PATH="/root/.local/bin:$PATH"
 COPY . /app
 
 # 스크립트 복사
-COPY ./scripts ./scripts
+COPY ./scripts /scripts
 
 # 실행 권한 부여
-RUN chmod +x ./scripts/run_daphne.sh
-RUN chmod +x ./scripts/run_api.sh
-
-COPY . .
+RUN chmod +x /scripts/run_daphne.sh
+RUN chmod +x /scripts/run_api.sh
 
 # 기본 실행 명령
 CMD ["gunicorn", "fixlog.wsgi:application", "--bind", "0.0.0.0:8000", "--reload", "--reload-engine=poll"]

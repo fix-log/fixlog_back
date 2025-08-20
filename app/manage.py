@@ -12,7 +12,7 @@ load_dotenv(BASE_DIR / ".env.local")  # 확실하게 경로 지정
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.config.settings.base")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.base")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -25,5 +25,5 @@ def main():
 
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.config.settings.base")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.base")
     main()

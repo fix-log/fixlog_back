@@ -63,10 +63,11 @@ class FixredListSerializer(serializers.ModelSerializer):
 
 class FixredCommentSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+    fixred = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = FixredComment
-        fields = ["id", "user", "comment", "created_at"]
+        fields = ["id", "fixred", "user", "comment", "created_at"]
         read_only_fields = ["id", "created_at"]
 
     def get_user(self, obj):

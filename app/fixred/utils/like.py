@@ -16,7 +16,6 @@ def toggle_fixred_like(user, fixred_id):
         fixred.refresh_from_db(fields=["like_count"])
         return {"fixred": fixred, "liked": False}
 
-    if fixred.user != user:
-        send_notification(user=fixred.user, sender=user, type_="fixred", event="like", target_id=fixred.id)
+    # 시그널에서 알림 처리
     fixred.refresh_from_db(fields=["like_count"])
     return {"fixred": fixred, "liked": True}

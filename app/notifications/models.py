@@ -1,5 +1,6 @@
 from django.db import models
 
+from app.accounts.models import User
 from app.crew.models import Project
 from app.fixred.models import Fixred
 from app.util.models import CreatedOnlyModel
@@ -24,8 +25,8 @@ class Notification(CreatedOnlyModel):
         ("like", "좋아요"),
         ("mention", "언급"),
     ]
-    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="notifications")
-    sender = models.ForeignKey("accounts.User", on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     notification_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     event = models.CharField(max_length=50, choices=EVENT_CHOICES, null=True, blank=True)
@@ -46,3 +47,9 @@ class Notification(CreatedOnlyModel):
         #     return None  # 픽레터는 현재 구현되지 않음
         else:
             return None
+
+
+# 알림 온오프를 위한 모델
+class NotificationSetting(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="notification_setting")
+    is_enabled = models.BooleanField(default=True)

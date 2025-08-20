@@ -27,6 +27,7 @@ else
 fi
 
 exec poetry run gunicorn config.wsgi:application \
+     --chdir app \
      --bind 0.0.0.0:8001 \
      --workers 4 \
      --timeout 60 \

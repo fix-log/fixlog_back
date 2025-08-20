@@ -40,7 +40,7 @@ services:
   daphne:
     image: seonhongmun/fixlog-daphne:prod-latest
     command: >
-      sh -c "/scripts/run_daphne.sh"
+      sh -c "/app/scripts/run_daphne.sh"
     env_file:
       - .env.prod   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
     volumes:
@@ -61,7 +61,7 @@ services:
   api:
     image: seonhongmun/fixlog-api:prod-latest
     command: >
-      sh -c "/scripts/run_api.sh"
+      sh -c "/app/scripts/run_api.sh"
     env_file:
       - .env.prod   # DB 연결용 POSTGRES_* 를 .env.prod 로 읽도록
     volumes:

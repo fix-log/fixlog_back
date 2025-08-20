@@ -14,12 +14,10 @@ RUN pip install --upgrade pip && pip install poetry && poetry config virtualenvs
 # poetry 가 설치한 바이너리를 실행 가능하도록 PATH 설정
 ENV PATH="/root/.local/bin:$PATH"
 
+COPY . .
 
 # .env 파일 복사 (환경 변수 설정용)
 # COPY .env /app/.env
-
-# 소스 코드 복사
-COPY . /app
 
 # 스크립트 복사
 COPY ./scripts /scripts

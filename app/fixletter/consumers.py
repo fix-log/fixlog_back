@@ -1,16 +1,19 @@
 import json
 import traceback
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from channels.db import database_sync_to_async
-from django.db.models import Q
-from django.db import transaction
 
-from .models import Fixletter, Message, FixletterBlock
+from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from django.db import transaction
+from django.db.models import Q
+
+from .models import Fixletter, FixletterBlock, Message
+
 
 class FixletterConsumer(AsyncJsonWebsocketConsumer):
     async def encode_json(cls, content):
         # 한글 그대로(UTF-8) 내려보내기
         return json.dumps(content, ensure_ascii=False)
+
     async def connect(self):
         try:
             print("WS connect:", self.scope.get("path"), self.scope.get("user"))
@@ -37,7 +40,7 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
             await self.channel_layer.group_add(self.group_name, self.channel_name)
             await self.accept()
 
-            # 방입장 동시에 읽음처리하기 
+            # 방입장 동시에 읽음처리하기
             changed = await self._mark_all_read(user.id, self.fixletter_id)
             if changed:
                 await self.channel_layer.group_send(
@@ -82,7 +85,10 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
             if changed:
                 await self.channel_layer.group_send(
                     self.group_name,
-                    {"type": "message_read_broadcast", "payload": {"fixletter_id": self.fixletter_id, "reader_id": uid}},
+                    {
+                        "type": "message_read_broadcast",
+                        "payload": {"fixletter_id": self.fixletter_id, "reader_id": uid},
+                    },
                 )
 
         else:
@@ -90,7 +96,7 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
 
     # === 그룹 이벤트 핸들러 ===
     async def message_broadcast(self, event):
-        await self.send_json(event["payload"]) 
+        await self.send_json(event["payload"])
 
     async def message_read_broadcast(self, event):
         await self.send_json({"type": "message.read", **event["payload"]})
@@ -99,11 +105,7 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     # 유저가 해당 픽레터의 참여자인지 체크
     def _is_participant(self, user_id, fid):
-        return Fixletter.objects.filter(
-            id=fid
-        ).filter(
-            Q(from_user_id=user_id) | Q(to_user_id=user_id)
-        ).exists()
+        return Fixletter.objects.filter(id=fid).filter(Q(from_user_id=user_id) | Q(to_user_id=user_id)).exists()
 
     @database_sync_to_async
     # 양방향 차단 여부 확인
@@ -111,8 +113,7 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
         f = Fixletter.objects.select_related("from_user", "to_user").get(id=fid)
         a, b = f.from_user_id, f.to_user_id
         return FixletterBlock.objects.filter(
-            Q(blocker_id=a, blocked_id=b, is_active=True) |
-            Q(blocker_id=b, blocked_id=a, is_active=True)
+            Q(blocker_id=a, blocked_id=b, is_active=True) | Q(blocker_id=b, blocked_id=a, is_active=True)
         ).exists()
 
     @database_sync_to_async

@@ -31,10 +31,7 @@ IS_TEST = "test" in sys.argv
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    os.getenv("DJANGO_SECRET_KEY")
-    or os.getenv("SECRET_KEY")
-)
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY") or os.getenv("SECRET_KEY")
 
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY is not set. Put DJANGO_SECRET_KEY in app/.env.local")
@@ -104,10 +101,10 @@ ROOT_URLCONF = "app.config.urls.base"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'fixletter', 'templates')],
+        "DIRS": [os.path.join(BASE_DIR, "fixletter", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
-            "debug":True,
+            "debug": True,
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",

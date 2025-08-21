@@ -1,7 +1,8 @@
-from rest_framework import serializers
-from django.db.models import Q
-from .models import Fixletter, FixletterBlock, Message
 from django.contrib.auth import get_user_model
+from django.db.models import Q
+from rest_framework import serializers
+
+from .models import Fixletter, FixletterBlock, Message
 
 User = get_user_model()
 
@@ -21,18 +22,19 @@ class FixletterCreateSerializer(serializers.Serializer):
 
         a, b = sorted([me_id, value])
         blocked = FixletterBlock.objects.filter(
-            Q(blocker_id=a, blocked_id=b, is_active=True) |
-            Q(blocker_id=b, blocked_id=a, is_active=True)
+            Q(blocker_id=a, blocked_id=b, is_active=True) | Q(blocker_id=b, blocked_id=a, is_active=True)
         ).exists()
         if blocked:
             raise serializers.ValidationError("차단 상태입니다.")
 
         return value
 
+
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ["id", "fixletter", "send_user", "content", "sent_at", "is_read"]
+
 
 class FixletterSerializer(serializers.ModelSerializer):
     class Meta:

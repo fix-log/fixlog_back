@@ -10,7 +10,5 @@ from .base import *
 
 DEBUG = True
 ENVIRONMENT = "local"
-CHANNEL_LAYERS = {
-    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
-}
+CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 REST_FRAMEWORK["EXCEPTION_HANDLER"] = "rest_framework.views.exception_handler"

@@ -1,15 +1,18 @@
 from urllib.parse import parse_qs
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from rest_framework_simplejwt.tokens import AccessToken
 
 User = get_user_model()
 
+
 def _get_header(headers, key: bytes):
     for k, v in headers:
         if k.lower() == key:
             return v.decode()
     return None
+
 
 def _parse_cookies(cookie_header: str) -> dict:
     pairs = [c.strip() for c in (cookie_header or "").split(";") if "=" in c]
@@ -18,6 +21,7 @@ def _parse_cookies(cookie_header: str) -> dict:
         k, v = p.split("=", 1)
         out[k.strip()] = v.strip()
     return out
+
 
 class JWTAuthMiddleware:
     def __init__(self, app):

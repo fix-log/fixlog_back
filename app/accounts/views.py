@@ -1,6 +1,7 @@
 import datetime
 import random
 import traceback
+
 from django.conf import settings
 from django.core.cache import cache
 from django.core.mail import send_mail
@@ -199,6 +200,7 @@ class LoginView(TokenObtainPairView):
 
     def login(request):
         try:
+
             def post(self, request, *args, **kwargs):
                 serializer = self.get_serializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
@@ -214,6 +216,7 @@ class LoginView(TokenObtainPairView):
                 )
                 set_refresh_cookie(res, refresh, secure=False)  # 개발 시 secure=False
                 return res
+
         except Exception as e:
             print("에러 발생:", e)
             print(traceback.format_exc())

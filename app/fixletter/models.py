@@ -1,10 +1,8 @@
-from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q, F, UniqueConstraint, CheckConstraint
+from django.db.models import CheckConstraint, F, Q, UniqueConstraint
 from django.utils import timezone
 
-from app.accounts.models import User
 from app.accounts.models import User
 from app.util.models import CreatedOnlyModel
 
@@ -15,7 +13,7 @@ class Fixletter(CreatedOnlyModel):
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_letters")
     last_message = models.ForeignKey("Message", on_delete=models.SET_NULL, null=True, related_name="last_fixletters")
     last_sent_at = models.DateTimeField(default=timezone.now, db_index=True)
-    
+
     @classmethod
     def get_pair(cls, u1_id: int, u2_id: int):
         if u1_id == u2_id:
@@ -33,7 +31,7 @@ class Fixletter(CreatedOnlyModel):
 
     def other_user(self, user: User) -> User:
         return self.to_user if user.id == self.from_user_id else self.from_user
-   
+
     class Meta:
         db_table = "fixletter"
         ordering = ["-last_sent_at"]
@@ -48,6 +46,7 @@ class Fixletter(CreatedOnlyModel):
                 name="fixletter_unique_pair",
             ),
         ]
+
     def __str__(self):
         last_msg = self.last_message.content[:10] if self.last_message else "No message"
         return f"{self.last_sent_at}|[{self.from_user.nickname}] -> [{self.to_user.nickname}]: {last_msg}..."
@@ -63,8 +62,8 @@ class Message(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['fixletter', 'sent_at']),
-            models.Index(fields=['fixletter', 'is_read', 'sent_at']),
+            models.Index(fields=["fixletter", "sent_at"]),
+            models.Index(fields=["fixletter", "is_read", "sent_at"]),
         ]
 
     def __str__(self):
@@ -96,7 +95,6 @@ class FixletterBlock(models.Model):
         constraints = [
             UniqueConstraint(fields=["blocker", "blocked"], name="uniq_fixletter_block_pair"),
         ]
-
 
     def __str__(self):
         status = "활성" if self.is_active else f"해제({self.unblocked_at})"

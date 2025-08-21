@@ -1,4 +1,3 @@
-# app/fixletter/ws_auth.py
 from urllib.parse import parse_qs
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -21,25 +20,16 @@ def _parse_cookies(cookie_header: str) -> dict:
     return out
 
 class JWTAuthMiddleware:
-    def __init__(self, inner):
-        self.inner = inner
-    def __call__(self, scope):
-        return JWTAuthMiddlewareInstance(scope, self.inner)
+    def __init__(self, app):
+        self.app = app
 
-class JWTAuthMiddlewareInstance:
-    def __init__(self, scope, inner):
-        self.scope = dict(scope)
-        self.inner = inner
-    async def __call__(self, receive, send):
-        self.scope["user"] = await self._resolve_user() or AnonymousUser()
-        return await self.inner(self.scope)(receive, send)
-
-    async def _resolve_user(self):
+    async def __call__(self, scope, receive, send):
+        # 토큰: query → Authorization → Cookie → subprotocols
         token = None
-        query = parse_qs(self.scope.get("query_string", b"").decode())
+        query = parse_qs(scope.get("query_string", b"").decode())
         token = (query.get("token") or [None])[0]
 
-        headers = self.scope.get("headers", [])
+        headers = scope.get("headers", [])
 
         if not token:
             auth = _get_header(headers, b"authorization")
@@ -51,16 +41,19 @@ class JWTAuthMiddlewareInstance:
             token = _parse_cookies(cookie).get("access")
 
         if not token:
-            sub = self.scope.get("subprotocols") or []
+            sub = scope.get("subprotocols") or []
             if len(sub) >= 2 and (sub[0] or "").lower() == "bearer":
                 token = sub[1]
 
-        if not token:
-            return None
+        user = AnonymousUser()
+        if token:
+            try:
+                at = AccessToken(token)
+                user_id = at.get("user_id")
+                # Django 5 async ORM
+                user = await User.objects.aget(pk=user_id)
+            except Exception:
+                user = AnonymousUser()
 
-        try:
-            at = AccessToken(token)
-            user_id = at.get("user_id")
-            return await User.objects.aget(pk=user_id)
-        except Exception:
-            return None
+        scope["user"] = user
+        return await self.app(scope, receive, send)

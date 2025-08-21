@@ -1,31 +1,5 @@
-# from channels.generic.websocket import AsyncWebsocketConsumer
-
-
-# class ChatConsumer(AsyncWebsocketConsumer):
-#     async def connect(self):
-#         self.room_name = self.scope["url_route"]["kwargs"].get("room_name", "default")
-#         self.room_group_name = f"chat_{self.room_name}"
-
-#         # 그룹에 참여
-#         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-
-#         await self.accept()
-
-#     async def disconnect(self, close_code):
-#         # 그룹에서 나가기
-#         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-
-#     async def receive(self, text_data):
-#         # 받은 메시지를 그대로 그룹 전체에 전송 (echo 테스트용)
-#         await self.channel_layer.group_send(self.room_group_name, {"type": "chat_message", "message": text_data})
-
-#     async def chat_message(self, event):
-#         message = event["message"]
-
-#         # 클라이언트에게 메시지 전송
-#         await self.send(text_data=message)
-
-
+import json
+import traceback
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.db.models import Q
@@ -34,29 +8,48 @@ from django.db import transaction
 from .models import Fixletter, Message, FixletterBlock
 
 class FixletterConsumer(AsyncJsonWebsocketConsumer):
+    async def encode_json(cls, content):
+        # 한글 그대로(UTF-8) 내려보내기
+        return json.dumps(content, ensure_ascii=False)
     async def connect(self):
-        self.fixletter_id = int(self.scope["url_route"]["kwargs"]["fixletter_id"])
-        self.group_name = f"fixletter_{self.fixletter_id}"
-        user = self.scope["user"]
+        try:
+            print("WS connect:", self.scope.get("path"), self.scope.get("user"))
+            self.fixletter_id = int(self.scope["url_route"]["kwargs"]["fixletter_id"])
+            self.group_name = f"fixletter_{self.fixletter_id}"
+            user = self.scope["user"]
 
-        # 1) 인증 체크
-        if not (user and user.is_authenticated):
-            await self.close(code=4401)  # Unauthorized
-            return
+            # 1) 인증 체크
+            if not (user and user.is_authenticated):
+                await self.close(code=4401)  # Unauthorized
+                return
 
-        # 2) 참여자 권한 체크
-        if not await self._is_participant(user.id, self.fixletter_id):
-            await self.close(code=4403)  # Forbidden
-            return
+            # 2) 참여자 권한 체크
+            if not await self._is_participant(user.id, self.fixletter_id):
+                await self.close(code=4403)  # Forbidden
+                return
 
-        # 3) 차단 체크(둘 중 누가 누구를 막아도 입장 불가)
-        if await self._is_blocked(self.fixletter_id):
-            await self.close(code=4403)  # Forbidden
-            return
+            # 3) 차단 체크(둘 중 누가 누구를 막아도 입장 불가)
+            if await self._is_blocked(self.fixletter_id):
+                await self.close(code=4403)  # Forbidden
+                return
 
-        # 4) 그룹 조인 + 연결 승인
-        await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await self.accept()
+            # 4) 그룹 조인 + 연결 승인
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
+            await self.accept()
+
+            # 방입장 동시에 읽음처리하기 
+            changed = await self._mark_all_read(user.id, self.fixletter_id)
+            if changed:
+                await self.channel_layer.group_send(
+                    self.group_name,
+                    {
+                        "type": "message_read_broadcast",
+                        "payload": {"fixletter_id": self.fixletter_id, "reader_id": user.id},
+                    },
+                )
+        except Exception:
+            traceback.print_exc()
+            await self.close(code=1011)
 
     async def disconnect(self, code):
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
@@ -77,18 +70,19 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
                 return
 
             payload = await self._create_message(uid, self.fixletter_id, text)
+
             # 방 전체에 브로드캐스트
             await self.channel_layer.group_send(
                 self.group_name,
-                {"type": "message.broadcast", "payload": payload},
+                {"type": "message_broadcast", "payload": payload},
             )
-
+        # 모두 읽음 처리
         elif typ == "message.read_all":
             changed = await self._mark_all_read(uid, self.fixletter_id)
             if changed:
                 await self.channel_layer.group_send(
                     self.group_name,
-                    {"type": "message.read_broadcast", "payload": {"fixletter_id": self.fixletter_id, "reader_id": uid}},
+                    {"type": "message_read_broadcast", "payload": {"fixletter_id": self.fixletter_id, "reader_id": uid}},
                 )
 
         else:
@@ -96,13 +90,14 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
 
     # === 그룹 이벤트 핸들러 ===
     async def message_broadcast(self, event):
-        await self.send_json(event["payload"])  # {"type":"message", ...}
+        await self.send_json(event["payload"]) 
 
     async def message_read_broadcast(self, event):
         await self.send_json({"type": "message.read", **event["payload"]})
 
     # === DB helpers ===
     @database_sync_to_async
+    # 유저가 해당 픽레터의 참여자인지 체크
     def _is_participant(self, user_id, fid):
         return Fixletter.objects.filter(
             id=fid
@@ -111,6 +106,7 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
         ).exists()
 
     @database_sync_to_async
+    # 양방향 차단 여부 확인
     def _is_blocked(self, fid):
         f = Fixletter.objects.select_related("from_user", "to_user").get(id=fid)
         a, b = f.from_user_id, f.to_user_id
@@ -141,6 +137,7 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
         }
 
     @database_sync_to_async
+    # 받은 메세지 중 미읽음메세지만 일괄읽음 처리
     def _mark_all_read(self, reader_id, fid):
         qs = Message.objects.filter(fixletter_id=fid, is_read=False).exclude(send_user_id=reader_id)
         return qs.update(is_read=True)

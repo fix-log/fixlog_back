@@ -37,9 +37,14 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-      sh -c "cd /app && python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
-
+      sh -c "
+        cd /app &&
+        python -m pip show django-filter &&
+        python manage.py migrate &&
+        daphne -b 0.0.0.0 -p 8000 app.config.asgi:application
+      "
+    env_file:
+      - .env 
     volumes:
       - .:/app
     environment:

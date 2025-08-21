@@ -1,19 +1,24 @@
 import os
+from pathlib import Path
 
-from channels.auth import JWTAuthMiddleware
-from channels.routing import ProtocolTypeRouter, URLRouter
+from dotenv import load_dotenv
+APP_DIR = Path(__file__).resolve().parent.parent.parent
+load_dotenv(APP_DIR.parent / ".env.local")
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.config.settings.dev")
+
+import django
+django.setup()
+
 from django.core.asgi import get_asgi_application
-
+from channels.routing import ProtocolTypeRouter, URLRouter
 
 from app.fixletter.routing import websocket_urlpatterns
+from app.fixletter.ws_auth import JWTAuthMiddleware
 
-# settings 설정
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.config.settings.base")
-
-# WebSocket 지원을 위한 ASGI 애플리케이션 구성
-application = ProtocolTypeRouter(
-    {
-        "http": get_asgi_application(),
-        "websocket": JWTAuthMiddleware(URLRouter(websocket_urlpatterns)),
-    }
-)
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": JWTAuthMiddleware(
+        URLRouter(websocket_urlpatterns)
+    ),
+})

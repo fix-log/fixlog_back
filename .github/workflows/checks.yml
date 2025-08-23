@@ -84,6 +84,7 @@ jobs:
           psql -h localhost -U $POSTGRES_USER -d postgres -c "CREATE DATABASE $POSTGRES_DB_TEST;"
 
       - name: Make Migrations
+        working-directory: ./app
         run: |
           poetry run python manage.py makemigrations util
           poetry run python manage.py makemigrations accounts  
@@ -94,7 +95,7 @@ jobs:
           poetry run python manage.py makemigrations
 
       - name: Run Django Migration
-        run: poetry run python manage.py migrate
+        run: poetry run python app/manage.py migrate
 
       - name: Run Tests
-        run: poetry run python manage.py test
+        run: poetry run python app/manage.py test

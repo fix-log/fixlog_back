@@ -5,6 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
+ENV PYTHONPATH="/app/app"
 
 # 의존성 파일 복사 및 Poetry 설치
 COPY ./pyproject.toml ./poetry.lock ./
@@ -13,21 +14,14 @@ RUN pip install --upgrade pip && pip install poetry && poetry config virtualenvs
 # poetry 가 설치한 바이너리를 실행 가능하도록 PATH 설정
 ENV PATH="/root/.local/bin:$PATH"
 
+COPY . .
 
 # .env 파일 복사 (환경 변수 설정용)
 # COPY .env /app/.env
 
-# 소스 코드 복사
-COPY . /app
-
-# 스크립트 복사
-COPY ./scripts ./scripts
-
 # 실행 권한 부여
-RUN chmod +x ./scripts/run_daphne.sh
-RUN chmod +x ./scripts/run_api.sh
+RUN chmod +x /app/scripts/run_daphne.sh
+RUN chmod +x /app/scripts/run_api.sh
 
-COPY . .
-
-# 기본 실행 명령
+# 기본 실행 명령 (COPY . . 구조 기준)
 CMD ["sh", "/app/scripts/run_api.sh"]

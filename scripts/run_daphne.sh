@@ -6,7 +6,7 @@ set -e  # 에러 발생 시 스크립트 즉시 종료
 export DJANGO_SETTINGS_MODULE=config.settings.dev
 
 echo "▶️ 정적 파일 수집 시작..."
-poetry run python manage.py collectstatic --noinput
+poetry run python app/manage.py collectstatic --noinput
 
 echo "▶️ Daphne(WebSocket) 서버 시작..."
 exec poetry run daphne \

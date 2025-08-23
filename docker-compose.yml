@@ -82,7 +82,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/dev/nginx.conf:/etc/nginx/nginx.conf
       - static_volume:/app/static
     depends_on:
       - daphne

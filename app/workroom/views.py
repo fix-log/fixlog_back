@@ -63,7 +63,7 @@ class WorkroomDetailAllAPIView(RetrieveAPIView):  # 워크룸의 전체 정보 �
     summary="워크룸 목록 조회 및 생성",
     description=(
         "로그인한 사용자는 워크룸 전체 목록을 조회하거나 새 워크룸을 생성합니다.\n\n"
-        "📌 [POST 요청 시 Request Body 설명 및 예시]\n\n"
+        "[POST 요청 시 Request Body 설명 및 예시]\n\n"
         "**요청 필드**\n"
         "- `name` (string): 워크룸 이름\n"
         "- `introduction` (string): 한 줄 소개\n"
@@ -123,7 +123,7 @@ class WorkroomListCreateAPIView(ListCreateAPIView):
     summary="워크룸 상세 조회/수정/삭제",
     description=(
         "워크룸 상세 조회는 누구나 가능하며, 수정/삭제는 소유자만 가능합니다.\n\n"
-        "📌 [PATCH 요청 시 Request Body 설명 및 예시]\n\n"
+        "[PATCH 요청 시 Request Body 설명 및 예시]\n\n"
         "**요청 필드**\n"
         "- `name` (string): 워크룸 이름 (예: '프론트엔드 협업 워크룸')\n"
         "- `introduction` (string): 한 줄 소개 (예: 'React 기반 UI 개발')\n"
@@ -181,7 +181,7 @@ class WorkroomRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     summary="워크룸 멤버 목록 조회 및 초대",
     description=(
         "워크룸에 속한 멤버 목록을 조회하거나 새로운 멤버를 초대합니다.\n\n"
-        "📌 [POST 요청 시 Request Body 설명 및 예시]\n\n"
+        "[POST 요청 시 Request Body 설명 및 예시]\n\n"
         "**요청 필드**\n"
         "- `email` (string): 초대할 사용자이메일\n"
         "- `role` (string): 부여할 역할 ('member', 'manager')\n"
@@ -245,7 +245,7 @@ class WorkroomMemberListCreateAPIView(ListCreateAPIView):
     summary="초대 응답 처리 (PATCH)",
     description=(
         "초대받은 사용자가 초대를 수락(accepted)하거나 거절(rejected)할 수 있습니다.\n\n"
-        "📌 [PATCH 요청 시 Request Body 설명 및 예시]\n\n"
+        "[PATCH 요청 시 Request Body 설명 및 예시]\n\n"
         "**요청 필드**\n"
         "- `status` (string): 초대 응답 상태 ('accepted' 또는 'rejected')\n\n"
         "**예시 Request Body**\n"
@@ -302,7 +302,7 @@ class WorkroomMemberRespondAPIView(UpdateAPIView):
     description=(
         "워크룸 멤버의 정보를 조회, 수정 또는 삭제할 수 있습니다.\n"
         "수정 및 삭제는 관리자, 부관리자 또는 본인만 가능합니다.\n\n"
-        "📌 [PATCH 요청 시 Request Body 설명 및 예시]\n\n"
+        "[PATCH 요청 시 Request Body 설명 및 예시]\n\n"
         "**요청 필드**\n"
         "- `user` (int): 유저 아이디\n"
         "- `workroom` (int): 워크룸 아이디\n"
@@ -349,7 +349,7 @@ class WorkroomMemberRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     summary="리뷰 목록 조회 및 작성",
     description=(
         "워크룸 종료 후 멤버들 간 리뷰를 조회하거나 작성할 수 있습니다.\n\n"
-        "📌 [POST 요청 시 Request Body 설명 및 예시]\n\n"
+        "[POST 요청 시 Request Body 설명 및 예시]\n\n"
         "**요청 필드**\n"
         "- `reviewee` (int): 리뷰 대상자 유저 ID\n"
         "- `rating` (int): 평점 (1~5)\n"
@@ -395,7 +395,7 @@ class WorkroomReviewListCreateAPIView(ListCreateAPIView):
     summary="이슈 목록 조회 및 생성",
     description=(
         "워크룸 내 이슈를 조회하거나 생성합니다.\n\n"
-        "📌 [POST 요청 시 Request Body 설명 및 예시]\n\n"
+        "[POST 요청 시 Request Body 설명 및 예시]\n\n"
         "**요청 필드**\n"
         "- `user` (int): 유저 아이디\n"
         "- `title` (string): 이슈 제목\n"
@@ -446,7 +446,7 @@ class IssueListCreateAPIView(ListCreateAPIView):
     summary="이슈 상세 조회 / 수정 / 삭제",
     description=(
         "워크룸 내 특정 이슈를 조회하거나 수정, 삭제합니다.\n\n"
-        "📌 [PATCH 요청 시 Request Body 설명 및 예시]\n\n"
+        "[PATCH 요청 시 Request Body 설명 및 예시]\n\n"
         "**요청 필드**\n"
         "- `user` (int): 유저 아이디\n"
         "- `title` (string): 이슈 제목\n"
@@ -495,7 +495,7 @@ class IssueRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     summary="일정 목록 조회 및 생성",
     description=(
         "승인된 멤버는 일정을 조회 및 생성할 수 있으며, 권한에 따라 수정/삭제가 가능합니다.\n\n"
-        "📌 [POST 요청 시 Request Body 설명 및 예시]\n\n"
+        "[POST 요청 시 Request Body 설명 및 예시]\n\n"
         "**요청 필드**\n"
         "- `title` (string): 일정 제목\n"
         "- `start` (datetime): 시작 시각 (예: '2025-08-23T09:00:00')\n,"
@@ -563,7 +563,7 @@ class CalendarEventListCreateAPIView(ListCreateAPIView):
     summary="일정 상세 조회 / 수정 / 삭제",
     description=(
         "워크룸 내 특정 일정을 조회하거나 수정, 삭제합니다.\n\n"
-        "📌 [PATCH 요청 시 Request Body 설명 및 예시]\n\n"
+        "[PATCH 요청 시 Request Body 설명 및 예시]\n\n"
         "**요청 필드**\n"
         "- `title` (string): 일정 제목\n"
         "- `start` (datetime): 시작 시각 (예: '2025-09-01T09:00:00Z')\n"

@@ -27,7 +27,7 @@ jobs:
       DJANGO_SECRET_KEY: ${{ secrets.SECRET_KEY }}
       DJANGO_DEBUG: "False"
       DJANGO_ALLOWED_HOSTS: "localhost"
-      DJANGO_SETTINGS_MODULE: "app.config.settings.base"
+      DJANGO_SETTINGS_MODULE: "config.settings.base"
       POSTGRES_DB: "test_fixlogback"
       POSTGRES_DB_TEST: "test_fixlogback_test"
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}

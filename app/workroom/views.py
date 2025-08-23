@@ -47,7 +47,7 @@ from app.workroom.serializers import (
         403: OpenApiResponse(description="권한 없음: 접근 권한이 없습니다"),
         404: OpenApiResponse(description="찾을 수 없음: 해당 워크룸이 존재하지 않습니다"),
         500: OpenApiResponse(description="서버 내부 오류"),
-    }
+    },
 )
 class WorkroomDetailAllAPIView(RetrieveAPIView):  # 워크룸의 전체 정보 조회용 제너릭 뷰
     queryset = Workroom.objects.all()  # 워크룸 쿼리셋
@@ -70,25 +70,25 @@ class WorkroomDetailAllAPIView(RetrieveAPIView):  # 워크룸의 전체 정보 �
         "- `start_date` (string): 시작일 (YYYY-MM-DD)\n"
         "- `end_date` (string): 종료일 (YYYY-MM-DD)\n"
         "- `description` (string): 상세 설명\n"
-        "- `positions` (list): 포지션 ID 및 인원 수 목록 (예: [{\"position_id\": 1, \"count\": 3}])\n"
+        '- `positions` (list): 포지션 ID 및 인원 수 목록 (예: [{"position_id": 1, "count": 3}])\n'
         "- `language_ids` (list): 언어 ID 목록 (예: [1, 2])\n"
         "- `stack_ids` (list): 스택 ID 목록 (예: [3, 4])\n"
         "- `design_ids` (list): 디자인 ID 목록 (예: [5, 6])\n\n"
         "**예시 Request Body**\n"
         "```json\n"
         "{\n"
-        "  \"name\": \"프론트엔드 워크룸\",\n"
-        "  \"introduction\": \"UI 개발을 위한 팀\",\n"
-        "  \"start_date\": \"2025-09-01\",\n"
-        "  \"end_date\": \"2025-10-01\",\n"
-        "  \"description\": \"React 기반 프론트엔드 프로젝트\",\n"
-        "  \"positions\": [\n"
-        "    {\"position_id\": 1, \"count\": 2},\n"
-        "    {\"position_id\": 2, \"count\": 1}\n"
+        '  "name": "프론트엔드 워크룸",\n'
+        '  "introduction": "UI 개발을 위한 팀",\n'
+        '  "start_date": "2025-09-01",\n'
+        '  "end_date": "2025-10-01",\n'
+        '  "description": "React 기반 프론트엔드 프로젝트",\n'
+        '  "positions": [\n'
+        '    {"position_id": 1, "count": 2},\n'
+        '    {"position_id": 2, "count": 1}\n'
         "  ],\n"
-        "  \"language_ids\": [1, 2],\n"
-        "  \"stack_ids\": [3, 4],\n"
-        "  \"design_ids\": [5]\n"
+        '  "language_ids": [1, 2],\n'
+        '  "stack_ids": [3, 4],\n'
+        '  "design_ids": [5]\n'
         "}\n"
         "```"
     ),
@@ -131,25 +131,25 @@ class WorkroomListCreateAPIView(ListCreateAPIView):
         "- `end_date` (string): 종료일 (YYYY-MM-DD 형식)\n"
         "- `description` (string): 상세 설명\n"
         "- `positions` (list): 포지션 ID 및 인원 수 리스트\n"
-        "    예: [{\"position_id\": 1, \"count\": 2}]\n"
+        '    예: [{"position_id": 1, "count": 2}]\n'
         "- `language_ids` (list): 언어 ID 리스트 (예: [1, 2])\n"
         "- `stack_ids` (list): 기술스택 ID 리스트 (예: [3, 4])\n"
         "- `design_ids` (list): 디자인 툴 ID 리스트 (예: [5, 6])\n\n"
         "**예시 요청 바디**\n"
         "```json\n"
         "{\n"
-        "  \"name\": \"백엔드 워크룸\",\n"
-        "  \"introduction\": \"Django 기반 API 개발\",\n"
-        "  \"start_date\": \"2025-08-01\",\n"
-        "  \"end_date\": \"2025-10-01\",\n"
-        "  \"description\": \"프로젝트 백엔드 구조 설계 및 개발\",\n"
-        "  \"positions\": [\n"
-        "    {\"position_id\": 1, \"count\": 2},\n"
-        "    {\"position_id\": 2, \"count\": 1}\n"
+        '  "name": "백엔드 워크룸",\n'
+        '  "introduction": "Django 기반 API 개발",\n'
+        '  "start_date": "2025-08-01",\n'
+        '  "end_date": "2025-10-01",\n'
+        '  "description": "프로젝트 백엔드 구조 설계 및 개발",\n'
+        '  "positions": [\n'
+        '    {"position_id": 1, "count": 2},\n'
+        '    {"position_id": 2, "count": 1}\n'
         "  ],\n"
-        "  \"language_ids\": [1, 3],\n"
-        "  \"stack_ids\": [4, 5],\n"
-        "  \"design_ids\": [2]\n"
+        '  "language_ids": [1, 3],\n'
+        '  "stack_ids": [4, 5],\n'
+        '  "design_ids": [2]\n'
         "}\n"
         "```"
     ),
@@ -189,9 +189,9 @@ class WorkroomRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         "**예시 Request Body**\n"
         "```json\n"
         "{\n"
-        "  \"email\": \"user@user.com\",\n"
-        "  \"role\": \"member\",\n"
-        "  \"permission\": \"view\"\n"
+        '  "email": "user@user.com",\n'
+        '  "role": "member",\n'
+        '  "permission": "view"\n'
         "}\n"
         "```"
     ),
@@ -251,7 +251,7 @@ class WorkroomMemberListCreateAPIView(ListCreateAPIView):
         "**예시 Request Body**\n"
         "```json\n"
         "{\n"
-        "  \"status\": \"accepted\"\n"
+        '  "status": "accepted"\n'
         "}\n"
         "```"
     ),
@@ -311,10 +311,10 @@ class WorkroomMemberRespondAPIView(UpdateAPIView):
         "**예시 Request Body**\n"
         "```json\n"
         "{\n"
-        "  \"user\": \"1\",\n"
-        "  \"workroom\": \"1\",\n"
-        "  \"role\": \"manager\",\n"
-        "  \"permission\": \"modify_event\",\n"
+        '  "user": "1",\n'
+        '  "workroom": "1",\n'
+        '  "role": "manager",\n'
+        '  "permission": "modify_event",\n'
         "}\n"
         "```"
     ),
@@ -357,9 +357,9 @@ class WorkroomMemberRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         "**예시 Request Body**\n"
         "```json\n"
         "{\n"
-        "  \"reviewee\": 5,\n"
-        "  \"rating\": 4,\n"
-        "  \"comment\": \"함께 협업하기 편했고, 피드백이 빠릅니다.\"\n"
+        '  "reviewee": 5,\n'
+        '  "rating": 4,\n'
+        '  "comment": "함께 협업하기 편했고, 피드백이 빠릅니다."\n'
         "}\n"
         "```"
     ),
@@ -405,11 +405,11 @@ class WorkroomReviewListCreateAPIView(ListCreateAPIView):
         "**예시 Request Body**\n"
         "```json\n"
         "{\n"
-        "  \"user\": \"1\",\n"
-        "  \"title\": \"API 문서화 작업\",\n"
-        "  \"status\": \"in_progress\",\n"
-        "  \"content\": \"drf-spectacular을 활용해 전체 API 문서를 정리합니다.\",\n"
-        "  \"due_date\": \"2025-08-30\"\n"
+        '  "user": "1",\n'
+        '  "title": "API 문서화 작업",\n'
+        '  "status": "in_progress",\n'
+        '  "content": "drf-spectacular을 활용해 전체 API 문서를 정리합니다.",\n'
+        '  "due_date": "2025-08-30"\n'
         "}\n"
         "```"
     ),
@@ -456,11 +456,11 @@ class IssueListCreateAPIView(ListCreateAPIView):
         "**예시 Request Body**\n"
         "```json\n"
         "{\n"
-        "  \"user\": \"1\",\n"
-        "  \"title\": \"이슈 제목 수정\",\n"
-        "  \"status\": \"in_progress\",\n"
-        "  \"content\": \"업무 세부 내용을 수정합니다.\",\n"
-        "  \"due_date\": \"2025-09-01\"\n"
+        '  "user": "1",\n'
+        '  "title": "이슈 제목 수정",\n'
+        '  "status": "in_progress",\n'
+        '  "content": "업무 세부 내용을 수정합니다.",\n'
+        '  "due_date": "2025-09-01"\n'
         "}\n"
         "```"
     ),
@@ -501,7 +501,7 @@ class IssueRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         "- `start` (datetime): 시작 시각 (예: '2025-08-23T09:00:00')\n,"
         "- 'end` (datetime): 종료 시각 (예: '2025-08-24T09:00:00')\n"
         "- `all_day` (boolean): 종일 여부\n"
-        "- `recurrence` (object): 반복 설정 (예: {\"frequency\": \"weekly\", \"interval\": 1})\n"
+        '- `recurrence` (object): 반복 설정 (예: {"frequency": "weekly", "interval": 1})\n'
         "- `color` (string): 색상코드 (예: '#F74627')\n"
         "- `alert` (boolean): 알림 여부\n"
         "- `location` (string): 장소\n"
@@ -510,16 +510,16 @@ class IssueRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         "**예시 Request Body**\n"
         "```json\n"
         "{\n"
-        "  \"title\": \"주간 회의\",\n"
-        "  \"start\": \"2025-08-24T09:00:00\",\n"
-        "  \"end\": \"2025-08-24T10:00:00\",\n"
-        "  \"all_day\": false,\n"
-        "  \"recurrence\": {\"frequency\": \"weekly\", \"interval\": 1},\n"
-        "  \"color\": \"#4287f5\",\n"
-        "  \"alert\": true,\n"
-        "  \"location\": \"회의실 A\",\n"
-        "  \"url\": \"https://meetings.example.com\",\n"
-        "  \"memo\": \"정기 회의 - 개발 진행 상황 공유\"\n"
+        '  "title": "주간 회의",\n'
+        '  "start": "2025-08-24T09:00:00",\n'
+        '  "end": "2025-08-24T10:00:00",\n'
+        '  "all_day": false,\n'
+        '  "recurrence": {"frequency": "weekly", "interval": 1},\n'
+        '  "color": "#4287f5",\n'
+        '  "alert": true,\n'
+        '  "location": "회의실 A",\n'
+        '  "url": "https://meetings.example.com",\n'
+        '  "memo": "정기 회의 - 개발 진행 상황 공유"\n'
         "}\n"
         "```"
     ),
@@ -578,14 +578,14 @@ class CalendarEventListCreateAPIView(ListCreateAPIView):
         "**예시 Request Body**\n"
         "```json\n"
         "{\n"
-        "  \"title\": \"일정 수정\",\n"
-        "  \"start\": \"2025-09-01T10:00:00Z\",\n"
-        "  \"end\": \"2025-09-01T11:00:00Z\",\n"
-        "  \"all_day\": false,\n"
-        "  \"alert\": true,\n"
-        "  \"color\": \"#123456\",\n"
-        "  \"location\": \"회의실 B\",\n"
-        "  \"memo\": \"회의 후 피드백 정리\"\n"
+        '  "title": "일정 수정",\n'
+        '  "start": "2025-09-01T10:00:00Z",\n'
+        '  "end": "2025-09-01T11:00:00Z",\n'
+        '  "all_day": false,\n'
+        '  "alert": true,\n'
+        '  "color": "#123456",\n'
+        '  "location": "회의실 B",\n'
+        '  "memo": "회의 후 피드백 정리"\n'
         "}\n"
         "```"
     ),

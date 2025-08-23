@@ -27,7 +27,6 @@ jobs:
       DJANGO_SECRET_KEY: ${{ secrets.SECRET_KEY }}
       DJANGO_DEBUG: "False"
       DJANGO_ALLOWED_HOSTS: "localhost"
-      DJANGO_SETTINGS_MODULE: "app.config.settings.base"
       POSTGRES_DB: "test_fixlogback"
       POSTGRES_DB_TEST: "test_fixlogback_test"
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
@@ -37,7 +36,6 @@ jobs:
       CORS_ALLOWED_ORIGINS: "http://localhost:3000"
       CSRF_TRUSTED_ORIGINS: "http://localhost:8000"
       REDIS_URL: redis://localhost:6379/0
-      PYTHONPATH: "${{ github.workspace }}/fixlog_back"
 
     steps:
       - name: Checkout code
@@ -86,19 +84,22 @@ jobs:
           psql -h localhost -U $POSTGRES_USER -d postgres -c "CREATE DATABASE $POSTGRES_DB_TEST;"
 
       - name: Make Migrations
+        working-directory: ./fixlog_back
         run: |
-          poetry run python app/manage.py makemigrations util
-          poetry run python app/manage.py makemigrations accounts
-          poetry run python app/manage.py makemigrations fixred
-          poetry run python app/manage.py makemigrations crew
-          poetry run python app/manage.py makemigrations workroom
-          poetry run python app/manage.py makemigrations fixletter
-          poetry run python app/manage.py makemigrations
+          poetry run python manage.py makemigrations util
+          poetry run python manage.py makemigrations accounts
+          poetry run python manage.py makemigrations fixred
+          poetry run python manage.py makemigrations crew
+          poetry run python manage.py makemigrations workroom
+          poetry run python manage.py makemigrations fixletter
+          poetry run python manage.py makemigrations
 
       - name: Run Django Migration
+        working-directory: ./fixlog_back
         run: |
-          poetry run python app/manage.py migrate
+          poetry run python manage.py migrate
 
       - name: Run Tests
+        working-directory: ./fixlog_back
         run: |
-          poetry run python app/manage.py test
+          poetry run python manage.py test

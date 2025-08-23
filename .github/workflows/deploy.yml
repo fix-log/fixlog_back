@@ -27,6 +27,7 @@ jobs:
         with:
           context: .
           file: Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: seonhongmun/fixlog-api:prod-latest
 
@@ -35,6 +36,7 @@ jobs:
         with:
           context: .
           file: Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: seonhongmun/fixlog-daphne:prod-latest
 
@@ -43,6 +45,7 @@ jobs:
         with:
           context: ./nginx
           file: ./nginx/Dockerfile # nginx 설정 도커파일 따로
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: seonhongmun/fixlog-nginx:prod-latest
 

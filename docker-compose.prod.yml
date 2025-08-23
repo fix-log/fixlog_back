@@ -86,7 +86,7 @@ services:
       - "443:443"
     container_name: fixlog-nginx
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/prod/nginx.conf:/etc/nginx/nginx.conf
       - static_volume:/app/static
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:

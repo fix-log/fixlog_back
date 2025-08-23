@@ -5,7 +5,6 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
-ENV PYTHONPATH="/app/app"
 
 # 의존성 파일 복사 및 Poetry 설치
 COPY ./pyproject.toml ./poetry.lock ./
@@ -13,6 +12,7 @@ RUN pip install --upgrade pip && pip install poetry && poetry config virtualenvs
 
 # poetry 가 설치한 바이너리를 실행 가능하도록 PATH 설정
 ENV PATH="/root/.local/bin:$PATH"
+ENV PYTHONPATH="/app"
 
 COPY . .
 

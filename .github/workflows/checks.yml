@@ -83,6 +83,11 @@ jobs:
           psql -h localhost -U $POSTGRES_USER -d postgres -c "DROP DATABASE IF EXISTS $POSTGRES_DB_TEST;"
           psql -h localhost -U $POSTGRES_USER -d postgres -c "CREATE DATABASE $POSTGRES_DB_TEST;"
 
+      - name: Debug workspace
+        run: |
+          pwd
+          ls -R
+
       - name: Make Migrations
         working-directory: .
         run: |

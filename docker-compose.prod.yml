@@ -65,7 +65,7 @@ services:
     environment:
       PYTHONPATH: .
     ports:
-      - "8000:8000"
+      - "8001:8001"
     container_name: fixlog-api
     depends_on:
 #      - db

@@ -43,8 +43,6 @@ services:
       sh -c "/app/scripts/run_daphne.sh"
     env_file:
       - .env.prod   # DB 연결용 POSTGRES_* 를 .env 로 읽도록
-    volumes:
-      - .:/app
     environment:
       PYTHONPATH: .
 #    ports:
@@ -64,8 +62,6 @@ services:
       sh -c "/app/scripts/run_api.sh"
     env_file:
       - .env.prod   # DB 연결용 POSTGRES_* 를 .env.prod 로 읽도록
-    volumes:
-      - .:/app
     environment:
       PYTHONPATH: .
     ports:

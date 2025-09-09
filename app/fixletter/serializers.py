@@ -7,6 +7,11 @@ from .models import Fixletter, FixletterBlock, Message
 User = get_user_model()
 
 
+class FixletterUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "nickname", "profile_image"]
+
 class FixletterCreateSerializer(serializers.Serializer):
     peer_id = serializers.IntegerField(min_value=1)
 
@@ -31,12 +36,22 @@ class FixletterCreateSerializer(serializers.Serializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    fixletter_id = serializers.PrimaryKeyRelatedField(read_only=True)
+    sender = FixletterUserSerializer(source="send_user", read_only=True)
+
     class Meta:
         model = Message
-        fields = ["id", "fixletter", "send_user", "content", "sent_at", "is_read"]
+        fields = ["id", "fixletter_id", "sender", "content", "sent_at", "is_read"]
 
+class LastMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ["id", "content"]
 
 class FixletterSerializer(serializers.ModelSerializer):
+    from_user = FixletterUserSerializer(read_only=True)
+    to_user= FixletterUserSerializer(read_only=True)
+    last_message = LastMessageSerializer(read_only=True)
     class Meta:
         model = Fixletter
         fields = ["id", "from_user", "to_user", "last_message", "last_sent_at"]

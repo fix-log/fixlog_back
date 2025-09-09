@@ -10,9 +10,24 @@ from .models import Fixletter, FixletterBlock, Message
 
 
 class FixletterConsumer(AsyncJsonWebsocketConsumer):
-    async def encode_json(cls, content):
-        # 한글 그대로(UTF-8) 내려보내기
-        return json.dumps(content, ensure_ascii=False)
+    async def _send(self, data: dict):
+        await self.send(text_data=json.dumps(data, ensure_ascii=False))
+
+    def _message_to_dict(self, msg):
+        sender = getattr(msg, "send_user", None)
+        return {
+            "type": "message",
+            "id": msg.id,
+            "fixletter_id": msg.fixletter_id,
+            "sender": {
+                "id": msg.send_user_id,
+                "nickname": getattr(sender, "nickname", None),
+                "profile_image": getattr(sender, "profile_image", None),
+            },
+            "content": msg.content,
+            "sent_at": msg.sent_at.isoformat(),
+            "is_read": msg.is_read,
+        }
 
     async def connect(self):
         try:
@@ -127,16 +142,8 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
             )
             # 최신 메시지/시간 갱신
             Fixletter.objects.filter(id=fid).update(last_message=msg, last_sent_at=msg.sent_at)
-        return {
-            "type": "message",
-            "id": msg.id,
-            "fixletter_id": fid,
-            "sender_id": sender_id,
-            "content": msg.content,
-            "sent_at": msg.sent_at.isoformat(),
-            "is_read": msg.is_read,
-        }
-
+        return self._message_to_dict(msg)
+    
     @database_sync_to_async
     # 받은 메세지 중 미읽음메세지만 일괄읽음 처리
     def _mark_all_read(self, reader_id, fid):

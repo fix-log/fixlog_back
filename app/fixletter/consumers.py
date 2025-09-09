@@ -143,7 +143,7 @@ class FixletterConsumer(AsyncJsonWebsocketConsumer):
             # 최신 메시지/시간 갱신
             Fixletter.objects.filter(id=fid).update(last_message=msg, last_sent_at=msg.sent_at)
         return self._message_to_dict(msg)
-    
+
     @database_sync_to_async
     # 받은 메세지 중 미읽음메세지만 일괄읽음 처리
     def _mark_all_read(self, reader_id, fid):

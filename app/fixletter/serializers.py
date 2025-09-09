@@ -12,6 +12,7 @@ class FixletterUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "nickname", "profile_image"]
 
+
 class FixletterCreateSerializer(serializers.Serializer):
     peer_id = serializers.IntegerField(min_value=1)
 
@@ -43,15 +44,18 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ["id", "fixletter_id", "sender", "content", "sent_at", "is_read"]
 
+
 class LastMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ["id", "content"]
 
+
 class FixletterSerializer(serializers.ModelSerializer):
     from_user = FixletterUserSerializer(read_only=True)
-    to_user= FixletterUserSerializer(read_only=True)
+    to_user = FixletterUserSerializer(read_only=True)
     last_message = LastMessageSerializer(read_only=True)
+
     class Meta:
         model = Fixletter
         fields = ["id", "from_user", "to_user", "last_message", "last_sent_at"]

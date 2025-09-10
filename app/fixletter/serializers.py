@@ -13,6 +13,11 @@ class FixletterUserSerializer(serializers.ModelSerializer):
         fields = ["id", "nickname", "profile_image"]
 
 
+class FixletterCreateResponseSerializer(serializers.Serializer):
+    fixletter_id = serializers.IntegerField()
+    created = serializers.BooleanField()
+
+
 class FixletterCreateSerializer(serializers.Serializer):
     peer_id = serializers.IntegerField(min_value=1)
 

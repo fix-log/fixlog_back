@@ -21,7 +21,8 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / ".env", override=False)
+load_dotenv(BASE_DIR / ".env.local", override=True)
 
 # 테스트 환경 설정
 IS_TEST = "test" in sys.argv
@@ -30,7 +31,10 @@ IS_TEST = "test" in sys.argv
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY") or os.getenv("SECRET_KEY")
+
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not set. Put DJANGO_SECRET_KEY in app/.env.local")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG") == "True"
@@ -97,9 +101,10 @@ ROOT_URLCONF = "app.config.urls.base"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "fixletter", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
+            "debug": True,
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
@@ -110,13 +115,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "app.config.wsgi.application"
-ASGI_APPLICATION = "config.asgi.application"  # Channels ASGI 설정
+ASGI_APPLICATION = "app.config.asgi.application"  # Channels ASGI 설정
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",  # Redis 백엔드 설정
         "CONFIG": {
-            "hosts": [("redis", 6379)],  # docker-compose의 redis 서비스 이름 사용
+            "hosts": [("127.0.0.1", 6379)],  # docker-compose의 redis 서비스 이름 사용
         },
     },
 }
@@ -228,8 +233,8 @@ REST_FRAMEWORK = {
 
 # JWT 관련 추가 설정
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,

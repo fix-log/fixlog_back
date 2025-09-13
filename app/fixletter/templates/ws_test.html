@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>Fixletter WS Test</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 860px; margin: 24px auto; }
+    .row { display:flex; gap:8px; margin:8px 0; }
+    input, button, textarea { padding:8px; font-size:14px; }
+    textarea { width:100%; height:220px; }
+    .muted { color:#777; font-size:12px; }
+  </style>
+</head>
+<body>
+    <h2>📨 Fixletter WebSocket Test</h2>
+
+<div class="row">
+  <input id="token" placeholder="여기에 Access JWT 붙여넣기" style="flex:2" />
+  <input id="fid" placeholder="fixletter_id" style="width:140px" value="{{ fixletter_id }}">
+  <button id="connect">Connect</button>
+  <span id="status" class="muted">disconnected</span>
+</div>
+
+<div class="row" style="align-items:center;gap:12px">
+  <label><input type="checkbox" id="show-debug"> Show debug</label>
+  <button id="clear">Clear</button>
+</div>
+
+<div id="chat" style="border:1px solid #ddd;height:340px;overflow:auto;padding:12px;border-radius:8px;"></div>
+
+<div class="row" style="margin-top:8px">
+  <input id="text" placeholder="message text..." style="flex:1">
+  <button id="send">Send</button>
+  <button id="markread">Mark all read</button>
+  <button id="ping">Ping Connect</button>
+</div>
+
+<textarea id="debug" readonly style="width:100%;height:140px;display:none;margin-top:8px"></textarea>
+
+<style>
+  .msg{margin:8px 0;max-width:70%}
+  .msg.me{margin-left:auto;text-align:right}
+  .bubble{display:inline-block;padding:8px 12px;border-radius:14px;background:#f1f5f9;word-break:break-word}
+  .msg.me .bubble{background:#dbeafe}
+  .meta{font-size:11px;color:#6b7280;margin-top:2px}
+  .muted{color:#777;font-size:12px}
+  .row{display:flex;gap:8px;margin:8px 0}
+  input,button,textarea{padding:8px;font-size:14px}
+</style>
+
+<script>
+  const $ = (s)=>document.querySelector(s);
+  const dbg = (m)=>{ if(!$('#show-debug').checked) return;
+    const ta=$('#debug'); ta.style.display='block'; ta.value += m+"\n"; ta.scrollTop=ta.scrollHeight; };
+
+  let ws=null, myId=null, seenIds=new Set();
+
+  function parseJwt(t){
+    try{ const b=t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      return JSON.parse(atob(b)); }catch{ return {}; }
+  }
+  const esc = (s)=>s.replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+  function addMsg({mine,text,ts}){
+    const wrap=document.createElement('div'); wrap.className='msg'+(mine?' me':'');
+    wrap.innerHTML = `<div class="bubble">${esc(text)}</div><div class="meta">${new Date(ts).toLocaleTimeString()}</div>`;
+    $('#chat').appendChild(wrap); $('#chat').scrollTop = $('#chat').scrollHeight;
+  }
+
+  function connect(){
+    const fid = $('#fid').value.trim();
+    const token = $('#token').value.trim();
+    if(!fid){ alert('fixletter_id 필요'); return; }
+    if(!token){ alert('JWT access token 필요'); return; }
+
+    // 내 user_id 파싱 (SimpleJWT 기본 클레임)
+    myId = parseJwt(token).user_id;
+
+    const scheme = (location.protocol === 'https:') ? 'wss' : 'ws';
+    const url = `${scheme}://${location.host}/ws/fixletter/${encodeURIComponent(fid)}/?token=${encodeURIComponent(token)}`;
+
+    dbg(`🔌 connecting: ${url}`);
+    ws = new WebSocket(url);
+
+    ws.onopen = ()=>{ $('#status').textContent='connected'; dbg('✅ WS open'); };
+    ws.onclose = (e)=>{ $('#status').textContent=`closed (${e.code})`; dbg(`❌ WS close code=${e.code}`); };
+    ws.onerror = ()=>{ dbg('⚠️ WS error'); };
+    ws.onmessage = (e)=>{
+      dbg('📥 ' + e.data);
+      let data; try{ data = JSON.parse(e.data); }catch{ return; }
+
+      // 메시지만 말풍선으로
+      if(data.type === 'message'){
+        if(seenIds.has(data.id)) return;
+        seenIds.add(data.id);
+        addMsg({ mine: data.sender_id === myId, text: data.content, ts: data.sent_at });
+      }
+      // 읽음 이벤트 등은 UI에 표시하지 않음(디버그에서만 보임)
+    };
+  }
+
+  function sendMessage(){
+    if(!ws || ws.readyState !== WebSocket.OPEN){ alert('먼저 connect!'); return; }
+    const text = $('#text').value.trim(); if(!text) return;
+    const payload = { type:'message.send', text };
+    ws.send(JSON.stringify(payload));
+    dbg('📤 ' + JSON.stringify(payload));
+    $('#text').value = '';
+  }
+
+  function markAllRead(){
+    if(!ws || ws.readyState !== WebSocket.OPEN){ alert('먼저 connect!'); return; }
+    const payload = { type:'message.read_all' };
+    ws.send(JSON.stringify(payload));
+    dbg('📤 ' + JSON.stringify(payload));
+  }
+
+  function pingConnect(){
+    const scheme = (location.protocol === 'https:') ? 'wss' : 'ws';
+    const url = `${scheme}://${location.host}/ws/ping/`;
+    const ping = new WebSocket(url);
+    ping.onopen = ()=>dbg('✅ ping open');
+    ping.onmessage = (e)=>dbg('📥 ping ' + e.data);
+    ping.onclose = ()=>dbg('❌ ping close');
+  }
+
+  $('#connect').onclick = connect;
+  $('#send').onclick = sendMessage;
+  $('#markread').onclick = markAllRead;
+  $('#ping').onclick = pingConnect;
+  $('#clear').onclick = ()=>{ $('#chat').innerHTML=''; $('#debug').value=''; };
+
+  // URL이 /fixletter/test/<id>/ 이면 자동 채움
+  const m = location.pathname.match(/\/fixletter\/test\/(\d+)\/?$/);
+  if(m) $('#fid').value = m[1];
+
+  // 토큰 저장/복원
+  const ti = $('#token'); ti.value = localStorage.getItem('fixletter_access') || '';
+  ti.addEventListener('input', ()=>localStorage.setItem('fixletter_access', ti.value));
+</script>
+</body>
+</html>

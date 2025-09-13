@@ -1,9 +1,11 @@
 import datetime
 import random
+import traceback
 
 from django.conf import settings
 from django.core.cache import cache
 from django.core.mail import send_mail
+from django.http import JsonResponse
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
@@ -196,21 +198,29 @@ class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [AllowAny]
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        access = serializer.validated_data["access"]
-        refresh = serializer.validated_data["refresh"]
+    def login(request):
+        try:
 
-        res = Response(
-            {
-                "access": str(access),  # localStorage 저장용
-                "nickname": serializer.user.nickname,
-            },
-            status=status.HTTP_200_OK,
-        )
-        set_refresh_cookie(res, refresh, secure=False)  # 개발 시 secure=False
-        return res
+            def post(self, request, *args, **kwargs):
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                access = serializer.validated_data["access"]
+                refresh = serializer.validated_data["refresh"]
+
+                res = Response(
+                    {
+                        "access": str(access),  # localStorage 저장용
+                        "nickname": serializer.user.nickname,
+                    },
+                    status=status.HTTP_200_OK,
+                )
+                set_refresh_cookie(res, refresh, secure=False)  # 개발 시 secure=False
+                return res
+
+        except Exception as e:
+            print("에러 발생:", e)
+            print(traceback.format_exc())
+            return JsonResponse({"error": "Login error", "message": str(e)}, status=500)
 
 
 # 🔄 토큰 재발급
